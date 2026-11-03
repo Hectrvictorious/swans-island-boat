@@ -1,7 +1,7 @@
 /* Swan's Island Boat — service worker.
    The app shell is cached so the page opens with no signal at the terminal.
    conditions.json and the government weather feeds are network-first with a cached fallback. */
-const VERSION = 'boat-20261103T1508';
+const VERSION = 'boat-20261103T1515';
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

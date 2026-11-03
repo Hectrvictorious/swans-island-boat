@@ -331,6 +331,10 @@ p { margin: 0 0 8px; }
 
   <!-- NOW -->
   <section class="view" id="view-now">
+    <div class="install" id="movedBox" hidden>
+      <div><b>The boat is an app now</b><span>Open the new address in your phone's browser and tap Install. It works without a signal and updates the wind on its own.</span></div>
+      <div class="btnrow"><a class="btn primary" href="https://hectrvictorious.github.io/swans-island-boat/" target="_blank" rel="noopener">Open the app ›</a></div>
+    </div>
     <div class="install" id="installBox" hidden>
       <div><b>Put the boat on your phone</b><span id="installHint">Installs like an app: its own icon, full screen, works at the terminal with no signal.</span></div>
       <div class="btnrow"><button class="btn primary" id="installBtn">Install</button><button class="btn" id="installLater">Later</button></div>
@@ -1161,6 +1165,7 @@ p { margin: 0 0 8px; }
     COND.file = store.get('cond', null); paint(); loadConditions(); loadLive();
     setInterval(loadConditions, 30 * 60000); setInterval(loadLive, 20 * 60000);
     applyWho(); setupInstall(); loadPhotos(); setupWorker();
+    if (!window.__STANDALONE_SITE__) $('movedBox').hidden = false;
     document.querySelectorAll('#whoBox [data-who]').forEach(b => b.addEventListener('click', () => { store.set('who', b.dataset.who); applyWho(); if (b.dataset.who) toast('Hi, ' + b.dataset.who); }));
     showView((location.hash || '#now').slice(1));
     window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
