@@ -1,0 +1,1191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Swan's Island Boat</title>
+<meta name="description" content="Bass Harbor – Swan's Island ferry: next boat, timetable, trip planner, tickets, conditions and notices.">
+<meta name="theme-color" content="#1f3a53">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Boat">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>window.__STANDALONE_SITE__ = true;</script>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,500;0,600;0,700;1,500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: a chart-paper page. Full-bleed nautical chart on top with the boat moving across it,
+   then stacked cards; a bottom tab bar switches four views (Now / Plan / Tickets / Info). */
+:root {
+  --bg: #f1eee4;          /* chart paper */
+  --surface: #fbfaf5;
+  --surface-2: #ece7d8;
+  --ink: #16242f;
+  --ink-2: #3f5362;
+  --muted: #6b7b86;
+  --line: #d6cfbd;
+  --water: #c9dfe9;       /* chart water tint */
+  --water-2: #b4cfdd;
+  --land: #ede4c6;        /* chart buff */
+  --land-edge: #7f9573;
+  --accent: #c8102e;      /* signal red: the thing to act on */
+  --accent-ink: #ffffff;
+  --navy: #1f3a53;
+  --navy-ink: #ffffff;
+  --good: #2b7a4b;
+  --warn: #b8700c;
+  --bad: #b3261e;
+  --shadow: 0 10px 30px rgba(22, 36, 47, .12);
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Lora", Georgia, "Times New Roman", serif;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e171f; --surface: #162330; --surface-2: #1d2d3b; --ink: #ebeff3; --ink-2: #c3cfd8; --muted: #93a4b1; --line: #2b3b49;
+    --water: #173449; --water-2: #10293a; --land: #33403a; --land-edge: #6b8872; --accent: #ff6b64; --accent-ink: #1a0b0b;
+    --navy: #2d4f6e; --navy-ink: #ffffff; --good: #5fc082; --warn: #f0b24c; --bad: #ff8a80; --shadow: 0 10px 30px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e171f; --surface: #162330; --surface-2: #1d2d3b; --ink: #ebeff3; --ink-2: #c3cfd8; --muted: #93a4b1; --line: #2b3b49;
+  --water: #173449; --water-2: #10293a; --land: #33403a; --land-edge: #6b8872; --accent: #ff6b64; --accent-ink: #1a0b0b;
+  --navy: #2d4f6e; --navy-ink: #ffffff; --good: #5fc082; --warn: #f0b24c; --bad: #ff8a80; --shadow: 0 10px 30px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--navy); }
+a { color: var(--navy); }
+button { font: inherit; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.1; margin: 0; text-wrap: balance; }
+.num { font-family: var(--font-display); font-variant-numeric: tabular-nums; }
+
+.app { max-width: 680px; margin: 0 auto; padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+
+/* Masthead */
+.mast { background: var(--navy); color: var(--navy-ink); padding-block: 10px 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mast-in { max-width: 680px; margin: 0 auto; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.wordmark { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: .01em; }
+.wordmark small { font-weight: 500; opacity: .8; font-size: 14px; margin-left: 8px; letter-spacing: .04em; text-transform: uppercase; }
+.mast-date { font-family: var(--font-display); font-size: 15px; opacity: .92; }
+
+/* Chart */
+.chart { position: relative; background: var(--water); }
+.chart svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.chart .ribbon { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: 12px; background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 12px; box-shadow: var(--shadow); display: flex; gap: 10px; align-items: center; font-family: var(--font-display); font-size: 15px; }
+.ribbon .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--good); flex: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--good) 20%, transparent); }
+.ribbon .dot.docked { background: var(--warn); box-shadow: 0 0 0 4px color-mix(in srgb, var(--warn) 20%, transparent); }
+.ribbon .dot.done { background: var(--muted); box-shadow: none; }
+.ribbon b { font-weight: 700; }
+.ribbon .sub { color: var(--muted); font-size: 13px; margin-left: auto; white-space: nowrap; }
+.chart-note { position: absolute; top: 10px; right: max(12px, env(safe-area-inset-right, 0px)); font-family: var(--font-ui); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); background: color-mix(in srgb, var(--surface) 80%, transparent); padding: 3px 7px; border-radius: 6px; }
+
+/* SVG chart styling */
+.land { fill: var(--land); stroke: var(--land-edge); stroke-width: 1.4; stroke-linejoin: round; }
+.route { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 10 8; stroke-linecap: round; }
+.route-fb { fill: none; stroke: var(--navy); stroke-width: 2; stroke-dasharray: 3 9; stroke-linecap: round; opacity: .55; }
+.chart-label { font-family: var(--font-display); font-weight: 600; fill: var(--ink-2); font-size: 22px; letter-spacing: .06em; text-transform: uppercase; }
+.chart-label.water { font-family: var(--font-body); font-style: italic; text-transform: none; letter-spacing: .12em; fill: var(--navy); opacity: .75; font-weight: 400; }
+.chart-label.small { font-size: 17px; font-weight: 500; letter-spacing: .04em; }
+.terminal { fill: var(--surface); stroke: var(--accent); stroke-width: 4; }
+.terminal-label { font-family: var(--font-display); font-weight: 700; fill: var(--ink); font-size: 26px; }
+.terminal-sub { font-family: var(--font-display); font-weight: 500; fill: var(--ink-2); font-size: 17px; letter-spacing: .03em; }
+.ferry.live { transition: transform 15s linear; }
+.ferry .hull { fill: #f6f7f4; stroke: #16242f; stroke-width: 2; }
+.ferry .deck { fill: #b9c3cb; stroke: #7e8b95; stroke-width: .8; }
+.ferry .ramp { fill: #6f7c86; }
+.ferry .lane { stroke: #f6f7f4; stroke-width: 1.2; stroke-dasharray: 3 3; }
+.ferry .rail { stroke: #16242f; stroke-width: 1; opacity: .35; }
+.ferry .car { stroke: rgba(0,0,0,.25); stroke-width: .6; }
+.ferry .c1 { fill: #1f3a53; } .ferry .c2 { fill: #c8102e; } .ferry .c3 { fill: #e8e2d1; }
+.ferry .house { fill: #1f3a53; stroke: #0f1d2a; stroke-width: 1; }
+.ferry .bridge { fill: #e9eef2; stroke: #0f1d2a; stroke-width: .8; }
+.ferry .win { stroke: #1f3a53; stroke-width: 1.4; }
+.ferry .stack { fill: #c8102e; stroke: #0f1d2a; stroke-width: .8; }
+.ferry .mast { fill: #ffffff; stroke: #0f1d2a; stroke-width: .8; }
+.wake { fill: none; stroke: #ffffff; stroke-width: 2.5; stroke-linecap: round; opacity: .8; stroke-dasharray: 6 8; animation: wake 1.6s linear infinite; }
+@keyframes wake { to { stroke-dashoffset: -28; } }
+.ripple { stroke: var(--water-2); fill: none; stroke-width: 1.2; opacity: .9; }
+.rose text { font-family: var(--font-display); font-weight: 700; fill: var(--ink-2); font-size: 16px; }
+.rose path, .rose circle { fill: none; stroke: var(--ink-2); stroke-width: 1.5; opacity: .8; }
+.scalebar line { stroke: var(--ink-2); stroke-width: 2; }
+.scalebar text { font-family: var(--font-display); fill: var(--ink-2); font-size: 15px; letter-spacing: .04em; }
+@media (prefers-reduced-motion: reduce) { .ferry { transition: none; } .wake { animation: none; } }
+
+/* Views */
+.view { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 8px; display: grid; gap: 14px; }
+.view[hidden] { display: none; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; min-width: 0; }
+.card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.card h3 { font-size: 16px; font-weight: 700; margin: 10px 0 4px; }
+.eyebrow { font-family: var(--font-display); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.lede { color: var(--ink-2); margin: 0 0 8px; }
+p { margin: 0 0 8px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* Next-departure tiles */
+.next { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+.tile .from { font-family: var(--font-display); font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.tile .time { font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.tile .time small { font-size: 18px; font-weight: 600; margin-left: 2px; }
+.tile .in { font-family: var(--font-display); font-size: 16px; margin-top: 2px; color: var(--ink-2); }
+.tile .in.soon { color: var(--accent); font-weight: 700; }
+.tile .where { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* Schedule boards */
+.boards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.board { min-width: 0; }
+.board h3 { margin: 0 0 6px; font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.board ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.board li { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 6px 10px; border-radius: 8px; background: var(--surface-2); font-family: var(--font-display); font-size: 18px; font-variant-numeric: tabular-nums; }
+.board li .t { font-weight: 700; }
+.board li .c { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.board li.gone { opacity: .45; }
+.board li.gone .t { text-decoration: line-through; text-decoration-thickness: 1px; }
+.board li.next { background: var(--accent); color: var(--accent-ink); }
+.board li.next .c { color: var(--accent-ink); }
+.board li.nopax { background: repeating-linear-gradient(135deg, var(--surface-2) 0 6px, transparent 6px 10px); border: 1px dashed var(--line); }
+.board li.nopax .t { text-decoration: line-through; }
+.notes { display: grid; gap: 6px; margin-top: 10px; }
+.note { font-size: 13.5px; color: var(--ink-2); padding: 8px 10px; border-left: 3px solid var(--warn); background: var(--surface-2); border-radius: 0 8px 8px 0; }
+.note.holiday { border-left-color: var(--accent); }
+.note.season { border-left-color: var(--muted); }
+.note.fb { border-left-color: var(--navy); }
+
+/* Install and who */
+.install, .who { display: grid; gap: 10px; background: var(--navy); color: var(--navy-ink); border-radius: 14px; padding: 14px 16px; }
+.install b, .who b { font-family: var(--font-display); font-size: 18px; display: block; }
+.install span, .who span { font-size: 13.5px; opacity: .9; display: block; margin-top: 2px; }
+.install .btn, .who .btn { border-color: transparent; }
+.install .btn.primary { background: var(--accent); color: var(--accent-ink); }
+.who .btn.navy { background: var(--surface); color: var(--navy); }
+.who .btn:not(.navy) { background: transparent; color: var(--navy-ink); border-color: rgba(255,255,255,.4); }
+.install[hidden], .who[hidden] { display: none; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.gallery figure { margin: 0; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.gallery img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.gallery figcaption { font-size: 12px; color: var(--ink-2); padding: 6px 8px; }
+
+/* Live conditions */
+.notices { display: grid; gap: 8px; }
+.notices:empty { display: none; }
+.notice-item { border-radius: 12px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--warn); font-size: 14px; }
+.notice-item.bad { border-left-color: var(--bad); }
+.notice-item.ok { border-left-color: var(--good); }
+.notice-item .eyebrow { margin-bottom: 2px; }
+.notice-item p { margin: 2px 0 0; }
+.cond-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cond-head h2 { margin: 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.stat { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.stat .k { font-family: var(--font-display); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.stat .v { font-family: var(--font-display); font-weight: 700; font-size: 20px; line-height: 1.1; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stat .s { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.stat.ride { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline; border-left: 5px solid var(--good); }
+.stat.ride.warn { border-left-color: var(--warn); } .stat.ride.bad { border-left-color: var(--bad); }
+.stat.ride .k { grid-column: 1 / -1; }
+.stat.ride .v { font-size: 22px; }
+.stat.ride.warn .v { color: var(--warn); } .stat.ride.bad .v { color: var(--bad); } .stat.ride.good .v { color: var(--good); }
+.periods { display: grid; gap: 8px; margin-top: 10px; }
+.period { display: grid; grid-template-columns: 82px 1fr; gap: 8px; font-size: 13.5px; align-items: baseline; }
+.period b { font-family: var(--font-display); font-size: 14px; display: grid; gap: 2px; }
+.ridetag { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; color: var(--good); }
+.ridetag.warn { color: var(--warn); } .ridetag.bad { color: var(--bad); }
+.queasy { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: 13.5px; border-left: 4px solid var(--warn); }
+.queasy b { font-family: var(--font-display); }
+.alert-item { margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warn) 50%, transparent); font-family: var(--font-display); font-weight: 600; }
+.cond-links { margin-top: 10px; }
+.cond-links .btn { font-size: 13px; padding: 6px 10px; }
+.status511 { display: grid; gap: 6px; }
+.srow { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); font-size: 13.5px; }
+.srow .ldot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex: none; background: var(--muted); }
+.srow .ldot.green { background: var(--good); } .srow .ldot.red { background: var(--bad); } .srow .ldot.yellow, .srow .ldot.orange { background: var(--warn); }
+.srow b { font-family: var(--font-display); }
+.srow .msg { color: var(--ink-2); }
+@media (max-width: 380px) { .stats { grid-template-columns: 1fr 1fr; } }
+
+/* Date strip */
+.datebar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.datebar .btn { padding: 6px 10px; }
+.datebar input[type="date"] { font: inherit; font-family: var(--font-display); font-size: 16px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); min-width: 0; }
+.datebar .title { font-family: var(--font-display); font-weight: 700; font-size: 18px; flex: 1 1 100%; }
+.chip { display: inline-block; font-family: var(--font-display); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-weight: 600; }
+.chip.accent { background: var(--accent); color: var(--accent-ink); }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-display); font-weight: 600; font-size: 15px; padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; text-decoration: none; min-width: 0; }
+.btn:hover { filter: brightness(.97); }
+.btn:focus-visible, .tab:focus-visible, .board li:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-size: 17px; padding: 12px 18px; }
+.btn.navy { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.btn.block { width: 100%; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface-2); color: var(--ink); padding: 8px 14px; font-family: var(--font-display); font-weight: 600; font-size: 15px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--navy-ink); }
+
+/* Planner */
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { font-family: var(--font-display); font-size: 16px; font-weight: 600; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; font-variant-numeric: tabular-nums; }
+.chips button[aria-pressed="true"] { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.chips button:disabled { opacity: .35; cursor: default; }
+.result { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); display: grid; gap: 2px; }
+.result .big { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.result.good .big { color: var(--good); } .result.warn .big { color: var(--warn); } .result.bad .big { color: var(--bad); }
+.week { display: grid; gap: 6px; }
+.week .day { display: grid; grid-template-columns: 72px 1fr; gap: 8px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.week .day:first-child { border-top: 0; }
+.week .dn { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+.week .dn small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+.week .times { font-family: var(--font-display); font-variant-numeric: tabular-nums; color: var(--ink-2); line-height: 1.4; }
+.week .times b { color: var(--ink); font-weight: 600; }
+.week .times .x { text-decoration: line-through; opacity: .6; }
+
+/* Tickets */
+.fares { width: 100%; border-collapse: collapse; font-family: var(--font-display); font-size: 15px; font-variant-numeric: tabular-nums; }
+.fares th, .fares td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.fares th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.fares td.p, .fares th.p { text-align: right; white-space: nowrap; }
+.fares .now { background: color-mix(in srgb, var(--accent) 12%, transparent); font-weight: 700; }
+.fares tr.quiet td { color: var(--muted); }
+.tally { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tally .count { font-family: var(--font-display); font-weight: 700; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; margin: 2px 0; }
+.phone { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); margin-top: 8px; flex-wrap: wrap; }
+.phone .who { font-family: var(--font-display); font-weight: 600; }
+.phone .who small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+.phone .n { font-family: var(--font-display); font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; user-select: all; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; position: relative; }
+.fact .eyebrow { display: flex; justify-content: space-between; align-items: center; }
+.fact .eyebrow span:last-child { font-weight: 500; letter-spacing: 0; text-transform: none; font-family: var(--font-ui); }
+.fact p { font-size: 16px; line-height: 1.55; margin: 8px 0 0; min-height: 3.1em; }
+.fact p strong { font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.fact .btnrow { margin-top: 10px; }
+
+/* Info */
+.links { display: grid; gap: 8px; }
+.linkrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); text-decoration: none; color: var(--ink); }
+.linkrow .l { font-family: var(--font-display); font-weight: 600; font-size: 16px; }
+.linkrow .l small { display: block; font-weight: 400; font-family: var(--font-body); color: var(--muted); font-size: 13px; }
+.linkrow .arrow { font-family: var(--font-display); color: var(--accent); font-weight: 700; flex: none; }
+.portrait { display: block; width: 100%; max-width: 100%; height: auto; margin: 6px 0 2px; }
+.p-water { fill: var(--water); }
+.p-hull { fill: #f6f7f4; stroke: #16242f; stroke-width: 1.5; }
+.p-stripe { fill: var(--navy); }
+.p-deck { fill: #b9c3cb; stroke: #16242f; stroke-width: .8; }
+.p-ramp { fill: #6f7c86; }
+.p-house { fill: #f6f7f4; stroke: #16242f; stroke-width: 1.2; }
+.p-bridge { fill: var(--navy); stroke: #0f1d2a; stroke-width: 1; }
+.p-win { stroke: #16242f; stroke-width: 3; opacity: .7; }
+.p-bridge + .p-win { stroke: #e9eef2; opacity: .9; }
+.p-stack { fill: #c8102e; stroke: #0f1d2a; stroke-width: .8; }
+.p-mast { stroke: #16242f; stroke-width: 1.5; fill: none; }
+.p-rail { stroke: #16242f; stroke-width: 1; fill: none; opacity: .5; }
+.p-name { font-family: var(--font-display); font-size: 9px; font-weight: 700; letter-spacing: .12em; fill: #16242f; }
+.boats { display: grid; gap: 6px; }
+.boat { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--surface-2); }
+.boat .name { font-family: var(--font-display); font-weight: 700; }
+.boat .name small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; font-family: var(--font-body); }
+.boat a { font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 999px; font-family: var(--font-display); font-size: 14px; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 30; }
+.toast.show { opacity: 1; }
+.disclaimer { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+
+/* Tab bar */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
+.tabs-in { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+.tab { border: 0; background: none; color: var(--muted); font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; padding: 10px 4px 8px; display: grid; justify-items: center; gap: 3px; cursor: pointer; }
+.tab svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tab[aria-selected="true"] { color: var(--accent); }
+@media (min-width: 560px) { .tile .time { font-size: 46px; } }
+@media (max-width: 440px) { .wordmark small { display: none; } }
+@media (max-width: 380px) { .boards { grid-template-columns: 1fr; } .next { grid-template-columns: 1fr; } .plan-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="mast">
+  <div class="mast-in">
+    <div class="wordmark">Swan's Island Boat <small>Josh &amp; Sarah's crossing</small></div>
+    <div class="mast-date num" id="mastDate"></div>
+  </div>
+</div>
+
+<div class="app">
+  <div class="chart" id="chart">
+    <div class="chart-note">Scheduled position</div>
+    <div class="ribbon" id="ribbon"><span class="dot" id="ribbonDot"></span><span id="ribbonText">Reading the schedule…</span><span class="sub" id="ribbonSub"></span></div>
+  </div>
+
+  <!-- NOW -->
+  <section class="view" id="view-now">
+    <div class="install" id="installBox" hidden>
+      <div><b>Put the boat on your phone</b><span id="installHint">Installs like an app: its own icon, full screen, works at the terminal with no signal.</span></div>
+      <div class="btnrow"><button class="btn primary" id="installBtn">Install</button><button class="btn" id="installLater">Later</button></div>
+    </div>
+    <div class="who" id="whoBox" hidden>
+      <div><b>Whose phone is this?</b><span>So the rides tally and a couple of small things are yours.</span></div>
+      <div class="btnrow"><button class="btn navy" data-who="Josh">Josh</button><button class="btn navy" data-who="Sarah">Sarah</button><button class="btn" data-who="">Just visiting</button></div>
+    </div>
+    <div id="noticeBox" class="notices"></div>
+    <div class="next" id="nextTiles"></div>
+    <div class="card cond" id="condCard">
+      <div class="cond-head"><h2>Conditions</h2><span class="chip" id="condStamp">loading…</span></div>
+      <div class="stats" id="condStats"></div>
+      <div id="condAlerts"></div>
+      <div class="periods" id="condPeriods"></div>
+      <div class="btnrow cond-links" id="condLinks"></div>
+    </div>
+    <div class="card">
+      <div class="datebar">
+        <span class="eyebrow" id="todayLabel">Today</span>
+        <span class="chip" id="todaySeason"></span>
+      </div>
+      <div class="boards" id="todayBoards" style="margin-top:10px"></div>
+      <div class="notes" id="todayNotes"></div>
+      <p class="small muted" style="margin:10px 0 0">Be at the terminal 15 minutes before departure. Crossing is about 40 minutes.</p>
+    </div>
+    <div class="fact" id="factCardNow"></div>
+  </section>
+
+  <!-- PLAN -->
+  <section class="view" id="view-plan" hidden>
+    <div class="card">
+      <div class="datebar">
+        <button class="btn" id="prevDay" aria-label="Previous day">‹</button>
+        <input type="date" id="planDate" aria-label="Pick a date">
+        <button class="btn" id="nextDay" aria-label="Next day">›</button>
+        <button class="btn" id="planToday">Today</button>
+        <div class="title" id="planTitle"></div>
+      </div>
+      <div class="boards" id="planBoards" style="margin-top:10px"></div>
+      <div class="notes" id="planNotes"></div>
+    </div>
+    <div class="card">
+      <h2>Time off island, time on island</h2>
+      <p class="lede small">Pick the boat you're taking and the boat you're coming back on. Boarding time (15 minutes) is already taken off.</p>
+      <div class="seg" role="group" aria-label="Leaving from">
+        <button id="fromSI" aria-pressed="true">Leaving Swan's Island</button>
+        <button id="fromBH" aria-pressed="false">Leaving Bass Harbor</button>
+      </div>
+      <div class="plan-grid" style="margin-top:12px">
+        <div><div class="eyebrow" id="outLabel">Boat out</div><div class="chips" id="outChips" style="margin-top:6px"></div></div>
+        <div><div class="eyebrow" id="retLabel">Boat back</div><div class="chips" id="retChips" style="margin-top:6px"></div></div>
+      </div>
+      <div class="result" id="planResult"><div class="eyebrow">Your time</div><div class="big">—</div><div class="small muted">Tap a time in each column.</div></div>
+      <p class="small muted" style="margin:10px 0 0">Green: 4 hours or more. Orange: under 4 hours. Red: under 1½ hours. A dash means the return boat leaves before you could make it.</p>
+    </div>
+    <div class="card">
+      <h2 id="weekTitle">This week</h2>
+      <div class="week" id="week"></div>
+    </div>
+  </section>
+
+  <!-- TICKETS -->
+  <section class="view" id="view-tickets" hidden>
+    <div class="card">
+      <h2>Tickets</h2>
+      <p class="lede">The state sells round-trip tickets online for this crossing. Both halves of a round trip work in either direction, and tickets aren't tied to a sailing, so buy ahead and keep them on your phone.</p>
+      <a class="btn primary block" href="https://secure.rocket-rez.com/RocketWeb2/756a86b20bd996e6?ro=zym" target="_blank" rel="noopener">Buy Bass Harbor – Swan's Island tickets ›</a>
+      <p class="small muted" style="margin:8px 0 0">Opens the Maine State Ferry Service webstore directly on this route. Download the PDF from the confirmation email before you get to the terminal: reception in the boarding lane is spotty, and the deckhand scans the barcode off your screen.</p>
+      <div class="tally" style="margin-top:14px">
+        <div><div class="eyebrow">Rides on hand</div><div class="count num" id="rideCount">0</div><div class="small muted">on this phone</div></div>
+        <div class="btnrow">
+          <button class="btn" id="rideBuy">+ bought a round trip</button>
+          <button class="btn" id="rideUse">− took a ride</button>
+          <button class="btn" id="rideReset" title="Set to zero">reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="fact" id="factCardTickets"></div>
+    <div class="card">
+      <h2>Fares</h2>
+      <p class="lede small" id="fareLede"></p>
+      <div style="overflow-x:auto"><table class="fares" id="fareTable"></table></div>
+      <p class="small muted" style="margin:8px 0 0" id="commuterMath"></p>
+      <p class="small muted" style="margin:4px 0 0">Tariff 11, effective June 1, 2025. Vehicles over 20 feet pay extra per foot. Truck tickets and all reservations are sold by phone or at the terminal, not online.</p>
+    </div>
+    <div class="card">
+      <h2>Taking a car</h2>
+      <p>Only four car reservations and two truck reservations are sold per sailing, and the boat holds about 16 vehicles. A reservation is $17 each way on top of the vehicle fare, and it's the only way to be sure of a spot on a busy boat.</p>
+      <p>If your car is <em>not</em> reserved and you're leaving Swan's Island, the state asks you to call the Swan's Island terminal 24 hours before you plan to depart Bass Harbor, for line-up instructions.</p>
+      <p class="small muted">Reservations don't exist online anywhere, not even on the state's own webstore, and the terminals don't publish how many spots are left on a given boat. The phone is the whole system.</p>
+      <div class="phone"><div class="who">Bass Harbor terminal<small>reservations · 45 Granville Rd</small></div><div class="n">207-244-3254</div><div class="btnrow"><button class="btn copy" data-copy="2072443254">Copy</button><a class="btn" href="tel:+12072443254">Call</a></div></div>
+      <div class="phone"><div class="who">Swan's Island terminal<small>line-up · 118 Ferry Rd</small></div><div class="n">207-526-4273</div><div class="btnrow"><button class="btn copy" data-copy="2075264273">Copy</button><a class="btn" href="tel:+12075264273">Call</a></div></div>
+    </div>
+  </section>
+
+  <!-- INFO -->
+  <section class="view" id="view-info" hidden>
+    <div class="card" id="photosCard" hidden>
+      <h2 id="photosTitle">Our island</h2>
+      <div class="gallery" id="gallery"></div>
+    </div>
+    <div class="card">
+      <h2>Where's the boat, really</h2>
+      <p class="lede small">The chart above moves the boat by the timetable. For the real GPS position, open the live map. It shows whichever boat is on the run that day.</p>
+      <div class="links">
+        <a class="linkrow" href="https://www.vesselfinder.com/?zoom=13&lat=44.205&lon=-68.390" target="_blank" rel="noopener"><span class="l">Live map of the crossing<small>VesselFinder · every boat between Bass Harbor and Swan's Island, updated from its AIS signal</small></span><span class="arrow">›</span></a>
+      </div>
+      <h3>Which boat is it today?</h3>
+      <svg class="portrait" viewBox="0 0 360 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Side view of a Maine State Ferry Service double-ended car ferry">
+        <path class="p-water" d="M0 86 Q20 80 40 86 T80 86 T120 86 T160 86 T200 86 T240 86 T280 86 T320 86 T360 86 V96 H0 Z"/>
+        <path class="p-hull" d="M18 72 L34 84 H326 L342 72 L330 62 H30 Z"/>
+        <path class="p-stripe" d="M30 62 H330 L334 66 H26 Z"/>
+        <rect class="p-deck" x="22" y="56" width="316" height="6" rx="1"/>
+        <path class="p-ramp" d="M8 60 L24 56 V62 L10 66 Z M352 60 L336 56 V62 L350 66 Z"/>
+        <rect class="p-house" x="120" y="34" width="120" height="22" rx="3"/>
+        <path class="p-win" d="M128 42 H150 M156 42 H178 M184 42 H206 M212 42 H234"/>
+        <rect class="p-bridge" x="150" y="20" width="60" height="14" rx="3"/>
+        <path class="p-win" d="M156 27 H170 M174 27 H188 M192 27 H204"/>
+        <rect class="p-stack" x="134" y="22" width="8" height="12" rx="1.5"/><rect class="p-stack" x="218" y="22" width="8" height="12" rx="1.5"/>
+        <path class="p-mast" d="M180 20 V6 M172 10 H188"/>
+        <path class="p-rail" d="M24 50 H338 M24 50 V56 M60 50 V56 M96 50 V56 M264 50 V56 M300 50 V56 M336 50 V56"/>
+        <text class="p-name" x="60" y="80">CAPT. HENRY LEE · 130 ft</text>
+      </svg>
+      <p class="small muted">Three boats take turns on this run. Tap a name to follow that one.</p>
+      <div class="boats">
+        <div class="boat"><span class="name">Captain Henry Lee<small>the regular Swan's Island boat · 130 ft · built 1992</small></span><a href="https://www.vesselfinder.com/vessels/details/367334890" target="_blank" rel="noopener">Follow ›</a></div>
+        <div class="boat"><span class="name">Captain Charles Philbrook<small>Vinalhaven's boat, fills in here</small></span><a href="https://www.vesselfinder.com/vessels/details/367342230" target="_blank" rel="noopener">Follow ›</a></div>
+        <div class="boat"><span class="name">Governor Curtis<small>the fleet's spare · built 1968</small></span><a href="https://www.vesselfinder.com/vessels?name=GOVERNOR+CURTIS" target="_blank" rel="noopener">Find ›</a></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Cancellations and notices</h2>
+      <p class="lede small">The state posts trip cancellations and service notices to New England 511; this page checks that feed three times a day and shows anything posted for the Bass Harbor boats. For same-minute news, the text alerts and the Facebook page are still the fastest.</p>
+      <div class="status511" id="status511"><span class="small muted">Checking the 511 feed…</span></div>
+      <div class="links" style="margin-top:10px">
+        <a class="linkrow" href="https://newengland511.org/" target="_blank" rel="noopener"><span class="l">Text alerts: New England 511<small>Free account → "My Trips" → ferry trip cancellations. This is the official text service.</small></span><span class="arrow">›</span></a>
+        <a class="linkrow" href="https://www.facebook.com/maineferryservice/" target="_blank" rel="noopener"><span class="l">Maine State Ferry Service on Facebook<small>Where cancellations get posted first</small></span><span class="arrow">›</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Wind, seas and tide</h2>
+      <div class="links">
+        <a class="linkrow" href="https://forecast.weather.gov/shmrn.php?mz=anz052&syn=anz000" target="_blank" rel="noopener"><span class="l">Marine forecast for the crossing<small>National Weather Service · Intra-coastal waters, Schoodic Point to Stonington</small></span><span class="arrow">›</span></a>
+        <a class="linkrow" href="https://forecast.weather.gov/MapClick.php?lat=44.1588&lon=-68.4322" target="_blank" rel="noopener"><span class="l">Swan's Island forecast<small>Hourly wind and weather</small></span><span class="arrow">›</span></a>
+        <a class="linkrow" href="https://tidesandcurrents.noaa.gov/noaatidepredictions.html?id=8413651" target="_blank" rel="noopener"><span class="l">Bass Harbor tides<small>NOAA tide predictions</small></span><span class="arrow">›</span></a>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Terminals</h2>
+      <div class="phone"><div class="who">Bass Harbor<small>45 Granville Rd, Bass Harbor</small></div><div class="n">207-244-3254</div><div class="btnrow"><a class="btn" href="https://maps.apple.com/?daddr=45+Granville+Rd,+Bass+Harbor,+ME+04653" target="_blank" rel="noopener">Apple Maps</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=45+Granville+Rd,+Bass+Harbor,+ME+04653" target="_blank" rel="noopener">Google Maps</a></div></div>
+      <div class="phone"><div class="who">Swan's Island<small>118 Ferry Rd, Swan's Island</small></div><div class="n">207-526-4273</div><div class="btnrow"><a class="btn" href="https://maps.apple.com/?daddr=118+Ferry+Rd,+Swans+Island,+ME+04685" target="_blank" rel="noopener">Apple Maps</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&destination=118+Ferry+Rd,+Swans+Island,+ME+04685" target="_blank" rel="noopener">Google Maps</a></div></div>
+      <p class="small muted" style="margin:10px 0 0">Maine State Ferry Service main office, Rockland: 207-596-5400.</p>
+    </div>
+    <div class="card">
+      <h2>Keep it on your phone</h2>
+      <p>Tap the page name, <b>Swan's Island Boat</b>, at the top left of this page, then <b>Add to Home Screen</b>. That puts the boat on your home screen as its own app. (Installing from the browser's own menu gives you Claude instead, so use the page name.)</p>
+      <p>It needs a signal to open, so keep your ticket PDFs in Files or Photos too.</p>
+      <p>To share it, use the Share button at the top of this page and send the link; whoever gets it can add it to their phone the same way. Everyone sees the same schedule; the rides tally stays on each phone.</p>
+    </div>
+    <div class="card">
+      <h2>About</h2>
+      <p class="small">Times come from the Maine State Ferry Service schedule pages: winter schedule effective November 1, 2026 through April 11, 2027, with the Frenchboro legs, the third-Tuesday fuel run, and the holiday pattern folded in. Summer 2027 uses the state's provisional table. Fares are Tariff 11.</p>
+      <p class="small">Built for Josh and Sarah on Swan's Island, with a nod to Andy and Karter's swansislandferry.com, which started the idea of a schedule you can read on a phone. The ride rating is a rule of thumb from the forecast wind and seas, not a promise; the captain decides.</p>
+      <p class="disclaimer">Not affiliated with or endorsed by the Maine State Ferry Service. Schedules change, boats break, and the weather has the final say. Confirm with the terminal before a trip that matters.</p>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="tabs-in">
+    <button class="tab" data-view="now" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 15h18l-2 4H5z"/><path d="M6 15V9h12v6"/><path d="M10 9V6h4v3"/><path d="M2 20c2 1 3 1 5 0s3-1 5 0 3 1 5 0 3-1 5 0"/></svg>Now</button>
+    <button class="tab" data-view="plan" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
+    <button class="tab" data-view="tickets" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12"/></svg>Tickets</button>
+    <button class="tab" data-view="info" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>Info</button>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Schedule engine ===== */
+// Swan's Island Boat — schedule engine (shared between the page and the Node test)
+// All times are minutes after midnight, Maine local time (America/New_York).
+(function (root) {
+  'use strict';
+
+  const CROSS = 40;      // Bass Harbor <-> Swan's Island, official crossing time (minutes)
+  const CROSS_FB = 50;   // Bass Harbor <-> Frenchboro, official crossing time (minutes)
+  const BOARD = 15;      // be at the terminal this many minutes early
+
+  // Official Maine State Ferry Service tables.
+  // Winter 11/01/2026 – 4/11/2027 (published). Summer 2027 is posted as "not yet finalized".
+  const SCHED = {
+    winter: {
+      label: 'Winter schedule',
+      MTF:  { si: [405, 495, 585, 765, 855, 945], bh: [450, 540, 660, 810, 900, 990] },
+      Sat:  { si: [405, 495, 585, 855, 945],      bh: [450, 540, 660, 900, 990] },
+      W13:  { si: [405, 495, 795, 1005],          bh: [450, 660, 960, 1050] },
+      W245: { si: [405, 495, 855, 945],           bh: [450, 660, 900, 990] },
+      Thu:  { si: [405, 495, 585, 795, 1005],     bh: [450, 540, 660, 960, 1050] },
+      Sun:  { si: [450, 540, 735, 945],           bh: [495, 585, 900, 990] },
+      gas:  { bh: 660, si: 855 },                 // 3rd Tuesday: fuel run, no passengers
+      fb:   { wedAll: [[540, 600]], wed13: [[840, 900]], thu: [[840, 900]], sun: [[780, 840]] }
+    },
+    summer: {
+      label: 'Summer schedule',
+      MTF:  { si: [405, 495, 585, 810, 900, 990], bh: [450, 540, 660, 855, 945, 1035] },
+      Sat:  { si: [405, 495, 585, 810, 900, 990], bh: [450, 540, 660, 855, 945, 1035] },
+      W13:  { si: [405, 495, 795, 1005],          bh: [450, 660, 960, 1050] },
+      W245: { si: [405, 495, 810, 900, 990],      bh: [450, 660, 855, 945, 1035] },
+      Thu:  { si: [405, 495, 585, 795, 1005],     bh: [450, 540, 660, 960, 1050] },
+      Sun:  { si: [450, 540, 630, 780, 990],      bh: [495, 585, 675, 945, 1035] },
+      gas:  { bh: 660, si: 810 },
+      fb:   { wedAll: [[540, 600]], wed13: [[840, 900]], thu: [[840, 900]], sun: [[825, 885]] }
+    }
+  };
+
+  // Thanksgiving, Christmas, New Year's: the one-boat holiday pattern from the official page.
+  const HOLIDAY = { si: [405, 990], bh: [570, 1035], fb: [[450, 510]] };
+
+  // Season ranges. Later dates fall back to a rule and are flagged as assumed.
+  const SEASONS = [
+    { from: '2026-04-14', to: '2026-10-31', key: 'summer', note: '' },
+    { from: '2026-11-01', to: '2027-04-11', key: 'winter', note: '' },
+    { from: '2027-04-12', to: '2027-10-31', key: 'summer', note: 'Summer 2027 times are the state’s provisional table (posted as not yet final).' }
+  ];
+
+  const pad = n => (n < 10 ? '0' : '') + n;
+  const dateKey = (y, m, d) => y + '-' + pad(m) + '-' + pad(d);
+
+  function seasonFor(key) {
+    for (const s of SEASONS) if (key >= s.from && key <= s.to) return { key: s.key, note: s.note, assumed: false };
+    const m = +key.slice(5, 7), d = +key.slice(8, 10);
+    const winter = (m >= 11) || (m <= 3) || (m === 4 && d <= 11);
+    return { key: winter ? 'winter' : 'summer', note: 'This date is past the published schedules; times shown follow this year’s pattern and should be confirmed.', assumed: true };
+  }
+
+  function nthWeekdayOfMonth(d) { return Math.ceil(d / 7); }
+
+  function holidayName(y, m, d, wd) {
+    if (m === 12 && d === 25) return 'Christmas Day';
+    if (m === 1 && d === 1) return 'New Year’s Day';
+    if (m === 11 && wd === 4 && nthWeekdayOfMonth(d) === 4) return 'Thanksgiving';
+    return null;
+  }
+
+  // weekday: 0=Sun ... 6=Sat
+  function weekdayOf(y, m, d) { return new Date(Date.UTC(y, m - 1, d)).getUTCDay(); }
+
+  function dayPlan(y, m, d) {
+    const wd = weekdayOf(y, m, d);
+    const key = dateKey(y, m, d);
+    const season = seasonFor(key);
+    const T = SCHED[season.key];
+    const nth = nthWeekdayOfMonth(d);
+    const notes = [];
+    let si, bh, fb = [], label;
+    const hol = holidayName(y, m, d, wd);
+    if (hol) {
+      si = HOLIDAY.si.slice(); bh = HOLIDAY.bh.slice(); fb = HOLIDAY.fb.map(p => ({ bh: p[0], fb: p[1] }));
+      label = hol + ' schedule';
+      notes.push({ kind: 'holiday', text: hol + ': one morning round and one afternoon round. The 7:30 from Bass Harbor goes to Frenchboro first; Swan’s Island passengers board the 9:30. Confirm with the terminal before you go.' });
+    } else {
+      let dayKey;
+      if (wd === 0) dayKey = 'Sun';
+      else if (wd === 6) dayKey = 'Sat';
+      else if (wd === 4) dayKey = 'Thu';
+      else if (wd === 3) dayKey = (nth === 1 || nth === 3) ? 'W13' : 'W245';
+      else dayKey = 'MTF';
+      si = T[dayKey].si.slice(); bh = T[dayKey].bh.slice();
+      label = T.label;
+      // Frenchboro legs (the same boat)
+      const F = T.fb;
+      if (wd === 3) { fb = fb.concat(F.wedAll.map(p => ({ bh: p[0], fb: p[1] }))); if (nth === 1 || nth === 3) fb = fb.concat(F.wed13.map(p => ({ bh: p[0], fb: p[1] }))); }
+      if (wd === 4) fb = fb.concat(F.thu.map(p => ({ bh: p[0], fb: p[1], soft: true })));
+      if (wd === 0) fb = fb.concat(F.sun.map(p => ({ bh: p[0], fb: p[1] })));
+      if (wd === 3) notes.push({ kind: 'fb', text: (nth === 1 || nth === 3 ? '1st & 3rd Wednesday: ' : 'Wednesday: ') + 'the boat makes the Frenchboro run mid-day, which is why there is a gap in the Swan’s Island times.' });
+      if (wd === 4) notes.push({ kind: 'fb', text: 'Thursday: the 2:00 Frenchboro run only happens if someone books it with Bass Harbor (207-244-3254) by 4 pm Wednesday. Either way the 1:15 from Swan’s Island and the 4:00 from Bass Harbor run as listed.' });
+      if (wd === 0) notes.push({ kind: 'fb', text: 'Sunday: the boat makes the Frenchboro run early afternoon, which is why there is a gap in the mid-day Swan’s Island times.' });
+    }
+    // 3rd Tuesday gas trip
+    let gas = null;
+    if (!hol && wd === 2 && nth === 3) {
+      gas = { bh: T.gas.bh, si: T.gas.si };
+      notes.unshift({ kind: 'gas', text: '3rd Tuesday: the ' + fmt(T.gas.bh) + ' from Bass Harbor and the ' + fmt(T.gas.si) + ' from Swan’s Island are fuel runs with no passengers.' });
+    }
+    if (season.note) notes.push({ kind: 'season', text: season.note });
+
+    // Build departures with flags
+    const deps = [];
+    si.forEach(t => deps.push({ t, from: 'si', to: 'bh', nopax: !!(gas && gas.si === t) }));
+    bh.forEach(t => deps.push({ t, from: 'bh', to: 'si', nopax: !!(gas && gas.bh === t) }));
+    fb.forEach(p => { deps.push({ t: p.bh, from: 'bh', to: 'fb', soft: !!p.soft }); deps.push({ t: p.fb, from: 'fb', to: 'bh', soft: !!p.soft }); });
+    deps.sort((a, b) => a.t - b.t);
+    const legs = deps.map(x => ({ ...x, arr: x.t + ((x.to === 'fb' || x.from === 'fb') ? CROSS_FB : CROSS) }));
+    return { key, y, m, d, wd, nth, season, label, holiday: hol, si, bh, fb, gas, notes, legs };
+  }
+
+  // Where is the boat at minute `now` on a given plan?
+  function boatStatus(plan, now) {
+    const legs = plan.legs;
+    if (!legs.length) return { state: 'none' };
+    for (const L of legs) if (now >= L.t && now < L.arr) return { state: 'underway', leg: L, progress: (now - L.t) / (L.arr - L.t) };
+    if (now < legs[0].t) return { state: 'docked', at: 'si', next: legs[0], first: true };
+    let last = legs[0];
+    for (const L of legs) { if (L.arr <= now) last = L; }
+    const next = legs.find(L => L.t > now) || null;
+    return { state: next ? 'docked' : 'done', at: last.to, next, last };
+  }
+
+  function nextDeparture(plan, now, from) {
+    return plan.legs.find(L => L.from === from && L.t > now && !L.nopax && L.to !== 'fb') || null;
+  }
+
+  function fmt(min, h24) {
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h24) return pad(h) + ':' + pad(m);
+    const hh = ((h + 11) % 12) + 1;
+    return hh + ':' + pad(m) + (h < 12 ? ' AM' : ' PM');
+  }
+
+  function fmtDur(min) {
+    if (min < 1) return 'now';
+    const h = Math.floor(min / 60), m = min % 60;
+    if (h === 0) return m + 'm';
+    return h + 'h ' + pad(m) + 'm';
+  }
+
+  // Time ashore / on island for a chosen outbound leg and return leg.
+  function layover(outT, retT) {
+    const arr = outT + CROSS;
+    const free = retT - arr - BOARD;
+    return { arr, free };
+  }
+
+  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FerryEngine = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const E = window.FerryEngine;
+  const $ = id => document.getElementById(id);
+  const pad = n => (n < 10 ? '0' : '') + n;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+
+  /* ----- Time in Maine ----- */
+  function nowNY() {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false }).formatToParts(new Date());
+    const o = {}; parts.forEach(p => o[p.type] = p.value);
+    const h = o.hour === '24' ? 0 : +o.hour;
+    return { y: +o.year, m: +o.month, d: +o.day, min: h * 60 + (+o.minute), sec: +o.second };
+  }
+  const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const MONS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  function addDays(y, m, d, n) { const t = new Date(Date.UTC(y, m - 1, d + n)); return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() }; }
+  function longDate(p) { return DAYS[p.wd] + ', ' + MONTHS[p.m - 1] + ' ' + p.d + ', ' + p.y; }
+  const PLACE = { si: "Swan's Island", bh: 'Bass Harbor', fb: 'Frenchboro' };
+  function timeHTML(min) { const s = E.fmt(min); const i = s.indexOf(' '); return s.slice(0, i) + '<small>' + s.slice(i + 1) + '</small>'; }
+
+  /* ----- Chart ----- */
+  const COAST = '-684259 442950 2 -39 -18 -15 13 -3 29 -50 57 7 10 13 48 -16 31 -21 30 -3 49 14 8 26 10 -11 0 -15 -96 -32 -5 -21 -35 2 -5 -10 13 -24 -4 -10 -78 3 77 -49 -2 -15 19 -16 3 -19 58 -32 1 -9 -24 -29 43 -58 20 5 17 25 19 72 30 -21 10 2 8 16 -2 -16 39 -32 -17 -9 7 -5 -19 -20 -33 -19 6 -18 37 -21 5 -26 25 0 19 28 23 16 27 63 38 -3 -24 -56 16 -27 40 -27 25 -1 16 -28 12 7 17 -7 -14 42 9 1 -3 -17 12 9 13 -11 -10 -27 -20 -9 23 -22 28 3 2 -23 -15 -10 -31 6 -17 -20 15 -43 26 -27 31 8 -4 27 22 56 53 6 28 14 -13 6 9 9 -5 9 9 3 -41 40 20 -4 8 23 -24 12 0 12 -21 -3 -1 12 -14 2 86 -21 -19 19 13 14 -5 24 19 -8 23 -27 0 -44 14 -14 -19 -11 35 -27 -21 -14 -1 10 -11 -4 10 -12 -20 -7 8 0 1 -10 -6 -28 32 -23 56 -90 51 -10 41 32 84 -2 3 8 -15 22 -38 -3 13 9 -8 6 5 20 18 -3 9 -15 17 -1 -11 -10 44 -28 25 23 -10 13 6 6 53 -13 1 8 -15 5 -1 20 16 -6 15 12 8 -4 3 50 18 10 49 -10 -1 18 28 38 -4 11 40 10 13 17 30 10 -6 14 5 25 -26 27 -10 34 6 11 -23 44 -19 9 -16 43 -14 -3 -24 20 -42 -11 -76 27 -50 2 -40 -9 -16 12 16 30 15 4 -12 5 8 15 -4 24 13 -10 23 5 33 -19 28 -1 -6 -7 8 -8 35 11 -8 5 5 7 -37 34 -2 22 -18 5 -23 31 -51 2 -21 -20 -13 11 1 24 -19 22 4 10 5 -10 18 -2 11 -22 40 -10 28 77|-684206 441289 12 17 64 7 17 26 53 2 29 13 0 8 58 45 49 10 0 13 -33 37 13 24 0 35 13 17 94 12 -24 16 -25 -3 -13 8 9 23 -9 13 -33 9 -7 37 -23 15 1 23 -56 18 -26 29 -36 18 -23 47 -23 16 -7 51 -50 -4 -32 15 -14 20 -25 0 0 -30 26 -10 -5 -14 8 -4 -11 -5 -2 -13 -14 -2 19 -2 18 -35 15 -5 -8 -26 -16 -8 12 -19 -68 -12 -9 -13 -48 -15 0 -13 -10 1 -12 -15 7 -2 -23 3 -27 -41 -19 12 -2 20 20 33 28 19 0 19 -39 -27 -22 -38 -36 1 -28 -27 -15 -4 -1 -28 -11 -17 -28 17 -5 18 23 20 -6 10 -19 -2 1 13 12 8 23 -9 22 4 -16 3 2 10 22 1 26 24 17 0 -17 4 -25 27 23 25 -10 1 8 15 -54 31 -10 -2 -12 8 9 2 -23 12 -52 -19 1 -7 -8 14 -19 -9 -1 15 -12 1 33 7 -7 13 -13 1 -29 -8 4 -9 -15 -7 -18 -30 -5 -21 23 0 3 -8 -10 -2 11 -24 -18 0 -23 -15 22 -17 1 -15 -40 -7 -36 -32 16 -11 13 -30 -36 16 -3 -9 12 -6 -58 -12 -5 -13 -8 9 -40 2 9 13 -9 3 31 7 -10 47 9 20 -11 0 0 13 -10 0 -58 -35 -22 1 21 -8 -6 -17 -17 -1 1 -10 -25 -18 -31 -8 -6 -73 -3 -10 -16 -3 -2 -13 44 -7 15 -24 15 -5 31 4 14 18 22 -4 17 -24 -4 -18 30 -20 14 8 -16 25 12 12 29 -1 12 10 14 21 -11 7 31 9 0 26 8 10 48 4 43 -14 9 5 0 -8 27 28 -11 4 3 6 19 5 -19 29 28 -10 29 10 24 -8 6 -16 -21 -11 -9 -26 23 -10 3 -15 18 -2 10 -18 -10 -6 -1 -17 -21 -15 2 -11 -13 -1 -10 -12 9 -24 -14 -16 22 -28 47 -16 2 -11 12 5 30 -14 7 5 -13 20 6 7 -12 -3 -23 12 11 16 -14 25 14 4 -5 13 21 35 -16 55 55 51 11 -12 17 6 4 -9 -21 -20 -26 -4 7 -17 29 -7 -17 -14 3 -27 -11 0 -5 -28 32 -8 2 11 52 -13 0 -11 -24 -13 -27 5 -3 -6 20 -5 -1 -15 56 0 31 -12 36 4 7 -8 -30 1 -8 -19 -11 1 -15 -29 3 -17 19 -9 35 10 15 -12 23 2 33 -14|-683336 441050 32 40 -1 16 -12 6 -51 -4 -20 -15 -39 15 7 42 44 34 -23 23 -69 17 -6 16 17 23 -9 18 -61 1 -51 -26 -63 -65 8 -2 3 -16 -36 -24 12 20 9 50 -54 -15 -17 -23 -33 -11 -20 -44 22 -23 53 -6 -9 -19 19 -6 5 -22 59 0 23 21 15 -5 9 -16 87 0 28 30 16 1 16 14 13 -14 -11 -31|-685450 442705 28 -21 0 -12 -12 -7 5 -3 47 5 14 -6 -2 -18 -25 -5 -14 6 -4 -11 64 -10 40 10 45 -30 72 1 -9 58 -88 104 -12 68 -10 4 -15 29 19 54 18 22 -10 7 -70 0 17 -40 -3 -14 -14 -7 -14 -1 -39 23 -28 -3|-685450 442342 92 -30 8 -30 17 12 71 -15 28 7 -7 28 18 5 -9 13 1 31 -46 43 -9 54 -9 3 2 36 -16 5 -3 15 -13 2 -16 22 -44 13 -36 22 -29 4|-685012 441050 -10 17 -22 11 18 21 48 13 11 -4 1 -18 26 -3 33 28 -32 1 -11 10 26 30 -35 51 6 11 -29 10 -27 29 -66 19 -41 -26 -1 -37 -61 -51 -10 -21 15 -29 -8 -43 8 -19|-683557 441992 -36 2 -16 -14 -32 0 -29 -27 -30 -11 -1 -9 -18 -5 -19 -44 -18 -7 -31 -35 37 -25 45 -9 74 35 7 8 -5 11 42 15 26 39 56 38 -52 38|-684924 442824 3 -25 52 -92 -2 -14 60 -28 72 -9 40 -16 9 10 12 27 -10 23 -53 24 -83 71 -68 30 -32 -1|-683474 441852 -9 9 -20 -6 -12 -34 -25 -19 12 -10 -13 -39 31 4 6 -42 13 -16 21 -3 16 13 14 -10 7 10 26 -4 52 73 -12 44 -24 20 -41 -9 -18 18 -24 1|-683339 442075 -27 -12 -1 -11 10 -24 28 -19 2 -8 -15 -15 7 -9 37 -1 13 -7 -5 -10 22 -7 59 41 11 -1 14 -26 39 10 -14 28 -47 5 -17 36 -24 20 -92 10|-684829 442238 18 -34 33 -12 37 0 21 11 8 29 20 2 9 13 -24 41 -49 3 -28 -12 -22 8 -22 -18 -1 -31|-684777 442032 30 -3 -6 20 28 17 3 18 -11 -3 -31 15 14 2 -5 18 -22 23 -86 -8 11 -22 -25 -9 24 -1 8 10 26 -13 -3 -12 -21 -5 -7 -23 5 -24 12 -6 56 6|-683043 442950 16 -13 4 9 29 -6 14 -28 -5 -3 10 0 12 -28 31 -8 -11 10 0 18 9 0 19 -12 5 -23 10 -2 21 8 29 -3 -1 81|-684360 441217 8 12 -31 28 42 15 -29 22 4 34 -35 -3 -19 -14 -18 4 -46 -26 0 -23 -11 -12 56 9 33 -34 46 -12|-684652 442041 -14 -17 -26 -7 7 -19 35 -13 66 -7 45 22 1 17 -32 10 -5 13 -42 22 -31 5 -4 -26|-683366 441972 -38 -14 -28 -28 0 -20 65 -8 12 13 38 11 -19 14 1 11 -31 21|-682991 442816 -50 17 -6 -24 12 -12 -5 -23 42 -12 38 17 30 -19 21 1 -82 55';
+  function decodeCoast(s) {
+    return s.split('|').map(r => { const a = r.split(' ').map(Number); const pts = []; let x = a[0], y = a[1]; pts.push([x / 1e4, y / 1e4]); for (let i = 2; i < a.length; i += 2) { x += a[i]; y += a[i + 1]; pts.push([x / 1e4, y / 1e4]); } return pts; });
+  }
+  const BOX = { minLon: -68.545, maxLon: -68.285, minLat: 44.105, maxLat: 44.295 };
+  const K = Math.cos(44.2 * Math.PI / 180), VW = 1000, SX = VW / ((BOX.maxLon - BOX.minLon) * K), VH = Math.round((BOX.maxLat - BOX.minLat) * SX);
+  const P = ll => [(ll[0] - BOX.minLon) * K * SX, (BOX.maxLat - ll[1]) * SX];
+  const TERM = { bh: [-68.3488, 44.2392], si: [-68.4330, 44.1735], fb: [-68.3610, 44.1300] };
+  const ROUTE = { si_bh: [TERM.si, [-68.4355, 44.1800], [-68.4210, 44.1935], [-68.3850, 44.2080], [-68.3620, 44.2235], [-68.3508, 44.2345], TERM.bh] };
+  ROUTE.bh_si = ROUTE.si_bh.slice().reverse();
+  ROUTE.bh_fb = [TERM.bh, [-68.3508, 44.2345], [-68.3440, 44.2220], [-68.3440, 44.2060], [-68.3500, 44.1920], [-68.3570, 44.1780], [-68.3600, 44.1500], TERM.fb];
+  ROUTE.fb_bh = ROUTE.bh_fb.slice().reverse();
+
+  function polyLen(pts) { let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); return L; }
+  function alongPoly(pts, f) {
+    const total = polyLen(pts); let want = Math.max(0, Math.min(1, f)) * total;
+    for (let i = 1; i < pts.length; i++) {
+      const seg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+      if (want <= seg || i === pts.length - 1) { const t = seg ? want / seg : 0; const x = pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, y = pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t; const ang = Math.atan2(pts[i][1] - pts[i - 1][1], pts[i][0] - pts[i - 1][0]) * 180 / Math.PI; return { x, y, ang }; }
+      want -= seg;
+    }
+    return { x: pts[0][0], y: pts[0][1], ang: 0 };
+  }
+
+  function buildChart() {
+    const rings = decodeCoast(COAST);
+    const land = rings.map(r => 'M' + r.map(ll => P(ll).map(v => v.toFixed(1)).join(',')).join('L') + 'Z').join('');
+    const pl = pts => pts.map(ll => P(ll).map(v => v.toFixed(1)).join(',')).join(' ');
+    const ripples = [];
+    for (let i = 0; i < 22; i++) { const y = 30 + i * 46; const x0 = 40 + (i % 3) * 120; ripples.push('<path class="ripple" d="M' + x0 + ' ' + y + ' q 12 -4 24 0 t 24 0 t 24 0"/>'); ripples.push('<path class="ripple" d="M' + (x0 + 420) + ' ' + (y + 18) + ' q 12 -4 24 0 t 24 0 t 24 0"/>'); }
+    const labels = [
+      ['MOUNT DESERT ISLAND', [-68.395, 44.2745], 'chart-label'],
+      ['Placentia I.', [-68.3755, 44.2045], 'chart-label small'],
+      ['Black I.', [-68.3335, 44.1655], 'chart-label small'],
+      ['Great Gott I.', [-68.3305, 44.2135], 'chart-label small'],
+      ['Long Island · Frenchboro', [-68.353, 44.1385], 'chart-label small'],
+      ['Marshall I.', [-68.506, 44.1185], 'chart-label small'],
+      ["SWAN'S ISLAND", [-68.473, 44.1455], 'chart-label'],
+      ['Blue Hill Bay', [-68.49, 44.246], 'chart-label water']
+    ];
+    const lbl = labels.map(l => { const [x, y] = P(l[1]); return '<text class="' + l[2] + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="middle">' + l[0] + '</text>'; }).join('');
+    const bh = P(TERM.bh), si = P(TERM.si), fb = P(TERM.fb);
+    const rose = (() => { const cx = 920, cy = VH - 215; return '<g class="rose"><circle cx="' + cx + '" cy="' + cy + '" r="34"/><path d="M' + cx + ' ' + (cy - 48) + 'L' + (cx + 9) + ' ' + cy + 'L' + cx + ' ' + (cy + 20) + 'L' + (cx - 9) + ' ' + cy + 'Z"/><text x="' + cx + '" y="' + (cy - 56) + '" text-anchor="middle">N</text></g>'; })();
+    const nmPx = 1852 / 111320 * SX; // one nautical mile at this scale (1 degree of latitude = 111.32 km = SX units)
+    const scale = '<g class="scalebar" transform="translate(40,' + (VH - 170) + ')"><line x1="0" y1="0" x2="' + nmPx.toFixed(1) + '" y2="0"/><line x1="0" y1="-6" x2="0" y2="6"/><line x1="' + nmPx.toFixed(1) + '" y1="-6" x2="' + nmPx.toFixed(1) + '" y2="6"/><text x="' + (nmPx / 2).toFixed(1) + '" y="-10" text-anchor="middle">1 nautical mile</text></g>';
+    const svg = '<svg viewBox="0 0 ' + VW + ' ' + VH + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chart of the crossing between Bass Harbor and Swan\'s Island">' +
+      '<defs><radialGradient id="wg" cx="45%" cy="40%" r="80%"><stop offset="0" stop-color="var(--water)"/><stop offset="1" stop-color="var(--water-2)"/></radialGradient>' +
+      '<filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".35"/></filter></defs>' +
+      '<rect width="' + VW + '" height="' + VH + '" fill="url(#wg)"/>' + ripples.join('') +
+      '<path class="land" d="' + land + '"/>' +
+      '<polyline class="route-fb" points="' + pl(ROUTE.bh_fb) + '"/>' +
+      '<polyline class="route" points="' + pl(ROUTE.si_bh) + '"/>' +
+      lbl + rose + scale +
+      '<circle class="terminal" cx="' + bh[0].toFixed(1) + '" cy="' + bh[1].toFixed(1) + '" r="9"/>' +
+      '<text class="terminal-label" x="' + (bh[0] + 18).toFixed(1) + '" y="' + (bh[1] - 2).toFixed(1) + '">Bass Harbor</text>' +
+      '<text class="terminal-sub" x="' + (bh[0] + 18).toFixed(1) + '" y="' + (bh[1] + 18).toFixed(1) + '">terminal · 45 Granville Rd</text>' +
+      '<circle class="terminal" cx="' + si[0].toFixed(1) + '" cy="' + si[1].toFixed(1) + '" r="9"/>' +
+      '<text class="terminal-label" x="' + (si[0] + 16).toFixed(1) + '" y="' + (si[1] + 30).toFixed(1) + '">Swan\'s Island</text>' +
+      '<text class="terminal-sub" x="' + (si[0] + 16).toFixed(1) + '" y="' + (si[1] + 50).toFixed(1) + '">terminal · 118 Ferry Rd</text>' +
+      '<circle cx="' + fb[0].toFixed(1) + '" cy="' + fb[1].toFixed(1) + '" r="5" fill="var(--navy)" opacity=".6"/>' +
+      '<g class="ferry" id="ferry" filter="url(#shadow)" transform="translate(' + si[0].toFixed(1) + ',' + si[1].toFixed(1) + ')">' +
+        '<g id="ferryInner"><path class="wake" d="M-8 34 Q-13 60 -20 92 M8 34 Q13 60 20 92"/>' +
+        // double-ended hull, bow up
+        '<path class="hull" d="M0 -44 C11 -44 16 -36 16 -27 L16 27 C16 36 11 44 0 44 C-11 44 -16 36 -16 27 L-16 -27 C-16 -36 -11 -44 0 -44 Z"/>' +
+        '<rect class="deck" x="-12.5" y="-35" width="25" height="70" rx="1.5"/>' +
+        '<path class="ramp" d="M-10 -42 H10 L8 -35 H-8 Z M-10 42 H10 L8 35 H-8 Z"/>' +
+        '<path class="lane" d="M0 -34 V34"/>' +
+        '<path class="rail" d="M-13.5 -32 V32 M13.5 -32 V32"/>' +
+        // a few cars on the deck
+        '<rect class="car c1" x="-10.5" y="-31" width="7" height="11" rx="1.6"/><rect class="car c2" x="3.5" y="-29" width="7" height="11" rx="1.6"/><rect class="car c3" x="-10.5" y="-18" width="7" height="11" rx="1.6"/>' +
+        '<rect class="car c2" x="-10.5" y="16" width="7" height="11" rx="1.6"/><rect class="car c1" x="3.5" y="20" width="7" height="11" rx="1.6"/>' +
+        // deckhouse across the beam, wheelhouse on top, stacks and mast
+        '<rect class="house" x="-16" y="-10" width="32" height="20" rx="2.5"/>' +
+        '<rect class="bridge" x="-9" y="-6" width="18" height="12" rx="1.8"/>' +
+        '<path class="win" d="M-6 -2.5 H6 M-6 2.5 H6"/>' +
+        '<circle class="stack" cx="-12.5" cy="6" r="2.2"/><circle class="stack" cx="12.5" cy="6" r="2.2"/>' +
+        '<circle class="mast" cx="0" cy="-8.5" r="1.4"/></g>' +
+      '</g></svg>';
+    $('chart').insertAdjacentHTML('afterbegin', svg);
+  }
+
+  function placeBoat(status) {
+    const g = $('ferry'), inner = $('ferryInner');
+    let pos, moving = false;
+    if (status.state === 'underway') {
+      const key = status.leg.from + '_' + status.leg.to; const pts = (ROUTE[key] || ROUTE.si_bh).map(P);
+      pos = alongPoly(pts, status.progress); moving = true;
+    } else {
+      // Tied up at the pier: sit just off the terminal marker, bow pointed out the channel.
+      const at = status.at || 'si'; const pts = (at === 'si' ? ROUTE.si_bh : at === 'bh' ? ROUTE.bh_si : ROUTE.fb_bh).map(P);
+      const a = alongPoly(pts, 36 / polyLen(pts)); pos = { x: a.x, y: a.y, ang: a.ang };
+    }
+    g.setAttribute('transform', 'translate(' + pos.x.toFixed(1) + ',' + pos.y.toFixed(1) + ')');
+    inner.setAttribute('transform', 'rotate(' + (pos.ang + 90).toFixed(1) + ')');
+    inner.querySelector('.wake').style.opacity = moving ? '.8' : '0';
+    if (!g.classList.contains('live')) requestAnimationFrame(() => requestAnimationFrame(() => g.classList.add('live')));
+  }
+
+  /* ----- Rendering ----- */
+  let NOW = nowNY();
+  let selected = null; // {y,m,d} for the Plan view
+  let plannerFrom = 'si', plannerOut = null, plannerRet = null;
+
+  function renderBoards(plan, host, nowMin, isToday) {
+    const col = (from) => {
+      const items = plan.legs.filter(L => L.from === from && L.to !== 'fb');
+      const nextL = isToday ? items.find(L => L.t > nowMin && !L.nopax) : null;
+      return '<div class="board"><h3>From ' + PLACE[from] + '</h3><ul>' + items.map(L => {
+        const gone = isToday && L.t <= nowMin;
+        const cls = [gone ? 'gone' : '', L.nopax ? 'nopax' : '', (L === nextL) ? 'next' : ''].filter(Boolean).join(' ');
+        let c = '';
+        if (L.nopax) c = 'fuel run · no passengers';
+        else if (isToday && !gone) c = 'in ' + E.fmtDur(L.t - nowMin);
+        else if (gone) c = 'departed';
+        else c = 'arr ' + E.fmt(L.arr).replace(' ', ' ');
+        return '<li class="' + cls + '"><span class="t">' + E.fmt(L.t) + '</span><span class="c">' + c + '</span></li>';
+      }).join('') + '</ul></div>';
+    };
+    host.innerHTML = col('si') + col('bh');
+  }
+  function renderNotes(plan, host) {
+    host.innerHTML = plan.notes.map(n => '<div class="note ' + n.kind + '">' + n.text + '</div>').join('');
+  }
+
+  function statusText(plan, st, nowMin) {
+    const dot = $('ribbonDot'), txt = $('ribbonText'), sub = $('ribbonSub');
+    dot.className = 'dot ' + (st.state === 'underway' ? '' : st.state === 'docked' ? 'docked' : 'done');
+    if (st.state === 'underway') {
+      const L = st.leg; let extra = '';
+      if (L.nopax) extra = ' · fuel run, no passengers'; else if (L.to === 'fb' || L.from === 'fb') extra = ' · Frenchboro run'; if (L.soft) extra += ' (if booked)';
+      txt.innerHTML = '<b>Underway</b> ' + PLACE[L.from] + ' → ' + PLACE[L.to] + extra;
+      sub.textContent = 'due ' + E.fmt(L.arr);
+    } else if (st.state === 'docked') {
+      const n = st.next; txt.innerHTML = '<b>At ' + PLACE[st.at] + '</b>' + (st.first ? ' overnight' : '');
+      sub.textContent = n ? ('leaves ' + E.fmt(n.t) + ' for ' + PLACE[n.to] + (n.nopax ? ' (fuel run)' : '')) : '';
+    } else {
+      txt.innerHTML = '<b>Tied up at ' + PLACE[st.at || 'si'] + '</b> for the night';
+      const tm = addDays(NOW.y, NOW.m, NOW.d, 1); const tp = E.dayPlan(tm.y, tm.m, tm.d); const f = tp.legs[0];
+      sub.textContent = f ? ('first boat ' + E.fmt(f.t) + ' tomorrow') : '';
+    }
+  }
+
+  function renderNext(plan, nowMin) {
+    const tiles = ['si', 'bh'].map(from => {
+      let L = E.nextDeparture(plan, nowMin, from), when = '', tomorrow = false;
+      if (!L) { const tm = addDays(NOW.y, NOW.m, NOW.d, 1); const tp = E.dayPlan(tm.y, tm.m, tm.d); L = E.nextDeparture(tp, -1, from); tomorrow = true; }
+      if (!L) return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">—</div></div>';
+      const mins = tomorrow ? (24 * 60 - nowMin + L.t) : (L.t - nowMin);
+      when = tomorrow ? 'tomorrow' : ('in ' + E.fmtDur(mins));
+      const soon = !tomorrow && mins <= 30;
+      return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">' + timeHTML(L.t) + '</div><div class="in' + (soon ? ' soon' : '') + '">' + when + (soon ? ' · be there' : '') + '</div><div class="where">to ' + PLACE[L.to] + ' · arrives ' + E.fmt(L.arr) + '</div></div>';
+    });
+    $('nextTiles').innerHTML = tiles.join('');
+  }
+
+  function renderNow() {
+    NOW = nowNY();
+    const plan = E.dayPlan(NOW.y, NOW.m, NOW.d);
+    $('mastDate').textContent = DAYS[plan.wd].slice(0, 3) + ' ' + MONS[plan.m - 1] + ' ' + plan.d + ' · ' + E.fmt(NOW.min);
+    $('todayLabel').textContent = 'Today · ' + longDate(plan);
+    $('todaySeason').textContent = plan.label;
+    renderBoards(plan, $('todayBoards'), NOW.min, true);
+    renderNotes(plan, $('todayNotes'));
+    renderNext(plan, NOW.min);
+    const st = E.boatStatus(plan, NOW.min);
+    statusText(plan, st, NOW.min);
+    placeBoat(st);
+  }
+
+  function renderPlan() {
+    const s = selected; const plan = E.dayPlan(s.y, s.m, s.d);
+    const isToday = (s.y === NOW.y && s.m === NOW.m && s.d === NOW.d);
+    $('planDate').value = plan.key;
+    $('planTitle').innerHTML = longDate(plan) + ' <span class="chip' + (plan.holiday ? ' accent' : '') + '">' + plan.label + '</span>';
+    renderBoards(plan, $('planBoards'), NOW.min, isToday);
+    renderNotes(plan, $('planNotes'));
+    renderPlanner(plan);
+    renderWeek(plan);
+  }
+
+  function renderPlanner(plan) {
+    const other = plannerFrom === 'si' ? 'bh' : 'si';
+    $('outLabel').textContent = 'Boat out from ' + PLACE[plannerFrom];
+    $('retLabel').textContent = 'Boat back from ' + PLACE[other];
+    const outs = plan.legs.filter(L => L.from === plannerFrom && L.to === other && !L.nopax);
+    const rets = plan.legs.filter(L => L.from === other && L.to === plannerFrom && !L.nopax);
+    if (plannerOut !== null && !outs.some(L => L.t === plannerOut)) plannerOut = null;
+    if (plannerRet !== null && !rets.some(L => L.t === plannerRet)) plannerRet = null;
+    const chip = (L, sel, dis) => '<button data-t="' + L.t + '" aria-pressed="' + (sel ? 'true' : 'false') + '"' + (dis ? ' disabled' : '') + '>' + E.fmt(L.t) + '</button>';
+    $('outChips').innerHTML = outs.map(L => chip(L, L.t === plannerOut, false)).join('') || '<span class="small muted">No sailings this way today.</span>';
+    $('retChips').innerHTML = rets.map(L => chip(L, L.t === plannerRet, plannerOut !== null && L.t <= plannerOut + E.CROSS)).join('') || '<span class="small muted">No return boats.</span>';
+    const r = $('planResult');
+    if (plannerOut === null || plannerRet === null) { r.className = 'result'; r.innerHTML = '<div class="eyebrow">' + (plannerFrom === 'si' ? 'Time off island' : 'Time on island') + '</div><div class="big">—</div><div class="small muted">Tap a time in each column.</div>'; return; }
+    const lay = E.layover(plannerOut, plannerRet);
+    const label = plannerFrom === 'si' ? 'Time off island' : 'Time on island';
+    if (lay.free < 0) { r.className = 'result bad'; r.innerHTML = '<div class="eyebrow">' + label + '</div><div class="big">—</div><div class="small">That boat leaves before you could get back to the terminal.</div>'; return; }
+    const cls = lay.free < 90 ? 'bad' : lay.free < 240 ? 'warn' : 'good';
+    r.className = 'result ' + cls;
+    r.innerHTML = '<div class="eyebrow">' + label + '</div><div class="big">' + E.fmtDur(lay.free) + '</div><div class="small">Land ' + E.fmt(lay.arr) + ' at ' + PLACE[other] + '. Be back at the terminal by ' + E.fmt(plannerRet - E.BOARD) + ' for the ' + E.fmt(plannerRet) + ' boat home.</div>';
+  }
+
+  function renderWeek(plan) {
+    // Monday-start week containing the selected day
+    const back = (plan.wd + 6) % 7; const start = addDays(plan.y, plan.m, plan.d, -back);
+    const rows = [];
+    for (let i = 0; i < 7; i++) {
+      const dd = addDays(start.y, start.m, start.d, i); const p = E.dayPlan(dd.y, dd.m, dd.d);
+      const f = from => p.legs.filter(L => L.from === from && L.to !== 'fb').map(L => L.nopax ? '<span class="x">' + E.fmt(L.t).replace(' ', ' ') + '</span>' : E.fmt(L.t).replace(' ', ' ')).join(', ');
+      const flag = p.holiday ? ' <span class="chip accent">' + p.holiday + '</span>' : (p.gas ? ' <span class="chip">fuel run</span>' : (p.fb.length ? ' <span class="chip">Frenchboro</span>' : ''));
+      rows.push('<div class="day"><div class="dn">' + DAYS[p.wd].slice(0, 3) + '<small>' + MONS[p.m - 1] + ' ' + p.d + '</small></div><div class="times"><b>SI</b> ' + f('si') + '<br><b>BH</b> ' + f('bh') + flag + '</div></div>');
+    }
+    const end = addDays(start.y, start.m, start.d, 6);
+    $('weekTitle').textContent = 'Week of ' + MONS[start.m - 1] + ' ' + start.d + (start.m === end.m ? '' : ' – ' + MONS[end.m - 1]) + ' ' + end.d;
+    $('week').innerHTML = rows.join('');
+  }
+
+  /* ----- Fares ----- */
+  const FARES = [
+    ['Adult (18+)', 15.75, 23.00], ['Minor (6–17)', 8.00, 15.00], ['Child (0–5)', 0, 0],
+    ['Commuter · 5 round trips, 14 days, one person', 63.00, 92.00],
+    ['Vehicle & driver (up to 20 ft)', 41.50, 55.00], ['Motorcycle & driver', 32.00, 42.50],
+    ['Adult bike & rider', 22.75, 29.75], ['Minor bike & rider', 14.75, 21.75],
+    ['Vehicle reservation, each way', 17.00, 17.00], ['Truck, per foot', 6.00, 7.00]
+  ];
+  function money(v) { return v === 0 ? 'free' : '$' + v.toFixed(2); }
+  function renderFares() {
+    const peak = NOW.m >= 6 && NOW.m <= 9;
+    $('fareLede').textContent = peak ? 'Peak rates apply now (June 1 – September 30). All prices are round trip.' : 'Off-peak rates apply now (October 1 – May 31). All prices are round trip.';
+    $('fareTable').innerHTML = '<thead><tr><th>Ticket</th><th class="p' + (peak ? '' : ' now') + '">Off-peak</th><th class="p' + (peak ? ' now' : '') + '">Peak</th></tr></thead><tbody>' +
+      FARES.map(f => '<tr' + (f[1] === 0 ? ' class="quiet"' : '') + '><td>' + f[0] + '</td><td class="p' + (peak ? '' : ' now') + '">' + money(f[1]) + '</td><td class="p' + (peak ? ' now' : '') + '">' + money(f[2]) + '</td></tr>').join('') + '</tbody>';
+    const c = peak ? 92 : 63, a = peak ? 23 : 15.75;
+    $('commuterMath').textContent = 'Commuter math right now: $' + c + ' for five round trips is $' + (c / 5).toFixed(2) + ' each instead of $' + a.toFixed(2) + ', a saving of $' + (a * 5 - c).toFixed(2) + ' if you make five crossings within two weeks.';
+  }
+
+  /* ----- Rides tally (this device) ----- */
+  function rides(delta, reset) {
+    let n = store.get('rides', 0); if (reset) n = 0; else n = Math.max(0, n + delta);
+    store.set('rides', n); $('rideCount').textContent = n;
+  }
+
+  /* ----- Facts ----- */
+  const FACTS = [
+    ['First on the chart', "Samuel de Champlain's expedition put Swan's Island on paper in the early 1600s (Wikipedia says 1606; Hermon Small's island history says 1604). It was a seasonal hunting ground for the Wabanaki."],
+    ['Burnt what?', "Champlain labeled it “Brûlé côte,” burnt hill. Later mapmakers translated the first word, kept the second, and the island spent a century as “Burnt Coat” or even “Burnt Coal.” One deed just says “Burn Coat.”"],
+    ['The Colonel', "The island is named for Colonel James Swan of Fife, Scotland, a Sons of Liberty member and Boston Tea Party participant, who bought it in 1786."],
+    ['Company town', 'Soon after buying the islands, Colonel Swan put up a sawmill, a grist mill, a store, and a large mansion, and settlers came up from Massachusetts for the work.'],
+    ['First settler', 'David Smith, a Revolutionary War veteran, became the first settler of European descent on the island in 1791.'],
+    ['Hockamock', "The point the lighthouse stands on kept its Wabanaki name, recorded by Small as “Hocomock.”"],
+    ['Then and now', 'The population passed 1,000 by 1900. The 2020 census counted 355 year-round residents, and summer brings it back near 1,000.'],
+    ['Mostly water', 'The town covers 80.81 square miles, but only 12.41 of them are land. The rest is Blue Hill Bay and the Gulf of Maine.'],
+    ['Three villages', "Swan's Island has three villages: the Harbor, Atlantic, and Minturn."],
+    ['The light', 'Burnt Coat Harbor Light on Hockamock Head was built in 1872, automated in 1975, and is now kept by the town. Its 32-foot brick tower puts the light 75 feet above the water, visible nine nautical miles out.'],
+    ['Two towers once', 'The lighthouse originally had a second range light with a covered walkway between the towers. The second tower came down in 1884.'],
+    ['The first boat', "State ferry service began in 1960 with the William S. Silsby, named for the man who pushed hardest to get the island a ferry. She carried seven or eight cars. Her replacement took 11 or 12. The Henry Lee takes 16 or 17."],
+    ['Captain Lee', "Henry Lee was the ferry's first captain and ran the boat from 1960 until he retired in the 1970s. His son Dexter served the town as a selectman for years."],
+    ['Built in Maine', 'The M/V Captain Henry Lee, launched in 1992, was the first state ferry built at a Maine shipyard in more than 30 years. She is 130 feet long, 46 feet wide, and carries up to 221 passengers.'],
+    ['The twin', "The Captain Charles Philbrook, built in 1993 for the Vinalhaven run, is the Henry Lee's near-twin: 130 feet, 46-foot beam, 221 passengers, 804 horsepower. When she fills in here, the boat feels familiar."],
+    ['The spare', 'The Governor Curtis, built in 1968, is the fleet’s backup. The state delivered the Richard G. Spear in 2020 to replace her, and she has been retiring ever since.'],
+    ['Mail boat', "The ferry still carries the island's mail."],
+    ['The crossing', "Bass Harbor to Swan's Island is 6 miles and takes about 40 minutes. Bass Harbor to Frenchboro is 8¼ miles and takes about 50."],
+    ['Fuel run', 'On the third Tuesday of each month the 11:00 boat from Bass Harbor carries fuel and nothing else. No passengers until the afternoon.'],
+    ['Soft reservation', 'The Thursday afternoon Frenchboro run only sails if somebody tells the Bass Harbor terminal by 4 pm Wednesday that they want it.'],
+    ['Crew week', 'Ferry crews work seven days on and seven days off, so it takes ten crews to run five boats.'],
+    ['Four aboard', 'The standard crew is four: the captain, two able seamen, and a licensed engineer.'],
+    ['Night call', "The ferry service keeps crew housing on Swan's Island so a crew can be called out at night to take an emergency to the mainland."],
+    ['Ten-foot tide', 'The tide at Bass Harbor runs about ten feet between low and high, which is why the ferry pens load over a transfer bridge that rides up and down with it.'],
+    ['Ice storm', "After a winter storm iced the wiring on the Swan's Island transfer bridge, the boat ran only twice a day until the state could fix it. Islanders commuting to jobs on Mount Desert Island felt every missing trip."],
+    ['Working waterfront', 'Lobster fishing is the main industry, with about 40 people fishing full time and many more part time.'],
+    ['Before lobster', 'Fish processing was the dominant industry on the island into the 1930s, when it stopped paying.'],
+    ["Baird's Quarry", 'Matthew Baird Contracting Co. of New York opened a granite quarry in Minturn in 1901. Within a few years the works were 500 by 250 feet. It closed abruptly around 1930, leaving the quarrymen without jobs.'],
+    ['Quarry families', 'Families such as the Martins, Johnsons, and Carlsons put down island roots through quarry work more than a century ago.'],
+    ['Quarry Pond', 'The pit filled with rain each off-season and froze into a skating pond. On July 27, 2003, islanders drained it to improve the swimming and found old tools, eels, lost swimmer’s gear, and the original quarry pumps, still in good shape until the air got to them.'],
+    ['The library fire', 'At about 3:40 a.m. on July 24, 2008, lightning hit the Atlantic Schoolhouse (the village school from 1903 to 1954) and burned the library to the ground: more than 10,000 books and a century of island history, including ferry logs and quarry records.'],
+    ['Rebuilt', 'Islanders broke ground on a new 3,500-square-foot library in August 2010, a $1.4 million project helped by a $398,000 USDA grant and $50,000 from the Stephen and Tabitha King Foundation.'],
+    ['Island blankets', "Swans Island Company started here. John and Carolyn Grace, Boston lawyers with a summer place on the island, sold their first handwoven wool blankets in 1992. The company moved to Northport in 2004 and still weaves about 1,000 blankets a year."],
+    ['A blanket for Ireland', 'In March 2009 First Lady Michelle Obama gave the Irish delegation a shamrock-green Swans Island merino blanket at the White House St. Patrick’s Day lunch.'],
+    ['Placentia', 'The big island east of the ferry route is Placentia, 552 acres. Art and Nan Kellam bought it in 1948 for $7,500, quit Lockheed, and lived there alone for four decades with no phone, electricity, or running water.'],
+    ['We Were an Island', 'The Kellams rowed a wooden dory two miles to Bass Harbor for mail, groceries, and library books. Peter P. Blanchard III told their story in the book We Were an Island, drawn from Nan’s journals.'],
+    ['Gotts Island', 'Novelist Ruth Moore was born on Gotts Island, off Bass Harbor, in 1903. Her 1946 novel Spoonhandle spent 14 weeks on the New York Times bestseller list and became the 1948 film Deep Waters.'],
+    ['Frenchboro', 'Frenchboro, on Long Island, counted 29 people in the 2020 census (61 in 2010). The town is twelve islands, including Placentia and Great Duck, 88 square miles with less than five of them land. Its school teaches kindergarten through eighth grade.'],
+    ['Bass Harbor Head', 'Bass Harbor Head Light, at the mouth of the harbor in Acadia National Park, was first lit on September 1, 1858. Its 33-foot tower shows a red light and was automated in 1974.'],
+    ['Tremont', 'Bass Harbor is a village in the town of Tremont. The ferry pen is at 45 Granville Road.'],
+    ['Steamboat Hill', "Steamboat Hill Road in the village remembers the steamboat landing. Islanders remember it as one of the better sledding hills."],
+    ['Sea chanteys', "The Sweet Chariot Music Festival brings folk music and sea chanteys to Swan's Island every summer."],
+    ['Round trip only', 'The state sells only round-trip tickets, and on this route either half works in either direction, so a ticket is really two rides between Bass Harbor and Swan’s Island.'],
+    ['Commuter math', 'Five round trips in a commuter book cost $63 off-peak, or $12.60 each instead of $15.75. The catch: you have 14 days to use them.']
+  ];
+  let factIdx = store.get('factIdx', Math.floor(Math.random() * FACTS.length)) % FACTS.length;
+  function renderFacts() {
+    const f = FACTS[factIdx];
+    const html = '<div class="eyebrow"><span>While you wait · island facts</span><span>' + (factIdx + 1) + ' of ' + FACTS.length + '</span></div><p><strong>' + f[0] + '.</strong> ' + f[1] + '</p><div class="btnrow"><button class="btn factNext">Another one</button></div>';
+    $('factCardNow').innerHTML = html; $('factCardTickets').innerHTML = html;
+  }
+  function nextFact() { factIdx = (factIdx + 1) % FACTS.length; store.set('factIdx', factIdx); renderFacts(); }
+
+  /* ----- Live conditions (conditions.json is refreshed by a scheduled run) ----- */
+  const LINKS = {
+    marine: 'https://forecast.weather.gov/shmrn.php?mz=anz052&syn=anz000',
+    hourly: 'https://forecast.weather.gov/MapClick.php?lat=44.1588&lon=-68.4322',
+    tides: 'https://tidesandcurrents.noaa.gov/noaatidepredictions.html?id=8413651'
+  };
+  const fmtNY = (iso, opts) => { try { return new Intl.DateTimeFormat('en-US', Object.assign({ timeZone: 'America/New_York' }, opts)).format(new Date(iso)); } catch (e) { return ''; } };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function condLinks() { return '<a class="btn" href="' + LINKS.marine + '" target="_blank" rel="noopener">Marine forecast ›</a><a class="btn" href="' + LINKS.hourly + '" target="_blank" rel="noopener">Hourly wind ›</a><a class="btn" href="' + LINKS.tides + '" target="_blank" rel="noopener">Tides ›</a>'; }
+
+  // How the crossing is likely to feel, from a marine forecast period. A 130-foot ferry on six inshore miles:
+  // wind under 10 kt and seas to 2 ft is a flat ride; 3 to 4 ft seas or 15-20 kt is some roll; 5 ft and up, or 25 kt,
+  // is a rough ride; a gale or 8-foot seas is weather the state cancels in. Southerly wind has the longest fetch here.
+  const COMFORT = [
+    { label: 'Easy crossing', cls: 'good', note: 'Flat water. Coffee stays in the cup.' },
+    { label: 'Some motion', cls: 'good', note: 'A gentle roll. Fine for almost everyone.' },
+    { label: 'Rough crossing', cls: 'warn', note: 'Real motion. Sit low and amidships; a window helps.' },
+    { label: 'Cancellation territory', cls: 'bad', note: 'The state cancels boats in this. Check before you leave the house.' }
+  ];
+  function comfort(text, alerts) {
+    const t = text || '';
+    let wind = 0, gust = 0, seas = 0;
+    t.replace(/(\d+)(?:\s*to\s*(\d+))?\s*kt/gi, (m, a, b, off) => { const v = Math.max(+a, +(b || 0)); if (/gust/i.test(t.slice(Math.max(0, off - 20), off))) gust = Math.max(gust, v); else wind = Math.max(wind, v); return m; });
+    t.replace(/seas?\s+(?:around\s+|near\s+)?(\d+)(?:\s*to\s*(\d+))?\s*(?:ft|feet)/gi, (m, a, b) => { seas = Math.max(seas, +a, +(b || 0)); return m; });
+    const southerly = /\b(S|SW|SE|SSW|SSE)\s+winds?/i.test(t) || /\b(south|southwest|southeast)\b/i.test(t);
+    let lvl = 0;
+    if (wind > 10 || seas >= 3) lvl = 1;
+    if (wind > 20 || seas >= 5 || (southerly && wind >= 18 && seas >= 4)) lvl = 2;
+    if (wind > 30 || gust >= 40 || seas >= 8) lvl = 3;
+    if (gust >= 30 && lvl < 2) lvl = 2;
+    (alerts || []).forEach(a => { const e = (a.event || '').toLowerCase(); if (/gale|storm|hurricane/.test(e)) lvl = Math.max(lvl, 3); else if (/small craft/.test(e)) lvl = Math.max(lvl, 2); });
+    return Object.assign({ lvl, wind, gust, seas, southerly }, COMFORT[lvl]);
+  }
+  const QUEASY = 'If you get seasick, take something before you board, not after: meclizine (Bonine, Dramamine Less Drowsy) or dimenhydrinate (original Dramamine) 30 to 60 minutes ahead, both over the counter. Ginger chews help some people. Read the label, especially if you’re driving off the boat.';
+
+  function renderConditions(c) {
+    $('condLinks').innerHTML = condLinks();
+    if (!c) {
+      $('condStamp').textContent = 'links only';
+      $('condStats').innerHTML = '<div class="stat" style="grid-column:1/-1"><div class="s">Live wind, seas and tide show here once the scheduled update has run. Until then, the forecast is one tap away.</div></div>';
+      $('condPeriods').innerHTML = ''; $('condAlerts').innerHTML = '';
+      $('status511').innerHTML = '<span class="small muted">The 511 status check hasn’t run yet.</span>';
+      return;
+    }
+    const stampIso = c.liveAt || c.generatedAt;
+    const gen = stampIso ? new Date(stampIso) : null;
+    const ageH = gen ? (Date.now() - gen.getTime()) / 3600000 : 99;
+    $('condStamp').textContent = gen ? ((c.liveAt ? 'live ' : 'updated ') + fmtNY(stampIso, { hour: 'numeric', minute: '2-digit' }) + (ageH > 24 ? ' ' + fmtNY(stampIso, { month: 'short', day: 'numeric' }) : '')) : '';
+    $('condStamp').className = 'chip' + (ageH > 14 ? ' accent' : '');
+    // wind now: hourly period containing now
+    const nowMs = Date.now(); let hp = null;
+    if (c.hourly) { for (const x of c.hourly) { const t = new Date(x.t).getTime(); if (t <= nowMs && nowMs < t + 3600000) { hp = x; break; } } if (!hp && c.hourly.length) hp = c.hourly[0]; }
+    const seas = (() => { const p = c.marine && c.marine.periods && c.marine.periods[0]; if (!p) return null; const m = /Seas? ([^.]*?)\./i.exec(p.text || ''); return m ? m[1] : null; })();
+    const tide = (() => { if (!c.tides) return null; const nowLocal = nowNY(); const key = nowLocal.y + '-' + pad(nowLocal.m) + '-' + pad(nowLocal.d) + ' ' + pad(Math.floor(nowLocal.min / 60)) + ':' + pad(nowLocal.min % 60); return c.tides.find(x => x.t > key) || null; })();
+    const periods = (c.marine && c.marine.periods) || [];
+    const cur = periods[0] ? comfort(periods[0].text, c.alerts) : null;
+    const stats = [];
+    if (cur) stats.push('<div class="stat ride ' + cur.cls + '"><div class="k">The ride</div><div class="v">' + esc(cur.label) + '</div><div class="s">' + esc(cur.note) + '</div></div>');
+    if (hp) stats.push('<div class="stat"><div class="k">Wind now</div><div class="v">' + esc(hp.dir || '') + ' ' + esc(hp.wind || '') + '</div><div class="s">' + esc(hp.short || '') + (hp.temp != null ? ' · ' + hp.temp + '°' : '') + '</div></div>');
+    if (seas) stats.push('<div class="stat"><div class="k">Seas</div><div class="v">' + esc(seas) + '</div><div class="s">on the crossing</div></div>');
+    if (tide) stats.push('<div class="stat"><div class="k">Next tide</div><div class="v">' + (tide.type === 'H' ? 'High' : 'Low') + ' ' + esc(E.fmt((+tide.t.slice(11, 13)) * 60 + (+tide.t.slice(14, 16))).replace(' ', ' ')) + '</div><div class="s">' + tide.v + ' ft at Bass Harbor</div></div>');
+    $('condStats').innerHTML = stats.join('');
+    const alertsHTML = (c.alerts || []).map(a => '<div class="alert-item">⚠ ' + esc(a.event) + (a.ends ? ' <span class="small muted">until ' + fmtNY(a.ends, { weekday: 'short', hour: 'numeric', minute: '2-digit' }) + '</span>' : '') + '</div>').join('');
+    const roughAhead = periods.slice(0, 4).map(p => ({ p, k: comfort(p.text, c.alerts) })).filter(x => x.k.lvl >= 2);
+    const queasy = roughAhead.length ? '<div class="queasy"><b>' + esc(roughAhead.map(x => x.p.name).join(' and ')) + (roughAhead.length > 1 ? ' look' : ' looks') + ' rough.</b> ' + QUEASY + '</div>' : '';
+    $('condAlerts').innerHTML = alertsHTML + queasy;
+    $('condPeriods').innerHTML = periods.slice(0, 4).map(p => { const k = comfort(p.text, c.alerts); return '<div class="period"><b>' + esc(p.name) + '<span class="ridetag ' + k.cls + '">' + esc(k.label) + '</span></b><span>' + esc((p.text || '').replace(/\s*Wave Detail:.*$/i, '')) + '</span></div>'; }).join('');
+    // 511 notices
+    const PRETTY = { '2971': "Swan's Island → Bass Harbor", '2972': "Bass Harbor → Swan's Island", '2976': 'Bass Harbor → Frenchboro', '2980': 'Frenchboro → Bass Harbor' };
+    const f511 = c.ferry511 || [];
+    $('status511').innerHTML = f511.length ? f511.map(f => '<div class="srow"><span class="ldot ' + esc(f.icon || '') + '"></span><span><b>' + esc(PRETTY[f.id] || f.route) + '</b>' + (f.status ? ' · ' + esc(f.status) : '') + (f.notices && f.notices.length ? '<br><span class="msg">' + f.notices.map(esc).join('<br>') + '</span>' : (f.icon === 'green' ? '<br><span class="msg">No notices posted.</span>' : '')) + (f.updated ? '<br><span class="small muted">511 updated ' + fmtNY(f.updated, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '</span>' : '') + '</span></div>').join('') + (c.checkedAt ? '<span class="small muted">Checked ' + fmtNY(c.checkedAt, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + '</span>' : '') : '<span class="small muted">The 511 feed didn’t answer on the last check.</span>';
+    const flagged = f511.filter(f => (f.id === '2971' || f.id === '2972') && ((f.notices && f.notices.length) || (f.icon && f.icon !== 'green')));
+    $('noticeBox').innerHTML = flagged.map(f => { const bad = /clos|cancel|suspend/i.test((f.status || '') + ' ' + (f.notices || []).join(' ')) || f.icon === 'red' && !(f.notices || []).length; return '<div class="notice-item' + (bad ? ' bad' : '') + '"><div class="eyebrow">Service notice · ' + esc(PRETTY[f.id]) + (f.status ? ' · ' + esc(f.status) : '') + '</div><p>' + esc((f.notices || []).join(' ') || 'A notice is flagged on New England 511 with no text. Check the terminal before you go.') + '</p><p class="small muted">New England 511' + (f.updated ? ', updated ' + fmtNY(f.updated, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '') + '</p></div>'; }).join('');
+  }
+
+  // Two sources: conditions.json (written by the scheduled refresh; the only place the 511 notices come from)
+  // and, where the page is allowed to reach them, the government feeds themselves for minute-fresh wind and tide.
+  const COND = { file: null, live: null };
+  function merged() {
+    const f = COND.file, l = COND.live;
+    if (!f && !l) return null;
+    const out = Object.assign({}, f || {}, l || {});
+    if (f && f.ferry511) out.ferry511 = f.ferry511;
+    out.checkedAt = f ? f.generatedAt : null;
+    return out;
+  }
+  function paint() { renderConditions(merged()); }
+  async function loadConditions() {
+    const base = location.href.replace(/[#?].*$/, '');
+    const candidates = ['conditions.json', base.replace(/\/?$/, '/') + 'conditions.json'];
+    for (const u of candidates) {
+      try { const r = await fetch(u, { cache: 'no-store' }); if (!r.ok) continue; const c = await r.json(); if (c && c.generatedAt) { COND.file = c; store.set('cond', c); paint(); return; } } catch (e) { /* try the next */ }
+    }
+    COND.file = store.get('cond', null); paint();
+  }
+  async function getJSON(url, ms) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms || 8000);
+    try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error(r.status); return await r.json(); } finally { clearTimeout(t); }
+  }
+  async function loadLive() {
+    const n = nowNY(); const ymd = '' + n.y + pad(n.m) + pad(n.d);
+    const jobs = {
+      marine: getJSON('https://api.weather.gov/zones/forecast/ANZ052/forecast').then(m => ({ zone: 'ANZ052', updated: m.properties.updated || m.properties.updateTime, periods: m.properties.periods.slice(0, 5).map(x => ({ name: x.name, text: x.detailedForecast })) })),
+      alerts: getJSON('https://api.weather.gov/alerts/active?zone=ANZ052').then(a => (a.features || []).map(f => ({ event: f.properties.event, headline: f.properties.headline, ends: f.properties.ends || f.properties.expires }))),
+      hourly: getJSON('https://api.weather.gov/gridpoints/CAR/83,47/forecast/hourly').then(h => h.properties.periods.slice(0, 36).map(x => ({ t: x.startTime, wind: x.windSpeed, dir: x.windDirection, temp: x.temperature, short: x.shortForecast, pop: x.probabilityOfPrecipitation && x.probabilityOfPrecipitation.value }))),
+      tides: getJSON('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&station=8413651&begin_date=' + ymd + '&range=48&datum=MLLW&time_zone=lst_ldt&units=english&interval=hilo&format=json').then(t => t.predictions.map(x => ({ t: x.t, type: x.type, v: Math.round(parseFloat(x.v) * 10) / 10 })))
+    };
+    const live = {}; let any = false;
+    await Promise.all(Object.keys(jobs).map(k => jobs[k].then(v => { live[k] = v; any = true; }).catch(() => {})));
+    if (any) { live.liveAt = new Date().toISOString(); COND.live = live; paint(); }
+  }
+
+  /* ----- Whose phone, install prompt, photos ----- */
+  function applyWho() {
+    const who = store.get('who', null);
+    const lbl = document.querySelector('#view-tickets .tally .small');
+    if (lbl) lbl.textContent = who ? ('on ' + who + '’s phone') : 'on this phone';
+    $('whoBox').hidden = who !== null;
+  }
+  let deferredInstall = null;
+  const standalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+  function setupInstall() {
+    const box = $('installBox');
+    if (standalone() || store.get('installLater', false)) return;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; box.hidden = false; });
+    const iOS = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (iOS && window.__STANDALONE_SITE__) { $('installHint').textContent = 'On iPhone: tap Share, then Add to Home Screen.'; $('installBtn').hidden = true; box.hidden = false; }
+    $('installBtn').addEventListener('click', async () => { if (!deferredInstall) return; deferredInstall.prompt(); try { await deferredInstall.userChoice; } catch (e) {} deferredInstall = null; box.hidden = true; });
+    $('installLater').addEventListener('click', () => { store.set('installLater', true); box.hidden = true; });
+    window.addEventListener('appinstalled', () => { box.hidden = true; toast('Installed. Look for the boat on your home screen.'); });
+  }
+  async function loadPhotos() {
+    try {
+      const r = await fetch('photos/photos.json', { cache: 'no-store' }); if (!r.ok) return;
+      const list = await r.json(); if (!Array.isArray(list) || !list.length) return;
+      $('gallery').innerHTML = list.map(p => '<figure><img loading="lazy" src="photos/' + esc(p.src) + '" alt="' + esc(p.caption || '') + '">' + (p.caption ? '<figcaption>' + esc(p.caption) + '</figcaption>' : '') + '</figure>').join('');
+      $('photosCard').hidden = false;
+    } catch (e) { /* no photos yet */ }
+  }
+  function setupWorker() {
+    if (!window.__STANDALONE_SITE__ || !('serviceWorker' in navigator)) return;
+    try { navigator.serviceWorker.register('./sw.js').catch(() => {}); } catch (e) {}
+  }
+
+  /* ----- Views ----- */
+  const VIEWS = ['now', 'plan', 'tickets', 'info'];
+  function showView(v) {
+    if (!VIEWS.includes(v)) v = 'now';
+    VIEWS.forEach(k => { $('view-' + k).hidden = (k !== v); });
+    document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.view === v ? 'true' : 'false'));
+    if (v === 'plan') renderPlan();
+    if (v === 'tickets') renderFares();
+    if (location.hash !== '#' + v) { try { history.replaceState(null, '', '#' + v); } catch (e) {} }
+    if (v === 'now') { window.scrollTo({ top: 0, behavior: 'auto' }); }
+    else { const el = $('view-' + v); const top = el.getBoundingClientRect().top + window.scrollY - 6; window.scrollTo({ top: Math.max(0, top), behavior: 'auto' }); }
+  }
+
+  /* ----- Toast ----- */
+  let toastT; function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800); }
+
+  /* ----- Wire up ----- */
+  function init() {
+    buildChart();
+    NOW = nowNY(); selected = { y: NOW.y, m: NOW.m, d: NOW.d };
+    renderNow(); renderFacts(); renderFares(); rides(0);
+    COND.file = store.get('cond', null); paint(); loadConditions(); loadLive();
+    setInterval(loadConditions, 30 * 60000); setInterval(loadLive, 20 * 60000);
+    applyWho(); setupInstall(); loadPhotos(); setupWorker();
+    document.querySelectorAll('#whoBox [data-who]').forEach(b => b.addEventListener('click', () => { store.set('who', b.dataset.who); applyWho(); if (b.dataset.who) toast('Hi, ' + b.dataset.who); }));
+    showView((location.hash || '#now').slice(1));
+    window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.view)));
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.factNext'); if (b) { nextFact(); return; }
+      const c = e.target.closest('.copy'); if (c) { const v = c.dataset.copy; (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => toast('Copied ' + v)).catch(() => { const n = c.closest('.phone').querySelector('.n'); const r = document.createRange(); r.selectNodeContents(n); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); toast('Number selected, copy it from there'); }); return; }
+      const ch = e.target.closest('#outChips button, #retChips button'); if (ch && !ch.disabled) { const t = +ch.dataset.t; if (ch.parentElement.id === 'outChips') { plannerOut = (plannerOut === t ? null : t); } else { plannerRet = (plannerRet === t ? null : t); } renderPlan(); return; }
+    });
+    $('fromSI').addEventListener('click', () => { plannerFrom = 'si'; plannerOut = plannerRet = null; $('fromSI').setAttribute('aria-pressed', 'true'); $('fromBH').setAttribute('aria-pressed', 'false'); renderPlan(); });
+    $('fromBH').addEventListener('click', () => { plannerFrom = 'bh'; plannerOut = plannerRet = null; $('fromBH').setAttribute('aria-pressed', 'true'); $('fromSI').setAttribute('aria-pressed', 'false'); renderPlan(); });
+    $('planDate').addEventListener('change', e => { const v = e.target.value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { selected = { y: +v.slice(0, 4), m: +v.slice(5, 7), d: +v.slice(8, 10) }; plannerOut = plannerRet = null; renderPlan(); } });
+    $('prevDay').addEventListener('click', () => { selected = addDays(selected.y, selected.m, selected.d, -1); plannerOut = plannerRet = null; renderPlan(); });
+    $('nextDay').addEventListener('click', () => { selected = addDays(selected.y, selected.m, selected.d, 1); plannerOut = plannerRet = null; renderPlan(); });
+    $('planToday').addEventListener('click', () => { selected = { y: NOW.y, m: NOW.m, d: NOW.d }; plannerOut = plannerRet = null; renderPlan(); });
+    $('rideBuy').addEventListener('click', () => { rides(2); toast('Two rides added'); });
+    $('rideUse').addEventListener('click', () => { rides(-1); toast('One ride used'); });
+    $('rideReset').addEventListener('click', () => { rides(0, true); toast('Tally reset'); });
+    setInterval(renderNow, 20000);
+    setInterval(() => { if (!$('view-now').hidden || !$('view-tickets').hidden) nextFact(); }, 25000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) renderNow(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+
+</body>
+</html>

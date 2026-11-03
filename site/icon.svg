@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#1f3a53"/>
+  <!-- water -->
+  <path d="M0 356 Q32 340 64 356 T128 356 T192 356 T256 356 T320 356 T384 356 T448 356 T512 356 V512 H0 Z" fill="#2d5f84"/>
+  <path d="M0 392 Q32 376 64 392 T128 392 T192 392 T256 392 T320 392 T384 392 T448 392 T512 392 V512 H0 Z" fill="#173449"/>
+  <!-- hull -->
+  <path d="M72 318 L104 362 H408 L440 318 L420 292 H92 Z" fill="#f6f7f4" stroke="#0f1d2a" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M92 292 H420 L428 304 H84 Z" fill="#c8102e"/>
+  <!-- deck and house -->
+  <rect x="86" y="272" width="340" height="22" rx="4" fill="#b9c3cb" stroke="#0f1d2a" stroke-width="4"/>
+  <rect x="170" y="212" width="172" height="62" rx="8" fill="#f6f7f4" stroke="#0f1d2a" stroke-width="6"/>
+  <path d="M186 240 H214 M226 240 H254 M266 240 H294 M306 240 H326" stroke="#1f3a53" stroke-width="10" stroke-linecap="round"/>
+  <rect x="208" y="166" width="96" height="46" rx="8" fill="#1f3a53" stroke="#0f1d2a" stroke-width="6"/>
+  <path d="M224 190 H246 M258 190 H288" stroke="#e9eef2" stroke-width="9" stroke-linecap="round"/>
+  <rect x="180" y="176" width="20" height="36" rx="4" fill="#c8102e" stroke="#0f1d2a" stroke-width="4"/>
+  <rect x="312" y="176" width="20" height="36" rx="4" fill="#c8102e" stroke="#0f1d2a" stroke-width="4"/>
+  <path d="M256 166 V132 M238 142 H274" stroke="#f6f7f4" stroke-width="6" stroke-linecap="round"/>
+</svg>
