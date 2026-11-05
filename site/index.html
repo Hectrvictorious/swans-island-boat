@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0234';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0239';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -338,6 +338,13 @@ p { margin: 0 0 8px; }
 .tag.plan { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
 .board li { flex-wrap: wrap; column-gap: 8px; }
 .board li .t { white-space: nowrap; }
+.trk { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-display); font-weight: 700; font-size: 12px; line-height: 1; padding: 3px 7px 3px 6px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; vertical-align: middle; }
+.trk svg { flex: none; overflow: visible; }
+.trk .tb { fill: var(--surface-2); stroke: currentColor; stroke-width: .75; }
+.trk .tc { fill: currentColor; }
+.trk .tw { fill: var(--surface); }
+.trk .tr { fill: var(--ink); stroke: var(--surface); stroke-width: .4; }
+.board li.next .trk { background: rgba(255,255,255,.92); color: var(--ink-2); }
 .board li .t small { font-size: 12px; font-weight: 600; margin-left: 2px; letter-spacing: .02em; }
 .board li .rb { font-size: 12.5px; padding: 3px 6px; gap: 3px; }
 .board li .c { margin-left: auto; }
@@ -1146,7 +1153,7 @@ p { margin: 0 0 8px; }
         if (hit) chips.push('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
         if (!uniform && rides.has(L)) chips.push(rideChip(rides.get(L)));
         const rr = (!L.nopax && !gone) ? resRow(plan.key, from, L.t) : null;
-        if (rr && rr.truck) chips.push('<span class="tag" title="Feet of truck reserved">' + rr.truck + '′ truck</span>');
+        if (rr && rr.truck) chips.push(truckBadge(rr.truck));
         const tappable = !L.nopax && (!gone || hit);
         // With reservation counts in, the badge takes the top-right spot and the countdown or arrival moves down a line.
         const top = rr ? resBadge(rr) : '<span class="c">' + c + '</span>';
@@ -1756,7 +1763,18 @@ p { margin: 0 0 8px; }
   function resRow(key, from, t) { const tr = D.traffic[key]; if (!tr) return null; return tr.rows.find(r => r.sec === from && r.t === t) || null; }
   const CAR_ICON = '<svg viewBox="0 0 24 16" aria-hidden="true"><path d="M5 7.2 7 2.6C7.4 1.6 8.2 1 9.3 1h5.4c1.1 0 1.9.6 2.3 1.6l2 4.6h.9A2.1 2.1 0 0 1 22 9.3V13h-2.1a2.6 2.6 0 0 1-5.2 0H9.3a2.6 2.6 0 0 1-5.2 0H2V9.3a2.1 2.1 0 0 1 2.1-2.1zm2.4 0h9.2l-1.5-3.6c-.2-.4-.5-.6-1-.6H9.9c-.5 0-.8.2-1 .6z"/></svg>';
   function resBadge(r) { const n = Math.min(r.cars, 9); return '<span class="rb ' + (r.full ? 'full' : n >= 3 ? 'mid' : 'ok') + '" title="' + (r.full ? 'Car reservations full' : n + ' of ' + E.CAR_RES + ' car reservations taken') + '">' + CAR_ICON + (r.full ? 'FULL' : n + '/' + E.CAR_RES) + '</span>'; }
-  function resChip(r) { return resBadge(r) + (r.truck ? '<span class="tag" title="Feet of truck reserved">' + r.truck + '′ truck</span>' : ''); }
+  function truckBadge(ft) {
+    const L = Math.max(4.5, Math.min(26, ft / 4.5)), W = L + 8, f = n => n.toFixed(1);
+    const svg = '<svg viewBox="0 0 ' + f(W) + ' 10" style="width:' + f(W * 1.18) + 'px;height:11.8px" aria-hidden="true">' +
+      '<rect class="tb" x="0.35" y="0.6" width="' + f(L) + '" height="6.2" rx="0.6"/>' +
+      '<path class="tc" d="M' + f(L + 0.7) + ' 2.3h4.2l2.6 2.7V6.8H' + f(L + 0.7) + 'z"/>' +
+      '<path class="tw" d="M' + f(L + 1.6) + ' 3.1h2.9l1.5 1.6h-4.4z"/>' +
+      '<rect class="tc" x="0.2" y="6.6" width="' + f(W - 0.5) + '" height="1"/>' +
+      '<circle class="tr" cx="2.3" cy="8.4" r="1.4"/>' + (L > 12 ? '<circle class="tr" cx="5.4" cy="8.4" r="1.4"/>' : '') +
+      '<circle class="tr" cx="' + f(L + 4.8) + '" cy="8.4" r="1.4"/></svg>';
+    return '<span class="trk" title="' + ft + ' feet of truck reserved">' + svg + ft + '′</span>';
+  }
+  function resChip(r) { return resBadge(r) + (r.truck ? truckBadge(r.truck) : ''); }
   function resStatus(key) {
     if (!FAM.linked) return {};
     const tr = D.traffic[key]; if (tr) return { tr };
@@ -1783,7 +1801,7 @@ p { margin: 0 0 8px; }
     opts = opts || {};
     if (!FAM.linked) return (opts.unlinked && unlinkedNow() && hasCrypto() && store.get('who', null) !== '') ? '<div class="resinfo"><span><b>Car reservations</b> show on each boat once this phone is linked.</span><button class="btn navy" data-act="golink">Link this phone</button></div>' : '';
     const st = resStatus(key);
-    if (st.tr) return '<div class="resinfo"><span><b>Car reservations</b> are on each boat: ' + resBadge({ cars: 3, full: false }) + ' means 3 of the boat’s 4 car reservations are taken. From the island’s Facebook traffic post' + (st.tr.label ? ' “' + esc(st.tr.label) + '”' : '') + (st.tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(st.tr.at) + '.</span></div>';
+    if (st.tr) return '<div class="resinfo"><span><b>Car reservations</b> are on each boat: ' + resBadge({ cars: 3, full: false }) + ' means 3 of the boat’s 4 car reservations are taken, and ' + truckBadge(60) + ' is feet of truck reserved (the bigger the truck, the more deck it takes). From the island’s Facebook traffic post' + (st.tr.label ? ' “' + esc(st.tr.label) + '”' : '') + (st.tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(st.tr.at) + '.</span></div>';
     if (st.warn && st.warn.level === 'red') return opts.red ? redHTML(st.warn) : '';
     if (st.warn && st.warn.level === 'quiet') return '<div class="resinfo"><span><b>Car reservations:</b> ' + st.warn.text + '</span></div>';
     return '';
@@ -1927,7 +1945,7 @@ p { margin: 0 0 8px; }
     const r = rideAt(plan.y, plan.m, plan.d, L.t);
     if (r) info.push('<div class="box">' + rideChip(r) + ' <b>' + TIERS[r.tier].label + '</b>' + ([windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).length ? ' · ' + [windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).join(' · ') : '') + '<div style="margin-top:4px">' + TIERS[r.tier].expect + '</div>' + rideNotes(r).map(n => '<div class="small muted" style="margin-top:3px">' + n + '</div>').join('') + (r.tier >= 3 ? '<div class="small" style="margin-top:6px">' + QUEASY + '</div>' : '') + '</div>');
     const rr = resRow(S.key, L.from, L.t);
-    if (rr) info.push('<div class="box"><b>Reservations on this boat</b><div>' + (rr.full ? 'Car reservations are full (' + rr.cars + ' of ' + E.CAR_RES + ').' : rr.cars + ' of ' + E.CAR_RES + ' car reservations taken.') + (rr.truck ? ' ' + rr.truck + ' feet of truck reserved.' : '') + '</div><div class="small muted">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '.</div></div>');
+    if (rr) info.push('<div class="box"><b>Reservations on this boat</b><div>' + (rr.full ? 'Car reservations are full (' + rr.cars + ' of ' + E.CAR_RES + ').' : rr.cars + ' of ' + E.CAR_RES + ' car reservations taken.') + (rr.truck ? ' ' + truckBadge(rr.truck) + ' ' + rr.truck + ' feet of truck reserved.' : '') + '</div><div class="small muted">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '.</div></div>');
     else { const st = resStatus(S.key); if (st.warn && st.warn.level === 'red') info.push('<div class="box"><b style="color:var(--bad)">' + st.warn.title + '</b><div class="small">' + st.warn.text + '</div></div>'); }
     dayWarnings(plan).forEach(w => info.push('<div class="note busy">' + w.text + '</div>'));
     const other = otherOf(me());
