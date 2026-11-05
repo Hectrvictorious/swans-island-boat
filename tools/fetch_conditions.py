@@ -36,6 +36,7 @@ if m and m.get('properties', {}).get('periods'):
 a = get('https://api.weather.gov/alerts/active?zone=ANZ052', 'application/geo+json')
 if a is not None and 'features' in a:
     data['alerts'] = [{'event': f['properties'].get('event'), 'headline': f['properties'].get('headline'),
+                       'onset': f['properties'].get('onset') or f['properties'].get('effective'),
                        'ends': f['properties'].get('ends') or f['properties'].get('expires')} for f in a['features']]
 
 # 3. Hourly forecast at Swan's Island
@@ -44,6 +45,38 @@ if h and h.get('properties', {}).get('periods'):
     data['hourly'] = [{'t': x.get('startTime'), 'wind': x.get('windSpeed'), 'dir': x.get('windDirection'),
                        'temp': x.get('temperature'), 'short': x.get('shortForecast'),
                        'pop': (x.get('probabilityOfPrecipitation') or {}).get('value')} for x in h['properties']['periods'][:36]]
+
+# 3b. Hour-by-hour wind, gusts, direction, temperature and weather from the raw grid (km/h, degC)
+#     The hourly forecast above has no gusts; the grid does. Expanded to one entry per hour, 72 hours out.
+def expand(series):
+    """[{validTime:'2026-11-04T16:00:00+00:00/PT3H', value:x}] -> {epoch_hour: value}"""
+    out = {}
+    for v in (series or {}).get('values', []):
+        try:
+            start, dur = v['validTime'].split('/')
+            t0 = datetime.datetime.fromisoformat(start)
+            m = re.match(r'P(?:(\d+)D)?T?(?:(\d+)H)?', dur)
+            hours = int(m.group(1) or 0) * 24 + int(m.group(2) or 0) or 1
+            for i in range(min(hours, 96)):
+                out[int((t0 + datetime.timedelta(hours=i)).timestamp() // 3600)] = v['value']
+        except Exception:
+            continue
+    return out
+g = get('https://api.weather.gov/gridpoints/CAR/83,47', 'application/geo+json')
+if g and g.get('properties'):
+    gp = g['properties']
+    ws, wg, wd, tc, wx = (expand(gp.get(k)) for k in ('windSpeed', 'windGust', 'windDirection', 'temperature', 'weather'))
+    now_h = int(datetime.datetime.now(datetime.timezone.utc).timestamp() // 3600)
+    kt = lambda kmh: None if kmh is None else round(kmh / 1.852)
+    rows = []
+    for hr in range(now_h - 1, now_h + 72):
+        if hr not in ws and hr not in wg: continue
+        w = wx.get(hr) or []
+        words = sorted({(x or {}).get('weather') for x in w if (x or {}).get('weather')})
+        rows.append({'h': hr, 'w': kt(ws.get(hr)), 'g': kt(wg.get(hr)), 'd': wd.get(hr),
+                     'f': None if tc.get(hr) is None else round(tc[hr] * 9 / 5 + 32),
+                     'x': ','.join(words) or None})
+    if rows: data['grid'] = rows
 
 # 4. Tides at Bass Harbor (today and tomorrow, local time)
 try:

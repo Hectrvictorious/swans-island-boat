@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true;</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0139';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -305,6 +305,113 @@ p { margin: 0 0 8px; }
 .toast.show { opacity: 1; }
 .disclaimer { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 
+/* Ride level chips (1 calm … 5 may cancel), reservation chips, planned-trip tags */
+:root { --t1: #2b7a4b; --t2: #4f7f2a; --t3: #a3690a; --t4: #c2410c; --t5: #b3261e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --t1: #5fc082; --t2: #a3d26a; --t3: #f0b24c; --t4: #ff9a5c; --t5: #ff8a80; } }
+:root[data-theme="dark"] { --t1: #5fc082; --t2: #a3d26a; --t3: #f0b24c; --t4: #ff9a5c; --t5: #ff8a80; }
+.rc, .res, .tag { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-display); font-size: 11.5px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; }
+.rc { color: var(--tc); border-color: color-mix(in srgb, var(--tc) 45%, transparent); }
+.rc .m { display: inline-flex; gap: 1.5px; }
+.rc .m i { display: inline-block; width: 3px; height: 9px; border-radius: 1px; background: currentColor; opacity: .22; }
+.rc.t1 { --tc: var(--t1); } .rc.t2 { --tc: var(--t2); } .rc.t3 { --tc: var(--t3); } .rc.t4 { --tc: var(--t4); } .rc.t5 { --tc: var(--t5); }
+.rc.t1 i:nth-of-type(-n+1), .rc.t2 i:nth-of-type(-n+2), .rc.t3 i:nth-of-type(-n+3), .rc.t4 i:nth-of-type(-n+4), .rc.t5 i { opacity: 1; }
+.res.full { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+.tag.plan { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.board li { flex-wrap: wrap; column-gap: 8px; }
+.board li .t { white-space: nowrap; }
+.board li .c { margin-left: auto; }
+.board li .r2 { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.ridesum { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-family: var(--font-display); font-size: 14px; color: var(--ink-2); padding: 2px 0 2px; }
+.ridesum b { color: var(--ink); }
+.board li[data-leg] { cursor: pointer; }
+.board li[data-leg]:hover { filter: brightness(.97); }
+.board li.planned:not(.next) { box-shadow: inset 4px 0 0 var(--navy); }
+.board li.next .rc, .board li.next .res, .board li.next .tag { background: rgba(255,255,255,.92); }
+.board li.next .tag.plan { background: var(--navy); }
+.tapnote { margin: 8px 0 0; font-size: 13px; color: var(--ink-2); }
+.resline { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+.note.busy { border-left-color: var(--bad); background: color-mix(in srgb, var(--bad) 7%, var(--surface-2)); color: var(--ink); }
+.note.busy b { font-family: var(--font-display); font-size: 14.5px; }
+
+/* Red: reservations couldn't be read */
+.reswarn { border-radius: 12px; padding: 12px 14px; background: color-mix(in srgb, var(--bad) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--bad) 55%, transparent); border-left: 6px solid var(--bad); display: grid; gap: 6px; }
+.reswarn b { font-family: var(--font-display); font-size: 17px; color: var(--bad); display: block; }
+.reswarn p { margin: 0; font-size: 13.5px; }
+.reswarn .btnrow .btn { font-size: 13px; padding: 6px 10px; }
+.reswarn[hidden] { display: none; }
+.quiet-note { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+
+/* Planned trips */
+.trips { display: grid; gap: 8px; }
+.trip { display: grid; gap: 6px; width: 100%; text-align: left; font: inherit; color: inherit; background: var(--surface-2); border: 1px solid var(--line); border-left: 5px solid var(--navy); border-radius: 12px; padding: 10px 12px; cursor: pointer; }
+.trip .when { font-family: var(--font-display); font-size: 17px; font-weight: 700; line-height: 1.2; }
+.trip .when small { font-weight: 500; color: var(--ink-2); font-size: 14px; }
+.trip .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.trip .tnote { font-style: italic; color: var(--ink-2); font-size: 13.5px; }
+.trip .twarn { font-size: 13px; color: var(--bad); }
+.trip .by { font-size: 12px; color: var(--muted); }
+.trip.today { border-left-color: var(--accent); }
+.empty { font-size: 13.5px; color: var(--ink-2); padding: 4px 0; }
+.chip.plan { background: var(--navy); color: var(--navy-ink); }
+.week .day[data-day] { cursor: pointer; border-radius: 8px; }
+.week .day.sel { background: color-mix(in srgb, var(--navy) 9%, transparent); }
+.chip.ok { background: color-mix(in srgb, var(--good) 16%, var(--surface-2)); color: var(--good); }
+.chip.wait { background: color-mix(in srgb, var(--warn) 16%, var(--surface-2)); color: var(--warn); }
+
+/* What's new */
+.news { display: grid; gap: 8px; border-radius: 14px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--accent); font-size: 14px; }
+.news b { font-family: var(--font-display); font-size: 17px; }
+.news[hidden] { display: none; }
+
+/* Ride detail in the conditions card */
+.stat.ride { display: block; }
+.stat.ride .k { margin-bottom: 2px; }
+.stat.ride .v { display: inline-flex; align-items: center; margin-right: 10px; }
+.stat.ride .s { display: inline; }
+.stat.ride .meter { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 6px; }
+.stat.ride .meter i { width: 5px; height: 14px; border-radius: 1.5px; background: currentColor; opacity: .2; }
+.stat.ride .meter i.on { opacity: 1; }
+.stat.ride .for { margin-top: 2px; font-family: var(--font-display); font-size: 13px; color: var(--ink-2); }
+.stat.ride .x { font-size: 13.5px; color: var(--ink); line-height: 1.45; margin-top: 4px; }
+.stat.ride ul { margin: 4px 0 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); }
+.stat.ride.r1, .stat.ride.r2 { border-left-color: var(--good); }
+.stat.ride.r3 { border-left-color: var(--t3); } .stat.ride.r4 { border-left-color: var(--t4); } .stat.ride.r5 { border-left-color: var(--t5); }
+.stat.ride.r1 .v, .stat.ride.r2 .v { color: var(--good); } .stat.ride.r3 .v { color: var(--t3); } .stat.ride.r4 .v { color: var(--t4); } .stat.ride.r5 .v { color: var(--t5); }
+.ridetag.t1, .ridetag.t2 { color: var(--good); } .ridetag.t3 { color: var(--t3); } .ridetag.t4 { color: var(--t4); } .ridetag.t5 { color: var(--t5); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 10px; align-items: center; font-size: 12px; color: var(--muted); }
+
+/* Which boat */
+.boatnow { display: grid; gap: 2px; margin: 4px 0 0; }
+.boatnow b { font-family: var(--font-display); font-size: 20px; }
+.boat .acts { display: flex; gap: 8px; align-items: center; flex: none; }
+.boat .acts button { font-family: var(--font-display); font-weight: 600; font-size: 13px; padding: 5px 9px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.boat.on { box-shadow: inset 4px 0 0 var(--accent); }
+.boat .onrun { font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+
+/* Bottom sheet for planning a trip */
+.sheet-back { position: fixed; inset: 0; z-index: 40; background: rgba(9, 17, 24, .48); opacity: 0; transition: opacity .2s; }
+.sheet-back.show { opacity: 1; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 90vh; max-height: 90dvh; overflow-y: auto; overscroll-behavior: contain; background: var(--surface); color: var(--ink); border-radius: 18px 18px 0 0; box-shadow: 0 -12px 40px rgba(0,0,0,.28); padding: 6px max(16px, env(safe-area-inset-left, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px)); transform: translateY(100%); transition: transform .24s cubic-bezier(.2,.8,.2,1); }
+.sheet.show { transform: none; }
+.sheet[hidden], .sheet-back[hidden] { display: none; }
+.sheet-in { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
+.grab { width: 42px; height: 5px; border-radius: 3px; background: var(--line); margin: 6px auto 2px; }
+.sheet h2 { font-size: 24px; }
+.sheet .sub { color: var(--ink-2); font-size: 14px; margin-top: 2px; }
+.field { display: grid; gap: 6px; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.opts button { font-family: var(--font-display); font-weight: 600; font-size: 15px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; font-variant-numeric: tabular-nums; }
+.opts button[aria-pressed="true"] { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.field input[type="text"], .field textarea { font: inherit; font-size: 16px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--ink); width: 100%; }
+.field textarea { min-height: 150px; font-family: var(--font-ui); font-size: 14px; }
+.sheet .info { display: grid; gap: 8px; }
+.sheet .info .box { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; }
+.sheet .info .box b { font-family: var(--font-display); font-size: 15px; }
+.sheet .warnline { font-size: 13.5px; color: var(--bad); }
+.btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); background: transparent; }
+.sheet-actions { position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom, 0px)); background: var(--surface); padding: 10px 0 2px; }
+@media (prefers-reduced-motion: reduce) { .sheet, .sheet-back { transition: none; } }
+
 /* Tab bar */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
 .tabs-in { max-width: 680px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -340,11 +447,17 @@ p { margin: 0 0 8px; }
       <div class="btnrow"><button class="btn primary" id="installBtn">Install</button><button class="btn" id="installLater">Later</button></div>
     </div>
     <div class="who" id="whoBox" hidden>
-      <div><b>Whose phone is this?</b><span>So the rides tally and a couple of small things are yours.</span></div>
+      <div><b>Whose phone is this?</b><span>So trips you plan carry your name, and the rides tally is yours.</span></div>
       <div class="btnrow"><button class="btn navy" data-who="Josh">Josh</button><button class="btn navy" data-who="Sarah">Sarah</button><button class="btn" data-who="">Just visiting</button></div>
     </div>
+    <div class="news" id="newsBox" hidden></div>
     <div id="noticeBox" class="notices"></div>
+    <div id="resWarnNow"></div>
     <div class="next" id="nextTiles"></div>
+    <div class="card" id="tripsCard" hidden>
+      <div class="cond-head"><h2>Planned trips</h2><span class="chip" id="syncChip"></span></div>
+      <div class="trips" id="tripsList" style="margin-top:10px"></div>
+    </div>
     <div class="card cond" id="condCard">
       <div class="cond-head"><h2>Conditions</h2><span class="chip" id="condStamp">loading…</span></div>
       <div class="stats" id="condStats"></div>
@@ -358,8 +471,9 @@ p { margin: 0 0 8px; }
         <span class="chip" id="todaySeason"></span>
       </div>
       <div class="boards" id="todayBoards" style="margin-top:10px"></div>
+      <div id="todayRes"></div>
       <div class="notes" id="todayNotes"></div>
-      <p class="small muted" style="margin:10px 0 0">Be at the terminal 15 minutes before departure. Crossing is about 40 minutes.</p>
+      <p class="small muted" style="margin:10px 0 0" id="todayFoot">Be at the terminal 15 minutes before departure. Crossing is about 40 minutes. Tap a boat to plan a trip.</p>
     </div>
     <div class="fact" id="factCardNow"></div>
   </section>
@@ -374,8 +488,12 @@ p { margin: 0 0 8px; }
         <button class="btn" id="planToday">Today</button>
         <div class="title" id="planTitle"></div>
       </div>
+      <div id="planRes" style="margin-top:10px"></div>
       <div class="boards" id="planBoards" style="margin-top:10px"></div>
+      <p class="tapnote" id="planHint"><b>Tap a boat to plan a trip.</b> It shows up on both phones, with who has the tickets and the car reservation.</p>
+      <div id="planResLine"></div>
       <div class="notes" id="planNotes"></div>
+      <div class="trips" id="planTrips" style="margin-top:10px"></div>
     </div>
     <div class="card">
       <h2>Time off island, time on island</h2>
@@ -425,7 +543,7 @@ p { margin: 0 0 8px; }
       <h2>Taking a car</h2>
       <p>Only four car reservations and two truck reservations are sold per sailing, and the boat holds about 16 vehicles. A reservation is $17 each way on top of the vehicle fare, and it's the only way to be sure of a spot on a busy boat.</p>
       <p>If your car is <em>not</em> reserved and you're leaving Swan's Island, the state asks you to call the Swan's Island terminal 24 hours before you plan to depart Bass Harbor, for line-up instructions.</p>
-      <p class="small muted">Reservations don't exist online anywhere, not even on the state's own webstore, and the terminals don't publish how many spots are left on a given boat. The phone is the whole system.</p>
+      <p class="small muted">Reservations are made by phone with the Bass Harbor terminal; the webstore doesn't sell them. Each day the island's Facebook group gets a "Traffic" post listing how many cars and how many feet of truck are reserved on every boat. This app reads that post every morning and evening and shows it on the schedule, so "Cars 4/4" means the car reservations on that boat are gone.</p>
       <div class="phone"><div class="who">Bass Harbor terminal<small>reservations · 45 Granville Rd</small></div><div class="n">207-244-3254</div><div class="btnrow"><button class="btn copy" data-copy="2072443254">Copy</button><a class="btn" href="tel:+12072443254">Call</a></div></div>
       <div class="phone"><div class="who">Swan's Island terminal<small>line-up · 118 Ferry Rd</small></div><div class="n">207-526-4273</div><div class="btnrow"><button class="btn copy" data-copy="2075264273">Copy</button><a class="btn" href="tel:+12075264273">Call</a></div></div>
     </div>
@@ -433,6 +551,10 @@ p { margin: 0 0 8px; }
 
   <!-- INFO -->
   <section class="view" id="view-info" hidden>
+    <div class="card" id="famCard">
+      <h2>Shared between Josh &amp; Sarah</h2>
+      <div id="famBody"><p class="small muted">Loading…</p></div>
+    </div>
     <div class="card" id="photosCard" hidden>
       <h2 id="photosTitle">Our island</h2>
       <div class="gallery" id="gallery"></div>
@@ -444,6 +566,7 @@ p { margin: 0 0 8px; }
         <a class="linkrow" href="https://www.vesselfinder.com/?zoom=13&lat=44.205&lon=-68.390" target="_blank" rel="noopener"><span class="l">Live map of the crossing<small>VesselFinder · every boat between Bass Harbor and Swan's Island, updated from its AIS signal</small></span><span class="arrow">›</span></a>
       </div>
       <h3>Which boat is it today?</h3>
+      <div class="boatnow" id="boatNow"></div>
       <svg class="portrait" viewBox="0 0 360 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Side view of a Maine State Ferry Service double-ended car ferry">
         <path class="p-water" d="M0 86 Q20 80 40 86 T80 86 T120 86 T160 86 T200 86 T240 86 T280 86 T320 86 T360 86 V96 H0 Z"/>
         <path class="p-hull" d="M18 72 L34 84 H326 L342 72 L330 62 H30 Z"/>
@@ -457,18 +580,14 @@ p { margin: 0 0 8px; }
         <rect class="p-stack" x="134" y="22" width="8" height="12" rx="1.5"/><rect class="p-stack" x="218" y="22" width="8" height="12" rx="1.5"/>
         <path class="p-mast" d="M180 20 V6 M172 10 H188"/>
         <path class="p-rail" d="M24 50 H338 M24 50 V56 M60 50 V56 M96 50 V56 M264 50 V56 M300 50 V56 M336 50 V56"/>
-        <text class="p-name" x="60" y="80">CAPT. HENRY LEE · 130 ft</text>
+        <text class="p-name" id="plate" x="180" y="80" text-anchor="middle">CAPT. HENRY LEE · 130 ft</text>
       </svg>
-      <p class="small muted">Three boats take turns on this run. Tap a name to follow that one.</p>
-      <div class="boats">
-        <div class="boat"><span class="name">Captain Henry Lee<small>the regular Swan's Island boat · 130 ft · built 1992</small></span><a href="https://www.vesselfinder.com/vessels/details/367334890" target="_blank" rel="noopener">Follow ›</a></div>
-        <div class="boat"><span class="name">Captain Charles Philbrook<small>Vinalhaven's boat, fills in here</small></span><a href="https://www.vesselfinder.com/vessels/details/367342230" target="_blank" rel="noopener">Follow ›</a></div>
-        <div class="boat"><span class="name">Governor Curtis<small>the fleet's spare · built 1968</small></span><a href="https://www.vesselfinder.com/vessels?name=GOVERNOR+CURTIS" target="_blank" rel="noopener">Find ›</a></div>
-      </div>
+      <p class="small muted">Three boats take turns on this run. Each morning the app checks the boats' AIS signals to see which one is working the Bass Harbor run. If it's wrong, tap <b>This one</b> on the boat that's really running and both phones change.</p>
+      <div class="boats" id="boatList"></div>
     </div>
     <div class="card">
       <h2>Cancellations and notices</h2>
-      <p class="lede small">The state posts trip cancellations and service notices to New England 511; this page checks that feed three times a day and shows anything posted for the Bass Harbor boats. For same-minute news, the text alerts and the Facebook page are still the fastest.</p>
+      <p class="lede small">The state posts trip cancellations and service notices to New England 511; the app checks that feed about every half hour and shows anything posted for the Bass Harbor boats at the top of the Now tab. For same-minute news, the text alerts and the Facebook page are still the fastest.</p>
       <div class="status511" id="status511"><span class="small muted">Checking the 511 feed…</span></div>
       <div class="links" style="margin-top:10px">
         <a class="linkrow" href="https://newengland511.org/" target="_blank" rel="noopener"><span class="l">Text alerts: New England 511<small>Free account → "My Trips" → ferry trip cancellations. This is the official text service.</small></span><span class="arrow">›</span></a>
@@ -491,9 +610,9 @@ p { margin: 0 0 8px; }
     </div>
     <div class="card">
       <h2>Keep it on your phone</h2>
-      <p>Tap the page name, <b>Swan's Island Boat</b>, at the top left of this page, then <b>Add to Home Screen</b>. That puts the boat on your home screen as its own app. (Installing from the browser's own menu gives you Claude instead, so use the page name.)</p>
-      <p>It needs a signal to open, so keep your ticket PDFs in Files or Photos too.</p>
-      <p>To share it, use the Share button at the top of this page and send the link; whoever gets it can add it to their phone the same way. Everyone sees the same schedule; the rides tally stays on each phone.</p>
+      <p>On Android, tap <b>Install</b> on the Now tab, or the browser menu (⋮) and <b>Add to Home screen</b>. On iPhone, tap Share, then <b>Add to Home Screen</b>.</p>
+      <p>Once it's installed it opens with no signal at the terminal, and it updates itself: when something new is added, the app refreshes on its own the next time it's opened. Nothing to reinstall.</p>
+      <p>Keep your ticket PDFs in Files or Photos too, in case the phone has no signal in the boarding lane.</p>
     </div>
     <div class="card">
       <h2>About</h2>
@@ -512,6 +631,8 @@ p { margin: 0 0 8px; }
     <button class="tab" data-view="info" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>Info</button>
   </div>
 </nav>
+<div class="sheet-back" id="sheetBack" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden><div class="grab"></div><div class="sheet-in" id="sheetIn"></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -670,7 +791,133 @@ p { margin: 0 0 8px; }
     return { arr, free };
   }
 
-  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName };
+  /* ----- Maine clock helpers (work in any time zone the phone is set to) ----- */
+  let nyFmt = null;
+  function nyParts(ms) {
+    if (!nyFmt) nyFmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+    const o = {}; nyFmt.formatToParts(new Date(ms)).forEach(p => { o[p.type] = p.value; });
+    return { y: +o.year, m: +o.month, d: +o.day, h: (+o.hour) % 24, min: +o.minute };
+  }
+  // Epoch milliseconds for a Maine wall-clock time (minutes after midnight).
+  function nyEpoch(y, m, d, min) {
+    const wall = Date.UTC(y, m - 1, d, Math.floor(min / 60), min % 60);
+    const off = t => { const p = nyParts(t); return Date.UTC(p.y, p.m - 1, p.d, p.h, p.min) - t; };
+    let t = wall - off(wall); t = wall - off(t);
+    return t;
+  }
+  function nextBoundary(ms, hour) {
+    const p = nyParts(ms);
+    let t = nyEpoch(p.y, p.m, p.d, hour * 60);
+    if (t <= ms) { const n = new Date(Date.UTC(p.y, p.m - 1, p.d + 1)); t = nyEpoch(n.getUTCFullYear(), n.getUTCMonth() + 1, n.getUTCDate(), hour * 60); }
+    return t;
+  }
+  // The marine forecast periods carry only a name ("Tonight", "Thu", "Thu Night") and text.
+  // Lay them end to end from the issue time: day periods end at 6 PM, night periods at 6 AM.
+  function marineWindows(marine) {
+    if (!marine || !marine.periods) return [];
+    let cur = Date.parse(marine.updated || '') || Date.now();
+    return marine.periods.map(p => {
+      const night = /night|tonight|overnight/i.test(p.name || '');
+      const end = nextBoundary(cur, night ? 6 : 18);
+      const w = { name: p.name, text: p.text, start: cur, end };
+      cur = end; return w;
+    });
+  }
+
+  /* ----- Reading a marine forecast sentence ----- */
+  const DIRS = { N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, ESE: 112.5, SE: 135, SSE: 157.5, S: 180, SSW: 202.5, SW: 225, WSW: 247.5, W: 270, WNW: 292.5, NW: 315, NNW: 337.5 };
+  function parseMarine(text) {
+    const t = String(text || '').replace(/\s*Wave Detail:.*$/i, '');
+    const o = { lo: null, hi: null, gust: null, seasLo: null, seasHi: null, seasMid: null, dirs: [], fog: /\bfog\b/i.test(t), spray: /freezing spray/i.test(t) };
+    let m;
+    const rw = /(\d+)\s*(?:to\s*(\d+)\s*)?kt\b/gi;
+    while ((m = rw.exec(t))) {
+      const a = +m[1], b = m[2] ? +m[2] : a, before = t.slice(Math.max(0, m.index - 18), m.index);
+      if (/gusts?\s*(?:up\s*)?(?:to\s*)?$/i.test(before)) o.gust = Math.max(o.gust || 0, b);
+      else if (/less than\s*$/i.test(before)) { o.lo = Math.max(o.lo || 0, 0); o.hi = Math.max(o.hi || 0, a - 1); }
+      else { o.lo = Math.max(o.lo || 0, a); o.hi = Math.max(o.hi || 0, b); }
+    }
+    const seas = (a, b) => { o.seasLo = Math.max(o.seasLo || 0, a); o.seasHi = Math.max(o.seasHi || 0, b); o.seasMid = Math.max(o.seasMid || 0, (a + b) / 2); };
+    const rs = /(?:seas?|waves?)\s+(?:around\s+|near\s+|less than\s+|up to\s+)?(\d+)(?:\s*(?:to|-)\s*(\d+))?\s*(?:ft|feet|foot)\b/gi;
+    while ((m = rs.exec(t))) seas(+m[1], m[2] ? +m[2] : +m[1]);
+    const rb = /(?:building|subsiding|increasing|decreasing)\s+to\s+(\d+)(?:\s*(?:to|-)\s*(\d+))?\s*(?:ft|feet|foot)\b/gi;
+    while ((m = rb.exec(t))) seas(+m[1], m[2] ? +m[2] : +m[1]);
+    const rd = /\b(NNE|NE|ENE|ESE|SE|SSE|SSW|SW|WSW|WNW|NW|NNW|N|E|S|W)\s+(?:winds?\s+)?(?:\d|around|less|up)/g;
+    while ((m = rd.exec(t))) o.dirs.push(DIRS[m[1]]);
+    return o;
+  }
+
+  /* ----- Five-level ride rating for a 130-foot ferry on a six-mile inshore crossing -----
+     S: sustained wind (kt), G: gusts (kt), seasMid: middle of the forecast seas range (ft),
+     dir: wind direction in degrees, alerts: NWS marine alerts in effect at sailing time.
+     Seas set the motion; sustained wind builds the local chop; gusts only matter when strong.
+     Southerly wind has the long reach across open water to this crossing. */
+  function rideTier(x) {
+    const S = x.S == null ? null : +x.S, G = x.G == null ? null : +x.G, W = x.seasMid == null ? null : +x.seasMid;
+    const tS = S == null ? 1 : S < 8 ? 1 : S < 13 ? 2 : S < 19 ? 3 : S < 27 ? 4 : 5;
+    const tG = G == null ? 1 : G < 18 ? 1 : G < 24 ? 2 : G < 32 ? 3 : G < 42 ? 4 : 5;
+    const tW = W == null ? 1 : W <= 1.25 ? 1 : W <= 2.5 ? 2 : W <= 3.5 ? 3 : W < 6.5 ? 4 : 5;
+    let tier = Math.max(tS, tG, tW);
+    const why = [];
+    if (x.dir != null && x.dir >= 135 && x.dir <= 248 && S != null && S >= 15 && (W == null || W >= 3) && tier < 4) { tier++; why.push('south'); }
+    for (const a of x.alerts || []) {
+      const e = String(a.event || '').toLowerCase();
+      if (/gale|storm|hurricane|hazardous seas/.test(e)) { tier = 5; why.push('alert:' + a.event); }
+      else if (/small craft|special marine/.test(e)) { tier = Math.max(tier, 4); why.push('alert:' + a.event); }
+    }
+    return { tier, tS, tG, tW, why };
+  }
+
+  /* ----- The daily "Traffic" post in the island Facebook group -----
+     "Wacky Wednesday 11/4 / SI Traffic / 6:45 ⭕' of truck, 4 cars / ... / BH Traffic: / 7:30 97' of truck, 3 cars"
+     Each line: a sailing (12-hour time, no AM/PM), feet of truck reserved, cars reserved (4 per boat is full). */
+  const CAR_RES = 4;
+  function nearestYear(m, d, today) {
+    let best = null;
+    for (const y of [today.y - 1, today.y, today.y + 1]) {
+      const diff = Math.abs(Date.UTC(y, m - 1, d) - Date.UTC(today.y, today.m - 1, today.d));
+      if (!best || diff < best.diff) best = { y, diff };
+    }
+    return best.y;
+  }
+  function parseTraffic(text, today) {
+    const lines = String(text || '').replace(/\r/g, '').replace(/[   ]/g, ' ').split('\n').map(s => s.trim()).filter(Boolean);
+    let date = null, label = '', i0 = 0;
+    for (let i = 0; i < lines.length && !date; i++) {
+      const m = /(^|[^\d/:])(1[0-2]|0?[1-9])\/(3[01]|[12]\d|0?[1-9])(?:\/(\d{4}|\d{2}))?(?![\d/])/.exec(lines[i]);
+      if (m) { const y = m[4] ? (m[4].length === 2 ? 2000 + +m[4] : +m[4]) : nearestYear(+m[2], +m[3], today); date = { y, m: +m[2], d: +m[3] }; label = lines[i].slice(0, 60); i0 = i + 1; }
+    }
+    if (!date) return { error: 'There is no date like 11/5 in that text.' };
+    const plan = dayPlan(date.y, date.m, date.d);
+    const legsFor = sec => plan.legs.filter(L => sec === 'fb' ? (L.to === 'fb' || L.from === 'fb') : (L.from === sec && L.to !== 'fb'));
+    const num = s => (s && /^\d+$/.test(s)) ? +s : 0;
+    const rows = []; let sec = null;
+    for (let i = i0; i < lines.length; i++) {
+      const ln = lines[i];
+      const h = /^(SI|S\.I\.|Swan'?s?(?:\s+Island)?|BH|B\.H\.|Bass\s+Harbou?r|FB|F\.B\.|French\s*boro)\b.*\btraffic\b/i.exec(ln) || /^(SI|BH|FB)\s*:?\s*$/i.exec(ln);
+      if (h) { const w = h[1].toLowerCase().replace(/[^a-z]/g, ''); sec = /^(si|swan)/.test(w) ? 'si' : /^(bh|bass)/.test(w) ? 'bh' : 'fb'; continue; }
+      if (!sec) continue;
+      const m = /^(\d{1,2})[:.](\d{2})(?:\s*([ap])\.?m\.?(?![a-z]))?\s*(.*)$/i.exec(ln);
+      if (!m) { if (/traffic/i.test(ln)) sec = null; continue; }
+      const hh = +m[1], mm = +m[2], ap = (m[3] || '').toLowerCase(), rest = m[4] || '';
+      if (hh > 23 || mm > 59) continue;
+      const tm = /(\d+|⭕️?|[oø0]|no)\s*(?:['’′`]+|ft\.?|feet)?\s*(?:of\s+)?trucks?\b/i.exec(rest);
+      const cm = /(\d+|⭕️?|[oø0]|no)\s*cars?\b/i.exec(rest);
+      if (!tm && !cm && !/full/i.test(rest)) continue;
+      const cands = ap ? [(hh % 12 + (ap === 'p' ? 12 : 0)) * 60 + mm] : hh >= 13 ? [hh * 60 + mm] : [(hh % 12) * 60 + mm, (hh % 12 + 12) * 60 + mm];
+      const legs = legsFor(sec);
+      let leg = null;
+      for (const c of cands) { leg = legs.find(L => L.t === c) || null; if (leg) break; }
+      if (!leg) { let best = null; for (const c of cands) for (const L of legs) { const dd = Math.abs(L.t - c); if (dd <= 20 && (!best || dd < best.dd)) best = { dd, L }; } leg = best ? best.L : null; }
+      const t = leg ? leg.t : (ap || hh >= 13 || (hh >= 5 && hh <= 11)) ? cands[0] : cands[cands.length - 1];
+      const cars = cm ? num(cm[1]) : 0;
+      rows.push({ sec, t, to: leg ? leg.to : null, truck: tm ? num(tm[1]) : 0, cars, full: cars >= CAR_RES || /\bfull\b/i.test(rest), matched: !!leg });
+    }
+    if (!rows.length) return { error: 'Found the date but no sailing lines like “7:30 97′ of truck, 3 cars”.' };
+    return { date: dateKey(date.y, date.m, date.d), label, rows };
+  }
+
+  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FerryEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -700,6 +947,37 @@ p { margin: 0 0 8px; }
   function longDate(p) { return DAYS[p.wd] + ', ' + MONTHS[p.m - 1] + ' ' + p.d + ', ' + p.y; }
   const PLACE = { si: "Swan's Island", bh: 'Bass Harbor', fb: 'Frenchboro' };
   function timeHTML(min) { const s = E.fmt(min); const i = s.indexOf(' '); return s.slice(0, i) + '<small>' + s.slice(i + 1) + '</small>'; }
+  const setHTML = (el, html) => { if (el && el.__html !== html) { el.innerHTML = html; el.__html = html; } };
+
+  /* ----- App identity, people, and the shared relay ----- */
+  const APP_VERSION = '2026.11.05';
+  const APP_URL = 'https://hectrvictorious.github.io/swans-island-boat/';
+  const NTFY = 'https://ntfy.sh/';
+  const SYNC_TOPIC = 'sibferry-fpu8hwfns6miyy6d3c0z';   // public relay channel; everything sent through it is encrypted with the family key
+  const PEOPLE = ['Josh', 'Sarah'];
+  const me = () => { const w = store.get('who', null); return PEOPLE.includes(w) ? w : null; };
+  const otherOf = p => p === 'Josh' ? 'Sarah' : p === 'Sarah' ? 'Josh' : null;
+  const OTHER_SIDE = { si: 'bh', bh: 'si' };
+  const parseKey = k => ({ y: +k.slice(0, 4), m: +k.slice(5, 7), d: +k.slice(8, 10) });
+  const todayKey = () => E.dateKey(NOW.y, NOW.m, NOW.d);
+  const tomorrowKey = () => { const t = addDays(NOW.y, NOW.m, NOW.d, 1); return E.dateKey(t.y, t.m, t.d); };
+  function fmtWhen(ms) {
+    if (!ms) return '';
+    const p = E.nyParts(ms), t = E.fmt(p.h * 60 + p.min), k = E.dateKey(p.y, p.m, p.d);
+    if (k === todayKey()) return t;
+    const y = addDays(NOW.y, NOW.m, NOW.d, -1);
+    if (k === E.dateKey(y.y, y.m, y.d)) return 'yesterday ' + t;
+    return MONS[p.m - 1] + ' ' + p.d + ', ' + t;
+  }
+  // Busy days: the Frenchboro run thins out the Swan's Island boats, and summer fills the car deck.
+  function busyDay(plan) {
+    const fbLegs = plan.fb && plan.fb.length ? plan.fb : [];
+    const softFb = fbLegs.length > 0 && fbLegs.every(f => f.soft);
+    const fb = fbLegs.length > 0 && !softFb;
+    const summer = (plan.m === 6 && plan.d >= 15) || plan.m === 7 || plan.m === 8;
+    return { fb, softFb, summer, any: fb || summer };
+  }
+  const lineUpMins = plan => busyDay(plan).any ? 30 : E.BOARD;
 
   /* ----- Chart ----- */
   const COAST = '-684259 442950 2 -39 -18 -15 13 -3 29 -50 57 7 10 13 48 -16 31 -21 30 -3 49 14 8 26 10 -11 0 -15 -96 -32 -5 -21 -35 2 -5 -10 13 -24 -4 -10 -78 3 77 -49 -2 -15 19 -16 3 -19 58 -32 1 -9 -24 -29 43 -58 20 5 17 25 19 72 30 -21 10 2 8 16 -2 -16 39 -32 -17 -9 7 -5 -19 -20 -33 -19 6 -18 37 -21 5 -26 25 0 19 28 23 16 27 63 38 -3 -24 -56 16 -27 40 -27 25 -1 16 -28 12 7 17 -7 -14 42 9 1 -3 -17 12 9 13 -11 -10 -27 -20 -9 23 -22 28 3 2 -23 -15 -10 -31 6 -17 -20 15 -43 26 -27 31 8 -4 27 22 56 53 6 28 14 -13 6 9 9 -5 9 9 3 -41 40 20 -4 8 23 -24 12 0 12 -21 -3 -1 12 -14 2 86 -21 -19 19 13 14 -5 24 19 -8 23 -27 0 -44 14 -14 -19 -11 35 -27 -21 -14 -1 10 -11 -4 10 -12 -20 -7 8 0 1 -10 -6 -28 32 -23 56 -90 51 -10 41 32 84 -2 3 8 -15 22 -38 -3 13 9 -8 6 5 20 18 -3 9 -15 17 -1 -11 -10 44 -28 25 23 -10 13 6 6 53 -13 1 8 -15 5 -1 20 16 -6 15 12 8 -4 3 50 18 10 49 -10 -1 18 28 38 -4 11 40 10 13 17 30 10 -6 14 5 25 -26 27 -10 34 6 11 -23 44 -19 9 -16 43 -14 -3 -24 20 -42 -11 -76 27 -50 2 -40 -9 -16 12 16 30 15 4 -12 5 8 15 -4 24 13 -10 23 5 33 -19 28 -1 -6 -7 8 -8 35 11 -8 5 5 7 -37 34 -2 22 -18 5 -23 31 -51 2 -21 -20 -13 11 1 24 -19 22 4 10 5 -10 18 -2 11 -22 40 -10 28 77|-684206 441289 12 17 64 7 17 26 53 2 29 13 0 8 58 45 49 10 0 13 -33 37 13 24 0 35 13 17 94 12 -24 16 -25 -3 -13 8 9 23 -9 13 -33 9 -7 37 -23 15 1 23 -56 18 -26 29 -36 18 -23 47 -23 16 -7 51 -50 -4 -32 15 -14 20 -25 0 0 -30 26 -10 -5 -14 8 -4 -11 -5 -2 -13 -14 -2 19 -2 18 -35 15 -5 -8 -26 -16 -8 12 -19 -68 -12 -9 -13 -48 -15 0 -13 -10 1 -12 -15 7 -2 -23 3 -27 -41 -19 12 -2 20 20 33 28 19 0 19 -39 -27 -22 -38 -36 1 -28 -27 -15 -4 -1 -28 -11 -17 -28 17 -5 18 23 20 -6 10 -19 -2 1 13 12 8 23 -9 22 4 -16 3 2 10 22 1 26 24 17 0 -17 4 -25 27 23 25 -10 1 8 15 -54 31 -10 -2 -12 8 9 2 -23 12 -52 -19 1 -7 -8 14 -19 -9 -1 15 -12 1 33 7 -7 13 -13 1 -29 -8 4 -9 -15 -7 -18 -30 -5 -21 23 0 3 -8 -10 -2 11 -24 -18 0 -23 -15 22 -17 1 -15 -40 -7 -36 -32 16 -11 13 -30 -36 16 -3 -9 12 -6 -58 -12 -5 -13 -8 9 -40 2 9 13 -9 3 31 7 -10 47 9 20 -11 0 0 13 -10 0 -58 -35 -22 1 21 -8 -6 -17 -17 -1 1 -10 -25 -18 -31 -8 -6 -73 -3 -10 -16 -3 -2 -13 44 -7 15 -24 15 -5 31 4 14 18 22 -4 17 -24 -4 -18 30 -20 14 8 -16 25 12 12 29 -1 12 10 14 21 -11 7 31 9 0 26 8 10 48 4 43 -14 9 5 0 -8 27 28 -11 4 3 6 19 5 -19 29 28 -10 29 10 24 -8 6 -16 -21 -11 -9 -26 23 -10 3 -15 18 -2 10 -18 -10 -6 -1 -17 -21 -15 2 -11 -13 -1 -10 -12 9 -24 -14 -16 22 -28 47 -16 2 -11 12 5 30 -14 7 5 -13 20 6 7 -12 -3 -23 12 11 16 -14 25 14 4 -5 13 21 35 -16 55 55 51 11 -12 17 6 4 -9 -21 -20 -26 -4 7 -17 29 -7 -17 -14 3 -27 -11 0 -5 -28 32 -8 2 11 52 -13 0 -11 -24 -13 -27 5 -3 -6 20 -5 -1 -15 56 0 31 -12 36 4 7 -8 -30 1 -8 -19 -11 1 -15 -29 3 -17 19 -9 35 10 15 -12 23 2 33 -14|-683336 441050 32 40 -1 16 -12 6 -51 -4 -20 -15 -39 15 7 42 44 34 -23 23 -69 17 -6 16 17 23 -9 18 -61 1 -51 -26 -63 -65 8 -2 3 -16 -36 -24 12 20 9 50 -54 -15 -17 -23 -33 -11 -20 -44 22 -23 53 -6 -9 -19 19 -6 5 -22 59 0 23 21 15 -5 9 -16 87 0 28 30 16 1 16 14 13 -14 -11 -31|-685450 442705 28 -21 0 -12 -12 -7 5 -3 47 5 14 -6 -2 -18 -25 -5 -14 6 -4 -11 64 -10 40 10 45 -30 72 1 -9 58 -88 104 -12 68 -10 4 -15 29 19 54 18 22 -10 7 -70 0 17 -40 -3 -14 -14 -7 -14 -1 -39 23 -28 -3|-685450 442342 92 -30 8 -30 17 12 71 -15 28 7 -7 28 18 5 -9 13 1 31 -46 43 -9 54 -9 3 2 36 -16 5 -3 15 -13 2 -16 22 -44 13 -36 22 -29 4|-685012 441050 -10 17 -22 11 18 21 48 13 11 -4 1 -18 26 -3 33 28 -32 1 -11 10 26 30 -35 51 6 11 -29 10 -27 29 -66 19 -41 -26 -1 -37 -61 -51 -10 -21 15 -29 -8 -43 8 -19|-683557 441992 -36 2 -16 -14 -32 0 -29 -27 -30 -11 -1 -9 -18 -5 -19 -44 -18 -7 -31 -35 37 -25 45 -9 74 35 7 8 -5 11 42 15 26 39 56 38 -52 38|-684924 442824 3 -25 52 -92 -2 -14 60 -28 72 -9 40 -16 9 10 12 27 -10 23 -53 24 -83 71 -68 30 -32 -1|-683474 441852 -9 9 -20 -6 -12 -34 -25 -19 12 -10 -13 -39 31 4 6 -42 13 -16 21 -3 16 13 14 -10 7 10 26 -4 52 73 -12 44 -24 20 -41 -9 -18 18 -24 1|-683339 442075 -27 -12 -1 -11 10 -24 28 -19 2 -8 -15 -15 7 -9 37 -1 13 -7 -5 -10 22 -7 59 41 11 -1 14 -26 39 10 -14 28 -47 5 -17 36 -24 20 -92 10|-684829 442238 18 -34 33 -12 37 0 21 11 8 29 20 2 9 13 -24 41 -49 3 -28 -12 -22 8 -22 -18 -1 -31|-684777 442032 30 -3 -6 20 28 17 3 18 -11 -3 -31 15 14 2 -5 18 -22 23 -86 -8 11 -22 -25 -9 24 -1 8 10 26 -13 -3 -12 -21 -5 -7 -23 5 -24 12 -6 56 6|-683043 442950 16 -13 4 9 29 -6 14 -28 -5 -3 10 0 12 -28 31 -8 -11 10 0 18 9 0 19 -12 5 -23 10 -2 21 8 29 -3 -1 81|-684360 441217 8 12 -31 28 42 15 -29 22 4 34 -35 -3 -19 -14 -18 4 -46 -26 0 -23 -11 -12 56 9 33 -34 46 -12|-684652 442041 -14 -17 -26 -7 7 -19 35 -13 66 -7 45 22 1 17 -32 10 -5 13 -42 22 -31 5 -4 -26|-683366 441972 -38 -14 -28 -28 0 -20 65 -8 12 13 38 11 -19 14 1 11 -31 21|-682991 442816 -50 17 -6 -24 12 -12 -5 -23 42 -12 38 17 30 -19 21 1 -82 55';
@@ -806,24 +1084,43 @@ p { margin: 0 0 8px; }
   let plannerFrom = 'si', plannerOut = null, plannerRet = null;
 
   function renderBoards(plan, host, nowMin, isToday) {
+    const past = plan.key < todayKey();
+    const rides = new Map(); let eligible = 0;
+    plan.legs.forEach(L => { if (L.to === 'fb' || L.from === 'fb' || L.nopax || past || (isToday && L.t <= nowMin)) return; eligible++; const r = rideAt(plan.y, plan.m, plan.d, L.t); if (r) rides.set(L, r); });
+    const tiers = [...rides.values()].map(r => r.tier);
+    const uniform = tiers.length > 1 && tiers.length === eligible && tiers.every(t => t === tiers[0]);
+    const sum = uniform ? '<div class="ridesum">' + rideChip(rides.values().next().value) + '<span><b>' + TIERS[tiers[0]].label + '</b> on every boat' + (isToday ? ' still to go today' : ' this day') + '. Tap one for what to expect.</span></div>' : '';
     const col = (from) => {
       const items = plan.legs.filter(L => L.from === from && L.to !== 'fb');
       const nextL = isToday ? items.find(L => L.t > nowMin && !L.nopax) : null;
       return '<div class="board"><h3>From ' + PLACE[from] + '</h3><ul>' + items.map(L => {
-        const gone = isToday && L.t <= nowMin;
-        const cls = [gone ? 'gone' : '', L.nopax ? 'nopax' : '', (L === nextL) ? 'next' : ''].filter(Boolean).join(' ');
+        const gone = past || (isToday && L.t <= nowMin);
+        const hit = tripForLeg(plan.key, from, L.t);
+        const cls = [gone ? 'gone' : '', L.nopax ? 'nopax' : '', (L === nextL) ? 'next' : '', hit ? 'planned' : ''].filter(Boolean).join(' ');
         let c = '';
         if (L.nopax) c = 'fuel run · no passengers';
         else if (isToday && !gone) c = 'in ' + E.fmtDur(L.t - nowMin);
         else if (gone) c = 'departed';
         else c = 'arr ' + E.fmt(L.arr).replace(' ', ' ');
-        return '<li class="' + cls + '"><span class="t">' + E.fmt(L.t) + '</span><span class="c">' + c + '</span></li>';
+        const chips = [];
+        if (hit) chips.push('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
+        if (!uniform && rides.has(L)) chips.push(rideChip(rides.get(L)));
+        if (!L.nopax && !gone) { const rr = resRow(plan.key, from, L.t); if (rr) chips.push(resChip(rr)); }
+        const tappable = !L.nopax && (!gone || hit);
+        return '<li class="' + cls + '"' + (tappable ? ' role="button" tabindex="0" data-leg="' + plan.key + '|' + from + '|' + L.t + '" aria-label="' + E.fmt(L.t) + ' from ' + PLACE[from] + (hit ? ', planned trip' : ', tap to plan a trip') + '"' : '') + '><span class="t">' + E.fmt(L.t) + '</span><span class="c">' + c + '</span>' + (chips.length ? '<span class="r2">' + chips.join('') + '</span>' : '') + '</li>';
       }).join('') + '</ul></div>';
     };
-    host.innerHTML = col('si') + col('bh');
+    setHTML(host, sum + col('si') + col('bh'));
+  }
+  function dayWarnings(plan) {
+    const b = busyDay(plan), out = [];
+    if (b.fb) out.push({ kind: 'busy', text: '<b>Frenchboro day: be there early.</b> With the Frenchboro run in the middle of the day there are fewer Swan’s Island boats, and the ones that run are packed. Get in line at least 30 minutes ahead, or have a car reservation.' });
+    else if (b.softFb) out.push({ kind: 'busy', text: '<b>Maybe a Frenchboro run this afternoon.</b> If someone booked it, the boats around it fill up. Give yourself extra time in line.' });
+    if (b.summer) out.push({ kind: 'busy', text: '<b>Summer boats fill up.</b> From mid-June through August, have a car reservation (207-244-3254) or get in line very early.' });
+    return out;
   }
   function renderNotes(plan, host) {
-    host.innerHTML = plan.notes.map(n => '<div class="note ' + n.kind + '">' + n.text + '</div>').join('');
+    setHTML(host, dayWarnings(plan).concat(plan.notes).map(n => '<div class="note ' + n.kind + '">' + n.text + '</div>').join(''));
   }
 
   function statusText(plan, st, nowMin) {
@@ -846,15 +1143,20 @@ p { margin: 0 0 8px; }
 
   function renderNext(plan, nowMin) {
     const tiles = ['si', 'bh'].map(from => {
-      let L = E.nextDeparture(plan, nowMin, from), when = '', tomorrow = false;
-      if (!L) { const tm = addDays(NOW.y, NOW.m, NOW.d, 1); const tp = E.dayPlan(tm.y, tm.m, tm.d); L = E.nextDeparture(tp, -1, from); tomorrow = true; }
+      let L = E.nextDeparture(plan, nowMin, from), tomorrow = false, p = plan;
+      if (!L) { const tm = addDays(NOW.y, NOW.m, NOW.d, 1); p = E.dayPlan(tm.y, tm.m, tm.d); L = E.nextDeparture(p, -1, from); tomorrow = true; }
       if (!L) return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">—</div></div>';
       const mins = tomorrow ? (24 * 60 - nowMin + L.t) : (L.t - nowMin);
-      when = tomorrow ? 'tomorrow' : ('in ' + E.fmtDur(mins));
+      const when = tomorrow ? 'tomorrow' : ('in ' + E.fmtDur(mins));
       const soon = !tomorrow && mins <= 30;
-      return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">' + timeHTML(L.t) + '</div><div class="in' + (soon ? ' soon' : '') + '">' + when + (soon ? ' · be there' : '') + '</div><div class="where">to ' + PLACE[L.to] + ' · arrives ' + E.fmt(L.arr) + '</div></div>';
+      const busy = busyDay(p).any;
+      const chips = [];
+      const r = rideAt(p.y, p.m, p.d, L.t); if (r) chips.push(rideChip(r));
+      const rr = resRow(p.key, from, L.t); if (rr) chips.push(resChip(rr));
+      const hit = tripForLeg(p.key, from, L.t); if (hit) chips.unshift('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
+      return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">' + timeHTML(L.t) + '</div><div class="in' + (soon ? ' soon' : '') + '">' + when + (soon ? ' · be there' : '') + '</div><div class="where">to ' + PLACE[L.to] + ' · arrives ' + E.fmt(L.arr) + (busy ? '<br><b>Busy day:</b> line up by ' + E.fmt(L.t - 30) : '') + '</div>' + (chips.length ? '<div class="r2" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">' + chips.join('') + '</div>' : '') + '</div>';
     });
-    $('nextTiles').innerHTML = tiles.join('');
+    setHTML($('nextTiles'), tiles.join(''));
   }
 
   function renderNow() {
@@ -866,9 +1168,14 @@ p { margin: 0 0 8px; }
     renderBoards(plan, $('todayBoards'), NOW.min, true);
     renderNotes(plan, $('todayNotes'));
     renderNext(plan, NOW.min);
-    const st = E.boatStatus(plan, NOW.min);
-    statusText(plan, st, NOW.min);
-    placeBoat(st);
+    renderTrips();
+    const st = resStatus(plan.key);
+    setHTML($('resWarnNow'), st.warn && st.warn.level === 'red' ? redHTML(st.warn) : '');
+    setHTML($('todayRes'), resHTML(plan.key, false));
+    $('todayFoot').textContent = 'Be at the terminal ' + lineUpMins(plan) + ' minutes before departure' + (busyDay(plan).any ? ' today' : '') + '. Crossing is about 40 minutes. Tap a boat to plan a trip.';
+    const st2 = E.boatStatus(plan, NOW.min);
+    statusText(plan, st2, NOW.min);
+    placeBoat(st2);
   }
 
   function renderPlan() {
@@ -877,7 +1184,12 @@ p { margin: 0 0 8px; }
     $('planDate').value = plan.key;
     $('planTitle').innerHTML = longDate(plan) + ' <span class="chip' + (plan.holiday ? ' accent' : '') + '">' + plan.label + '</span>';
     renderBoards(plan, $('planBoards'), NOW.min, isToday);
+    $('planHint').hidden = plan.key < todayKey();
+    const pst = resStatus(plan.key);
+    setHTML($('planRes'), pst.warn && pst.warn.level === 'red' ? redHTML(pst.warn) : '');
+    setHTML($('planResLine'), resHTML(plan.key, false));
     renderNotes(plan, $('planNotes'));
+    setHTML($('planTrips'), tripsOn(plan.key).sort((a, b) => a.t - b.t).map(tripCard).join(''));
     renderPlanner(plan);
     renderWeek(plan);
   }
@@ -900,7 +1212,8 @@ p { margin: 0 0 8px; }
     if (lay.free < 0) { r.className = 'result bad'; r.innerHTML = '<div class="eyebrow">' + label + '</div><div class="big">—</div><div class="small">That boat leaves before you could get back to the terminal.</div>'; return; }
     const cls = lay.free < 90 ? 'bad' : lay.free < 240 ? 'warn' : 'good';
     r.className = 'result ' + cls;
-    r.innerHTML = '<div class="eyebrow">' + label + '</div><div class="big">' + E.fmtDur(lay.free) + '</div><div class="small">Land ' + E.fmt(lay.arr) + ' at ' + PLACE[other] + '. Be back at the terminal by ' + E.fmt(plannerRet - E.BOARD) + ' for the ' + E.fmt(plannerRet) + ' boat home.</div>';
+    const canPlan = plan.key > todayKey() || (plan.key === todayKey() && plannerOut > NOW.min);
+    r.innerHTML = '<div class="eyebrow">' + label + '</div><div class="big">' + E.fmtDur(lay.free) + '</div><div class="small">Land ' + E.fmt(lay.arr) + ' at ' + PLACE[other] + '. Be back at the terminal by ' + E.fmt(plannerRet - E.BOARD) + ' for the ' + E.fmt(plannerRet) + ' boat home.</div>' + (canPlan ? '<div class="btnrow" style="margin-top:8px"><button class="btn navy" data-act="planpair">Plan this trip ›</button></div>' : '');
   }
 
   function renderWeek(plan) {
@@ -910,12 +1223,15 @@ p { margin: 0 0 8px; }
     for (let i = 0; i < 7; i++) {
       const dd = addDays(start.y, start.m, start.d, i); const p = E.dayPlan(dd.y, dd.m, dd.d);
       const f = from => p.legs.filter(L => L.from === from && L.to !== 'fb').map(L => L.nopax ? '<span class="x">' + E.fmt(L.t).replace(' ', ' ') + '</span>' : E.fmt(L.t).replace(' ', ' ')).join(', ');
-      const flag = p.holiday ? ' <span class="chip accent">' + p.holiday + '</span>' : (p.gas ? ' <span class="chip">fuel run</span>' : (p.fb.length ? ' <span class="chip">Frenchboro</span>' : ''));
-      rows.push('<div class="day"><div class="dn">' + DAYS[p.wd].slice(0, 3) + '<small>' + MONS[p.m - 1] + ' ' + p.d + '</small></div><div class="times"><b>SI</b> ' + f('si') + '<br><b>BH</b> ' + f('bh') + flag + '</div></div>');
+      const b = busyDay(p);
+      const flag = p.holiday ? ' <span class="chip accent">' + p.holiday + '</span>' : (p.gas ? ' <span class="chip">fuel run</span>' : (b.fb ? ' <span class="chip">Frenchboro · busy</span>' : (p.fb.length ? ' <span class="chip">Frenchboro?</span>' : '')));
+      const nT = tripsOn(p.key).length;
+      const tripChip = nT ? ' <span class="chip plan">' + nT + (nT > 1 ? ' trips' : ' trip') + '</span>' : '';
+      rows.push('<div class="day' + (p.key === plan.key ? ' sel' : '') + '" role="button" tabindex="0" data-day="' + p.key + '"><div class="dn">' + DAYS[p.wd].slice(0, 3) + '<small>' + MONS[p.m - 1] + ' ' + p.d + '</small></div><div class="times"><b>SI</b> ' + f('si') + '<br><b>BH</b> ' + f('bh') + flag + tripChip + '</div></div>');
     }
     const end = addDays(start.y, start.m, start.d, 6);
     $('weekTitle').textContent = 'Week of ' + MONS[start.m - 1] + ' ' + start.d + (start.m === end.m ? '' : ' – ' + MONS[end.m - 1]) + ' ' + end.d;
-    $('week').innerHTML = rows.join('');
+    setHTML($('week'), rows.join(''));
   }
 
   /* ----- Fares ----- */
@@ -1007,30 +1323,69 @@ p { margin: 0 0 8px; }
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function condLinks() { return '<a class="btn" href="' + LINKS.marine + '" target="_blank" rel="noopener">Marine forecast ›</a><a class="btn" href="' + LINKS.hourly + '" target="_blank" rel="noopener">Hourly wind ›</a><a class="btn" href="' + LINKS.tides + '" target="_blank" rel="noopener">Tides ›</a>'; }
 
-  // How the crossing is likely to feel, from a marine forecast period. A 130-foot ferry on six inshore miles:
-  // wind under 10 kt and seas to 2 ft is a flat ride; 3 to 4 ft seas or 15-20 kt is some roll; 5 ft and up, or 25 kt,
-  // is a rough ride; a gale or 8-foot seas is weather the state cancels in. Southerly wind has the longest fetch here.
-  const COMFORT = [
-    { label: 'Easy crossing', cls: 'good', note: 'Flat water. Coffee stays in the cup.' },
-    { label: 'Some motion', cls: 'good', note: 'A gentle roll. Fine for almost everyone.' },
-    { label: 'Rough crossing', cls: 'warn', note: 'Real motion. Sit low and amidships; a window helps.' },
-    { label: 'Cancellation territory', cls: 'bad', note: 'The state cancels boats in this. Check before you leave the house.' }
+  // The ride, 1 to 5, for any sailing in the next three days. Inputs come from conditions.json (refreshed every half
+  // hour by the site's workflow) and the live government feeds: the raw forecast grid for wind and gusts hour by hour,
+  // the hourly forecast as a backup, and the marine forecast for the crossing's seas. Rules are in FerryEngine.rideTier.
+  const TIERS = [null,
+    { label: 'Flat calm', chip: 'Calm', expect: 'Glassy or close to it. You won’t feel the boat move: walk around, coffee stays in the cup, and the outside deck is the best seat on the boat.' },
+    { label: 'Easy', chip: 'Easy', expect: 'A light chop and the odd gentle sway, mostly in the open middle of the crossing. Fine for everyone; walk around as you like.' },
+    { label: 'Choppy', chip: 'Choppy', expect: 'A steady roll in the open middle of the crossing, with some spray off the bow. Hold the rail on the stairs. Most people are fine; if you get queasy, sit low near the middle of the boat and keep your eyes on the horizon.' },
+    { label: 'Rough', chip: 'Rough', expect: 'Real pitching and rolling, with spray over the bow and onto the car deck. Stay seated, keep kids and pets close, and stow anything loose in the car. The car will come off salty.' },
+    { label: 'Cancellation risk', chip: 'May cancel', expect: 'The state delays or cancels boats in weather like this. Check the notices here and call the terminal before you leave the house. If it does run, it will be a hard ride.' }
   ];
-  function comfort(text, alerts) {
-    const t = text || '';
-    let wind = 0, gust = 0, seas = 0;
-    t.replace(/(\d+)(?:\s*to\s*(\d+))?\s*kt/gi, (m, a, b, off) => { const v = Math.max(+a, +(b || 0)); if (/gust/i.test(t.slice(Math.max(0, off - 20), off))) gust = Math.max(gust, v); else wind = Math.max(wind, v); return m; });
-    t.replace(/seas?\s+(?:around\s+|near\s+)?(\d+)(?:\s*to\s*(\d+))?\s*(?:ft|feet)/gi, (m, a, b) => { seas = Math.max(seas, +a, +(b || 0)); return m; });
-    const southerly = /\b(S|SW|SE|SSW|SSE)\s+winds?/i.test(t) || /\b(south|southwest|southeast)\b/i.test(t);
-    let lvl = 0;
-    if (wind > 10 || seas >= 3) lvl = 1;
-    if (wind > 20 || seas >= 5 || (southerly && wind >= 18 && seas >= 4)) lvl = 2;
-    if (wind > 30 || gust >= 40 || seas >= 8) lvl = 3;
-    if (gust >= 30 && lvl < 2) lvl = 2;
-    (alerts || []).forEach(a => { const e = (a.event || '').toLowerCase(); if (/gale|storm|hurricane/.test(e)) lvl = Math.max(lvl, 3); else if (/small craft/.test(e)) lvl = Math.max(lvl, 2); });
-    return Object.assign({ lvl, wind, gust, seas, southerly }, COMFORT[lvl]);
+  const QUEASY = 'If you get seasick, take something before you board, not after: meclizine (Bonine, Dramamine Less Drowsy) or dimenhydrinate (original Dramamine), 30 to 60 minutes ahead. Both are over the counter. Ginger chews help some people. Read the label, especially if you’re driving off the boat.';
+  const COMPASS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  const DIRDEG = {}; COMPASS.forEach((c, i) => { DIRDEG[c] = i * 22.5; });
+  const compass = deg => deg == null ? '' : COMPASS[Math.round((((deg % 360) + 360) % 360) / 22.5) % 16];
+  const maxN = (...a) => { const v = a.filter(x => x != null && x !== '' && isFinite(x)).map(Number); return v.length ? Math.max(...v) : null; };
+  let CURRENT = null;
+  let WIN = { src: null, wins: [] };
+  function marineWins(c) { if (!c || !c.marine) return []; if (WIN.src !== c.marine) WIN = { src: c.marine, wins: E.marineWindows(c.marine) }; return WIN.wins; }
+  function rideAt(y, m, d, min) {
+    const c = CURRENT; if (!c) return null;
+    const T = E.nyEpoch(y, m, d, min);
+    const ahead = (T - Date.now()) / 3.6e6;
+    if (ahead < -1.5 || ahead > 75) return null;
+    let g = null;
+    if (c.grid) { const h = Math.floor(T / 3.6e6); let best = null; for (const r of c.grid) { const dd = Math.abs(r.h - h); if (dd <= 1 && (!best || dd < best.dd)) best = { dd, r }; } g = best ? best.r : null; }
+    let hk = null, hdir = null;
+    if (c.hourly) for (const x of c.hourly) { const t0 = Date.parse(x.t); if (t0 <= T && T < t0 + 3.6e6) { const n = String(x.wind || '').match(/\d+/g); if (n) hk = Math.round(Math.max(...n.map(Number)) / 1.15078); hdir = DIRDEG[x.dir] != null ? DIRDEG[x.dir] : null; break; } }
+    let mw = null; for (const w of marineWins(c)) { if (w.start <= T && T < w.end) { mw = w; break; } }
+    const mp = mw ? E.parseMarine(mw.text) : null;
+    if (!g && hk == null && !mp) return null;
+    const S = maxN(g && g.w, hk, mp && mp.lo), G = maxN(g && g.g, mp && mp.gust);
+    const dir = g && g.d != null ? g.d : hdir != null ? hdir : (mp && mp.dirs.length ? mp.dirs[0] : null);
+    const alerts = (c.alerts || []).filter(a => (!a.onset || Date.parse(a.onset) <= T) && (!a.ends || Date.parse(a.ends) > T));
+    const r = E.rideTier({ S, G, seasMid: mp ? mp.seasMid : null, dir, alerts });
+    return Object.assign(r, { S, G, dir, mp, temp: g ? g.f : null, alerts, period: mw ? mw.name : null,
+      fog: !!((mp && mp.fog) || /fog/i.test((g && g.x) || '') || alerts.some(a => /fog/i.test(a.event || ''))),
+      spray: !!((mp && mp.spray) || alerts.some(a => /freezing spray/i.test(a.event || ''))) });
   }
-  const QUEASY = 'If you get seasick, take something before you board, not after: meclizine (Bonine, Dramamine Less Drowsy) or dimenhydrinate (original Dramamine) 30 to 60 minutes ahead, both over the counter. Ginger chews help some people. Read the label, especially if you’re driving off the boat.';
+  function rideChip(r) { return '<span class="rc t' + r.tier + '" title="Ride ' + r.tier + ' of 5: ' + TIERS[r.tier].label + '"><span class="m"><i></i><i></i><i></i><i></i><i></i></span>' + TIERS[r.tier].chip + '</span>'; }
+  function seasText(mp) { if (!mp || mp.seasHi == null) return ''; return mp.seasLo === mp.seasHi ? mp.seasHi + ' ft' : mp.seasLo + '–' + mp.seasHi + ' ft'; }
+  function windText(r) { if (r.S == null) return ''; return (r.dir != null ? compass(r.dir) + ' ' : '') + r.S + ' kt' + (r.G != null && r.G >= r.S + 5 ? ', gusts ' + r.G : ''); }
+  function rideNotes(r) {
+    const out = [];
+    if (r.why.includes('south')) out.push('Southerly wind with a long reach across open water. Southerlies make this crossing rougher than the numbers suggest.');
+    const seen = {};
+    r.alerts.forEach(a => { const e = a.event || ''; if (e && !seen[e] && !/fog|freezing spray/i.test(e)) { seen[e] = 1; out.push(esc(e) + ' in effect for the crossing.'); } });
+    if (r.fog) out.push('Fog in the forecast. The boat runs on radar and can run a little late.');
+    if (r.spray) out.push('Freezing spray: decks, stairs and ramps can be icy. Watch your step.');
+    if (r.temp != null && r.temp <= 40 && r.S != null && r.S >= 10) out.push('Cold on deck: ' + r.temp + '°F before the wind. Dress for it if you go outside.');
+    return out;
+  }
+  function rideStat(r, label) {
+    const T = TIERS[r.tier];
+    const facts = [windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).join(' · ');
+    const notes = rideNotes(r);
+    return '<div class="stat ride r' + r.tier + '"><div class="k">The ride · ' + label + '</div><div class="v">' + T.label + '<span class="meter">' + [1, 2, 3, 4, 5].map(i => '<i' + (i <= r.tier ? ' class="on"' : '') + '></i>').join('') + '</span></div><div class="s">' + r.tier + ' of 5</div>' + (facts ? '<div class="for">' + facts + '</div>' : '') + '<div class="x">' + T.expect + '</div>' + (notes.length ? '<ul>' + notes.map(n => '<li>' + n + '</li>').join('') + '</ul>' : '') + '</div>';
+  }
+  function nextBoatAny() {
+    let plan = E.dayPlan(NOW.y, NOW.m, NOW.d), first = false;
+    let L = plan.legs.find(x => x.t > NOW.min && !x.nopax && x.to !== 'fb' && x.from !== 'fb');
+    if (!L) { const t = addDays(NOW.y, NOW.m, NOW.d, 1); plan = E.dayPlan(t.y, t.m, t.d); L = plan.legs.find(x => !x.nopax && x.to !== 'fb' && x.from !== 'fb'); first = true; }
+    return L ? { plan, L, first } : null;
+  }
 
   function renderConditions(c) {
     $('condLinks').innerHTML = condLinks();
@@ -1052,18 +1407,29 @@ p { margin: 0 0 8px; }
     const seas = (() => { const p = c.marine && c.marine.periods && c.marine.periods[0]; if (!p) return null; const m = /Seas? ([^.]*?)\./i.exec(p.text || ''); return m ? m[1] : null; })();
     const tide = (() => { if (!c.tides) return null; const nowLocal = nowNY(); const key = nowLocal.y + '-' + pad(nowLocal.m) + '-' + pad(nowLocal.d) + ' ' + pad(Math.floor(nowLocal.min / 60)) + ':' + pad(nowLocal.min % 60); return c.tides.find(x => x.t > key) || null; })();
     const periods = (c.marine && c.marine.periods) || [];
-    const cur = periods[0] ? comfort(periods[0].text, c.alerts) : null;
+    const wins = marineWins(c);
+    const periodTier = (p, i) => { const mp = E.parseMarine(p.text); const w = wins[i]; const al = (c.alerts || []).filter(a => !w || ((!a.onset || Date.parse(a.onset) < w.end) && (!a.ends || Date.parse(a.ends) > w.start))); return E.rideTier({ S: mp.lo, G: mp.gust, seasMid: mp.seasMid, dir: mp.dirs.length ? mp.dirs[0] : null, alerts: al }).tier; };
+    // The ride on the next boat (either direction), with what to expect
+    const nb = nextBoatAny();
+    let ride = nb ? rideAt(nb.plan.y, nb.plan.m, nb.plan.d, nb.L.t) : null;
+    let rideLabel = nb ? ((nb.first ? 'tomorrow’s first boat, ' : 'next boat, ') + E.fmt(nb.L.t) + ' from ' + PLACE[nb.L.from]) : '';
+    if (!ride && periods[0]) { const mp = E.parseMarine(periods[0].text); ride = Object.assign(E.rideTier({ S: mp.lo, G: mp.gust, seasMid: mp.seasMid, dir: mp.dirs[0], alerts: c.alerts }), { S: mp.lo, G: mp.gust, dir: mp.dirs[0], mp, alerts: c.alerts || [], temp: null, fog: mp.fog, spray: mp.spray }); rideLabel = (periods[0].name || 'now').toLowerCase(); }
     const stats = [];
-    if (cur) stats.push('<div class="stat ride ' + cur.cls + '"><div class="k">The ride</div><div class="v">' + esc(cur.label) + '</div><div class="s">' + esc(cur.note) + '</div></div>');
+    if (ride) stats.push(rideStat(ride, rideLabel));
     if (hp) stats.push('<div class="stat"><div class="k">Wind now</div><div class="v">' + esc(hp.dir || '') + ' ' + esc(hp.wind || '') + '</div><div class="s">' + esc(hp.short || '') + (hp.temp != null ? ' · ' + hp.temp + '°' : '') + '</div></div>');
     if (seas) stats.push('<div class="stat"><div class="k">Seas</div><div class="v">' + esc(seas) + '</div><div class="s">on the crossing</div></div>');
     if (tide) stats.push('<div class="stat"><div class="k">Next tide</div><div class="v">' + (tide.type === 'H' ? 'High' : 'Low') + ' ' + esc(E.fmt((+tide.t.slice(11, 13)) * 60 + (+tide.t.slice(14, 16))).replace(' ', ' ')) + '</div><div class="s">' + tide.v + ' ft at Bass Harbor</div></div>');
     $('condStats').innerHTML = stats.join('');
     const alertsHTML = (c.alerts || []).map(a => '<div class="alert-item">⚠ ' + esc(a.event) + (a.ends ? ' <span class="small muted">until ' + fmtNY(a.ends, { weekday: 'short', hour: 'numeric', minute: '2-digit' }) + '</span>' : '') + '</div>').join('');
-    const roughAhead = periods.slice(0, 4).map(p => ({ p, k: comfort(p.text, c.alerts) })).filter(x => x.k.lvl >= 2);
-    const queasy = roughAhead.length ? '<div class="queasy"><b>' + esc(roughAhead.map(x => x.p.name).join(' and ')) + (roughAhead.length > 1 ? ' look' : ' looks') + ' rough.</b> ' + QUEASY + '</div>' : '';
+    // Seasickness tip when the next boat, or a planned trip in the next two days, is choppy or worse
+    const worry = [];
+    if (ride && ride.tier >= 3) worry.push({ what: rideLabel.replace(/^next boat, /, 'the ').replace(/^tomorrow’s first boat, /, 'tomorrow’s ') , tier: ride.tier });
+    upcomingTrips().slice(0, 4).forEach(tr => { const p = parseKey(tr.date); const r = rideAt(p.y, p.m, p.d, tr.t); if (r && r.tier >= 3) worry.push({ what: (tr.date === todayKey() ? 'today’s ' : DAYS[E.weekdayOf(p.y, p.m, p.d)] + '’s ') + E.fmt(tr.t) + ' trip', tier: r.tier }); });
+    const top = worry.reduce((a, w) => Math.max(a, w.tier), 0);
+    const queasy = worry.length ? '<div class="queasy"><b>' + (top >= 4 ? 'Rough water ahead' : 'A choppy ride ahead') + ' (' + esc(worry.map(w => w.what).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3).join(', ')) + ').</b> ' + QUEASY + '</div>' : '';
     $('condAlerts').innerHTML = alertsHTML + queasy;
-    $('condPeriods').innerHTML = periods.slice(0, 4).map(p => { const k = comfort(p.text, c.alerts); return '<div class="period"><b>' + esc(p.name) + '<span class="ridetag ' + k.cls + '">' + esc(k.label) + '</span></b><span>' + esc((p.text || '').replace(/\s*Wave Detail:.*$/i, '')) + '</span></div>'; }).join('');
+    $('condPeriods').innerHTML = periods.slice(0, 4).map((p, i) => { const t = periodTier(p, i); return '<div class="period"><b>' + esc(p.name) + '<span class="ridetag t' + t + '">' + t + ' · ' + esc(TIERS[t].label) + '</span></b><span>' + esc((p.text || '').replace(/\s*Wave Detail:.*$/i, '')) + '</span></div>'; }).join('') +
+      '<div class="legend">Ride levels: ' + [1, 2, 3, 4, 5].map(t => rideChip({ tier: t })).join('') + '</div>';
     // 511 notices
     const PRETTY = { '2971': "Swan's Island → Bass Harbor", '2972': "Bass Harbor → Swan's Island", '2976': 'Bass Harbor → Frenchboro', '2980': 'Frenchboro → Bass Harbor' };
     const f511 = c.ferry511 || [];
@@ -1083,7 +1449,7 @@ p { margin: 0 0 8px; }
     out.checkedAt = f ? f.generatedAt : null;
     return out;
   }
-  function paint() { renderConditions(merged()); }
+  function paint() { CURRENT = merged(); renderConditions(CURRENT); renderNow(); if (!$('view-plan').hidden && !sheetOpen()) renderPlan(); }
   async function loadConditions() {
     const base = location.href.replace(/[#?].*$/, '');
     const candidates = ['conditions.json', base.replace(/\/?$/, '/') + 'conditions.json'];
@@ -1100,7 +1466,7 @@ p { margin: 0 0 8px; }
     const n = nowNY(); const ymd = '' + n.y + pad(n.m) + pad(n.d);
     const jobs = {
       marine: getJSON('https://api.weather.gov/zones/forecast/ANZ052/forecast').then(m => ({ zone: 'ANZ052', updated: m.properties.updated || m.properties.updateTime, periods: m.properties.periods.slice(0, 5).map(x => ({ name: x.name, text: x.detailedForecast })) })),
-      alerts: getJSON('https://api.weather.gov/alerts/active?zone=ANZ052').then(a => (a.features || []).map(f => ({ event: f.properties.event, headline: f.properties.headline, ends: f.properties.ends || f.properties.expires }))),
+      alerts: getJSON('https://api.weather.gov/alerts/active?zone=ANZ052').then(a => (a.features || []).map(f => ({ event: f.properties.event, headline: f.properties.headline, onset: f.properties.onset || f.properties.effective, ends: f.properties.ends || f.properties.expires }))),
       hourly: getJSON('https://api.weather.gov/gridpoints/CAR/83,47/forecast/hourly').then(h => h.properties.periods.slice(0, 36).map(x => ({ t: x.startTime, wind: x.windSpeed, dir: x.windDirection, temp: x.temperature, short: x.shortForecast, pop: x.probabilityOfPrecipitation && x.probabilityOfPrecipitation.value }))),
       tides: getJSON('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=predictions&station=8413651&begin_date=' + ymd + '&range=48&datum=MLLW&time_zone=lst_ldt&units=english&interval=hilo&format=json').then(t => t.predictions.map(x => ({ t: x.t, type: x.type, v: Math.round(parseFloat(x.v) * 10) / 10 })))
     };
@@ -1136,9 +1502,499 @@ p { margin: 0 0 8px; }
       $('photosCard').hidden = false;
     } catch (e) { /* no photos yet */ }
   }
+  /* ===== Shared data: planned trips, the Facebook reservation counts, and the boat of the day =====
+     Everything goes through a public relay (ntfy.sh) as sealed envelopes: AES-GCM with a family key that only
+     exists on Josh's and Sarah's phones (it arrives in the link they open, after the #, which never reaches a server).
+     The site's workflow copies the sealed envelopes into data/sync.json every half hour, because the relay only
+     keeps messages for about 12 hours. Neither the relay nor GitHub can read them. */
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const b64e = u8 => { let s = ''; u8.forEach(b => { s += String.fromCharCode(b); }); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const b64d = s => { s = String(s).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; const bin = atob(s); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+  const hasCrypto = () => !!(window.crypto && crypto.subtle && crypto.getRandomValues);
+  const rid = n => hasCrypto() ? b64e(crypto.getRandomValues(new Uint8Array(n || 12))) : Math.random().toString(36).slice(2, 2 + (n || 12));
+  async function sha256hex(bytes) { const h = await crypto.subtle.digest('SHA-256', bytes); return Array.from(new Uint8Array(h), x => x.toString(16).padStart(2, '0')).join(''); }
+  async function fetchT(url, opts, ms) { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms || 10000); try { return await fetch(url, Object.assign({ signal: ctl.signal }, opts || {})); } finally { clearTimeout(t); } }
+
+  const FAM = { linked: false, raw: null, key: null, fp: null, notify: {}, ready: Promise.resolve() };
+  const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false };
+  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null };
+  const aadOf = e => enc.encode('v1|' + e.fp + '|' + e.id + '|' + e.k + '|' + e.ts);
+  async function seal(k, payload, id, ts) {
+    const env = { v: 1, fp: FAM.fp, id: id || rid(12), k, ts: ts || Date.now() };
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: aadOf(env) }, FAM.key, enc.encode(JSON.stringify(payload)));
+    env.iv = b64e(iv); env.ct = b64e(new Uint8Array(ct));
+    return env;
+  }
+  async function unseal(env) { const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(env.iv), additionalData: aadOf(env) }, FAM.key, b64d(env.ct)); return JSON.parse(dec.decode(pt)); }
+  function saveSync() { store.set('sync.ev', SYNC.ev); store.set('sync.out', SYNC.outbox); store.set('sync.ok', SYNC.lastOk); store.set('sync.sent', SYNC.lastSent); }
+
+  async function setFamily(raw) {
+    const bytes = b64d(raw); if (bytes.length !== 32) throw new Error('bad key');
+    FAM.key = await crypto.subtle.importKey('raw', bytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+    FAM.raw = raw; FAM.fp = (await sha256hex(bytes)).slice(0, 8); FAM.linked = true;
+    for (const p of PEOPLE) FAM.notify[p] = 'sib-n-' + (await sha256hex(enc.encode('notify:' + p + ':' + raw))).slice(0, 20);
+    store.set('fam', raw);
+    // Anything planned on this phone before it was linked goes out now.
+    for (const [id, e] of Object.entries(SYNC.ev)) if (e.local) { SYNC.outbox.push({ env: await seal(e.k, e.p, id, e.ts) }); delete e.local; }
+    saveSync();
+  }
+  async function loadFamily() { const raw = store.get('fam', null); if (raw && hasCrypto()) { try { await setFamily(raw); } catch (e) { store.set('fam', null); } } }
+  async function handleJoin(hash) {
+    const m = /[#&]join=([A-Za-z0-9_-]{43})(?=&|$)/.exec(hash || ''); if (!m) return false;
+    const w = /[#&]who=(josh|sarah)(?=&|$)/i.exec(hash);
+    if (!hasCrypto()) { toast('This browser can’t do the encryption sharing needs'); return false; }
+    try {
+      await setFamily(m[1]);
+      if (w) store.set('who', w[1][0].toUpperCase() + w[1].slice(1).toLowerCase());
+      toast(me() ? 'Linked. This is ' + me() + '’s phone.' : 'This phone is linked');
+      loadArchive(); poll();
+    } catch (e) { toast('That link didn’t work. Ask for it again.'); }
+    return true;
+  }
+
+  function validP(k, p) {
+    if (!p || typeof p !== 'object') return false;
+    if (k === 't') return typeof p.tid === 'string' && p.tid.length < 40 && (p.del === true || (/^\d{4}-\d\d-\d\d$/.test(p.date) && (p.from === 'si' || p.from === 'bh') && Number.isInteger(p.t)));
+    if (k === 'x') return /^\d{4}-\d\d-\d\d$/.test(p.date) && Array.isArray(p.rows) && p.rows.length < 80;
+    if (k === 'b') return Object.prototype.hasOwnProperty.call(VESSELS, p.boat);
+    if (k === 'p') return typeof p.reason === 'string';
+    return false;
+  }
+  function prune() {
+    const now = Date.now(), keep = {}, last = { b: [], p: [] };
+    for (const [id, e] of Object.entries(SYNC.ev)) {
+      if (e.k === 't') { if (now - e.ts < 400 * 864e5) keep[id] = e; }
+      else if (e.k === 'x') { if (now - e.ts < 21 * 864e5) keep[id] = e; }
+      else if (last[e.k]) last[e.k].push([id, e]);
+    }
+    for (const k of ['b', 'p']) last[k].sort((a, b) => b[1].ts - a[1].ts).slice(0, 6).forEach(([id, e]) => { keep[id] = e; });
+    SYNC.ev = keep;
+  }
+  function derive() {
+    const trips = {}, tripAt = {}, traffic = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null;
+    const evs = Object.values(SYNC.ev).sort((a, b) => ((a.p && a.p.at) || a.ts) - ((b.p && b.p.at) || b.ts));
+    for (const e of evs) {
+      const p = e.p, at = p.at || e.ts;
+      if (e.k === 't') { if (!(p.tid in tripAt) || at >= tripAt[p.tid]) { tripAt[p.tid] = at; trips[p.tid] = p.del ? null : p; } }
+      else if (e.k === 'x') { if (!traffic[p.date] || at >= traffic[p.date].at) traffic[p.date] = Object.assign({}, p, { at }); if (p.src !== 'pasted') lastX = Math.max(lastX, at); if (p.url) fbUrl = p.url; }
+      else if (e.k === 'b') { if (!vessel || at >= vessel.at) vessel = Object.assign({}, p, { at }); }
+      else if (e.k === 'p') { if (!problem || at >= problem.at) problem = Object.assign({}, p, { at }); }
+    }
+    Object.keys(trips).forEach(k => { if (!trips[k]) delete trips[k]; });
+    D = { trips, traffic, vessel, problem, lastX, fbUrl };
+  }
+  async function ingest(list) {
+    if (!FAM.linked) return false;
+    let changed = false;
+    for (const env of list || []) {
+      if (!env || env.v !== 1 || env.fp !== FAM.fp || typeof env.id !== 'string' || SYNC.ev[env.id] || SYNC.bad[env.id]) continue;
+      try { const p = await unseal(env); if (!validP(env.k, p)) throw new Error('shape'); SYNC.ev[env.id] = { k: env.k, ts: env.ts, p }; changed = true; }
+      catch (e) { SYNC.bad[env.id] = 1; }
+    }
+    if (changed) { prune(); saveSync(); derive(); renderAll(); }
+    return changed;
+  }
+  async function publish(k, payload, buzz) {
+    payload.at = payload.at || Date.now();
+    if (FAM.linked) {
+      const env = await seal(k, payload);
+      SYNC.ev[env.id] = { k, ts: env.ts, p: payload };
+      SYNC.outbox.push({ env });
+      const who = me(), other = otherOf(who);
+      if (buzz && who && other && FAM.notify[other]) SYNC.outbox.push({ nt: FAM.notify[other], msg: who + ' ' + buzz + '. Open the boat app to see it.' });
+    } else {
+      SYNC.ev['L' + rid(9)] = { k, ts: Date.now(), p: payload, local: true };
+    }
+    prune(); saveSync(); derive(); renderAll();
+    return flush();
+  }
+  async function flush() {
+    if (SYNC.flushing || !SYNC.outbox.length || Date.now() < SYNC.backoff || !FAM.linked) { renderSyncBits(); return; }
+    SYNC.flushing = true; renderSyncBits();
+    try {
+      while (SYNC.outbox.length) {
+        const item = SYNC.outbox[0]; let r;
+        if (item.env) r = await fetchT(NTFY + SYNC_TOPIC, { method: 'POST', body: JSON.stringify(item.env) }, 12000);
+        else r = await fetchT(NTFY + item.nt + '?title=' + encodeURIComponent('Swan’s Island Boat') + '&tags=ferry&click=' + encodeURIComponent(APP_URL), { method: 'POST', body: item.msg }, 12000);
+        if (r.status === 429) { SYNC.backoff = Date.now() + 10 * 60000; break; }
+        if (r.status >= 500) break;
+        SYNC.outbox.shift();
+        if (r.ok && item.env) SYNC.lastSent = Date.now();
+        saveSync();
+      }
+    } catch (e) { /* no signal; the outbox keeps it and tries again */ }
+    SYNC.flushing = false; saveSync(); renderSyncBits();
+  }
+  async function poll() {
+    if (!FAM.linked || SYNC.polling) return;
+    SYNC.polling = true;
+    try {
+      const r = await fetchT(NTFY + SYNC_TOPIC + '/json?poll=1&since=12h', { cache: 'no-store' }, 15000);
+      if (r.ok) {
+        const envs = [];
+        (await r.text()).split('\n').forEach(line => { if (!line.trim()) return; try { const m = JSON.parse(line); if (m.event === 'message' && m.message) envs.push(JSON.parse(m.message)); } catch (e) { /* not ours */ } });
+        await ingest(envs); SYNC.lastOk = Date.now(); saveSync();
+      }
+    } catch (e) { /* offline */ }
+    SYNC.polling = false;
+    flush();
+  }
+  async function loadArchive() {
+    if (!FAM.linked) return;
+    try { const r = await fetchT('data/sync.json', { cache: 'no-store' }, 15000); if (r.ok) { const j = await r.json(); await ingest(j.events || []); } } catch (e) { /* not there yet */ }
+  }
+
+  /* ----- Planned trips ----- */
+  const whoText = w => w === 'Both' ? 'Both' : (w || '');
+  const tripsOn = key => Object.values(D.trips).filter(t => t.date === key);
+  function tripForLeg(key, from, t) {
+    for (const tr of tripsOn(key)) {
+      if (tr.from === from && tr.t === t) return { trip: tr, leg: 'out' };
+      if (tr.back && OTHER_SIDE[tr.from] === from && tr.back.t === t) return { trip: tr, leg: 'back' };
+    }
+    return null;
+  }
+  function upcomingTrips() {
+    const tk = todayKey();
+    return Object.values(D.trips).filter(tr => tr.date > tk || (tr.date === tk && Math.max(tr.t, tr.back ? tr.back.t : 0) + 40 >= NOW.min))
+      .sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : a.t - b.t);
+  }
+  function tripCard(tr) {
+    const p = parseKey(tr.date), plan = E.dayPlan(p.y, p.m, p.d);
+    const isToday = tr.date === todayKey(), past = tr.date < todayKey();
+    const day = isToday ? 'Today' : tr.date === tomorrowKey() ? 'Tomorrow' : DAYS[plan.wd].slice(0, 3) + ', ' + MONS[p.m - 1] + ' ' + p.d;
+    const tags = ['<span class="tag plan">' + esc(tr.who === 'Both' ? 'Both of you' : tr.who) + '</span>'];
+    tags.push('<span class="tag">' + (tr.car ? (tr.res && tr.res !== 'none' ? 'Car · res: ' + esc(tr.res) : 'Car · no reservation') : 'Walking on') + '</span>');
+    tags.push('<span class="tag">' + (tr.tix === 'need' ? 'Tickets: to buy' : 'Tickets: ' + esc(tr.tix) + '’s phone') + '</span>');
+    if (tr.back) tags.push('<span class="tag">Back ' + E.fmt(tr.back.t) + '</span>');
+    if (!past) { const r = rideAt(p.y, p.m, p.d, tr.t); if (r) tags.push(rideChip(r)); }
+    const rr = resRow(tr.date, tr.from, tr.t); if (rr) tags.push(resChip(rr));
+    const warns = [];
+    if (!past) {
+      if (tr.car && (!tr.res || tr.res === 'none')) { if (rr && rr.full) warns.push('Car reservations on this boat are full. Get in line early.'); else if (busyDay(plan).any) warns.push('Busy day and no car reservation. Call 207-244-3254 or get in line early.'); }
+      if (tr.tix === 'need') warns.push('Tickets still to buy (Tickets tab).');
+    }
+    let when = E.fmt(tr.t) + ' from ' + PLACE[tr.from] + ' → ' + PLACE[OTHER_SIDE[tr.from]];
+    const soon = isToday && tr.t > NOW.min;
+    return '<div class="trip' + (isToday ? ' today' : '') + '" role="button" tabindex="0" data-tid="' + esc(tr.tid) + '"><div class="when">' + day + ' <small>' + when + (soon ? ' · in ' + E.fmtDur(tr.t - NOW.min) : '') + '</small></div><div class="tags">' + tags.join('') + '</div>' +
+      (soon ? '<div class="small">Be in line by ' + E.fmt(tr.t - lineUpMins(plan)) + '.</div>' : '') +
+      (tr.note ? '<div class="tnote">“' + esc(tr.note) + '”</div>' : '') + warns.map(w => '<div class="twarn">' + w + '</div>').join('') +
+      '<div class="by">' + (tr.by ? 'Planned by ' + esc(tr.by) : 'Planned') + (tr.at ? ' · ' + fmtWhen(tr.at) : '') + '</div></div>';
+  }
+  function renderSyncBits() {
+    const c = $('syncChip'); if (c) {
+      if (!FAM.linked) { c.className = 'chip'; c.textContent = 'this phone only'; }
+      else if (SYNC.outbox.length) { c.className = 'chip wait'; c.textContent = SYNC.flushing ? 'sending…' : 'waiting for signal'; }
+      else { c.className = 'chip ok'; c.textContent = 'shared'; }
+    }
+  }
+  function renderTrips() {
+    const list = upcomingTrips();
+    const show = FAM.linked || list.length > 0 || !!me();
+    $('tripsCard').hidden = !show;
+    if (!show) return;
+    const other = otherOf(me());
+    setHTML($('tripsList'), list.length ? list.slice(0, 8).map(tripCard).join('') : '<div class="empty">No trips planned. On the <a href="#plan">Plan</a> tab, tap the boat you’re taking and it shows up here' + (FAM.linked ? ' and on ' + (other ? other + '’s' : 'the other') + ' phone' : '') + '.</div>');
+    renderSyncBits();
+  }
+
+  /* ----- Reservation counts (the daily Facebook "Traffic" post) ----- */
+  const PROBLEM = {
+    signin: 'Facebook asked for a sign-in on Josh’s computer. Josh: open Claude’s browser on the computer and sign in to Facebook again.',
+    notyet: 'The traffic post wasn’t up on Facebook yet when the app checked.',
+    notfound: 'The app couldn’t find the traffic post in the group.',
+    blocked: 'Facebook wouldn’t load the group page.',
+    error: 'The daily check hit a snag reading Facebook.'
+  };
+  function resRow(key, from, t) { const tr = D.traffic[key]; if (!tr) return null; return tr.rows.find(r => r.sec === from && r.t === t) || null; }
+  function resChip(r) { return '<span class="res' + (r.full ? ' full' : '') + '" title="Car reservations taken on this boat, from the Facebook traffic post">Cars ' + Math.min(r.cars, 9) + '/' + E.CAR_RES + (r.full ? ' full' : '') + '</span>' + (r.truck ? '<span class="res" title="Feet of truck reserved">Trucks ' + r.truck + '′</span>' : ''); }
+  function resStatus(key) {
+    if (!FAM.linked) return {};
+    const tr = D.traffic[key]; if (tr) return { tr };
+    const tk = todayKey(), tm = tomorrowKey();
+    if (key < tk) return {};
+    if (key > tm) return { warn: { level: 'quiet', text: 'Car reservation counts show up here the evening before, when the island’s traffic post goes up.' } };
+    if (key === tk) { const plan = E.dayPlan(NOW.y, NOW.m, NOW.d); const last = plan.legs.filter(L => L.to !== 'fb' && L.from !== 'fb').pop(); if (last && NOW.min > last.t) return {}; }
+    const due = key === tk ? NOW.min >= 6 * 60 + 15 : NOW.min >= 21 * 60 + 30;
+    if (!due) return { warn: { level: 'quiet', text: key === tk ? 'Today’s reservation counts aren’t in yet.' : 'Tomorrow’s reservation counts usually come in during the evening.' } };
+    const p = D.problem, lastX = D.lastX || 0, now = Date.now();
+    let why;
+    if (p && p.at > lastX && now - p.at < 30 * 3600e3) why = (PROBLEM[p.reason] || PROBLEM.error) + ' (' + fmtWhen(p.at) + ')';
+    else if (!lastX || now - lastX > 20 * 3600e3) why = 'The daily check on Josh’s computer hasn’t come through' + (lastX ? ' since ' + fmtWhen(lastX) : '') + '. The computer may be asleep, or the Claude app closed.';
+    else why = 'The traffic post for ' + (key === tk ? 'today' : 'tomorrow') + ' wasn’t on Facebook when the app last checked, ' + fmtWhen(lastX) + '.';
+    return { warn: { level: 'red', title: 'Couldn’t reach ' + (key === tk ? 'today’s' : 'tomorrow’s') + ' reservations', text: why } };
+  }
+  function redHTML(w) {
+    const fb = D.fbUrl || store.get('fbGroup', null);
+    return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow"><a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
+  }
+  function resHTML(key, withRed) {
+    const st = resStatus(key);
+    if (st.tr) return '<p class="resline">“Cars 2/4” is car reservations taken on that boat (four per boat), from the island’s Facebook traffic post' + (st.tr.label ? ' “' + esc(st.tr.label) + '”' : '') + (st.tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(st.tr.at) + '.</p>';
+    if (st.warn && st.warn.level === 'red') return withRed ? redHTML(st.warn) : '';
+    if (st.warn && st.warn.level === 'quiet') return '<p class="quiet-note">' + st.warn.text + '</p>';
+    return '';
+  }
+  async function importTraffic(text, src, url) {
+    const r = E.parseTraffic(text, { y: NOW.y, m: NOW.m, d: NOW.d });
+    if (r.error) return { ok: false, error: r.error };
+    const tk = todayKey(), tm = tomorrowKey();
+    const which = r.date === tk ? 'today' : r.date === tm ? 'tomorrow' : r.date < tk ? 'past' : 'later';
+    const prev = D.traffic[r.date];
+    const same = !!prev && JSON.stringify(prev.rows) === JSON.stringify(r.rows);
+    const fbu = url && /^https:\/\/(www\.|m\.)?facebook\.com\//.test(url) ? String(url).split('?')[0] : store.get('fbGroup', null);
+    await publish('x', { date: r.date, label: r.label, rows: r.rows, src: src === 'pasted' ? 'pasted' : 'facebook', url: fbu || null, by: me() || 'auto', at: Date.now() });
+    return { ok: true, date: r.date, label: r.label, which, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, same, linked: FAM.linked, waiting: SYNC.outbox.length };
+  }
+
+  /* ----- Which boat is on the run ----- */
+  const VESSELS = {
+    henrylee: { name: 'Captain Henry Lee', short: 'Henry Lee', plate: 'CAPT. HENRY LEE · 130 ft', mmsi: '367334890', sub: 'the regular Swan’s Island boat · 130 ft · built 1992' },
+    philbrook: { name: 'Captain Charles Philbrook', short: 'Philbrook', plate: 'CAPT. CHARLES PHILBROOK · 130 ft', mmsi: '367342230', sub: 'Vinalhaven’s boat, the Henry Lee’s near-twin · built 1993' },
+    curtis: { name: 'Governor Curtis', short: 'Curtis', plate: 'GOVERNOR CURTIS', mmsi: null, sub: 'the fleet’s spare · built 1968' }
+  };
+  function currentBoat() { const v = D.vessel; return v && VESSELS[v.boat] ? v : null; }
+  function renderBoat() {
+    const v = currentBoat(), key = v ? v.boat : 'henrylee', B = VESSELS[key];
+    $('plate').textContent = B.plate;
+    let src;
+    if (!v) src = 'The usual boat. The app hasn’t heard otherwise' + (FAM.linked ? ' yet.' : '; link the phones on this tab to get the daily check.');
+    else if (v.src === 'auto') src = 'From the boats’ AIS signals' + (v.sure === false ? ' (best guess)' : '') + ', checked ' + fmtWhen(v.at);
+    else src = esc(v.src) + ' picked it, ' + fmtWhen(v.at);
+    setHTML($('boatNow'), '<b>' + B.name + '</b><span class="small muted">' + src + '</span>');
+    setHTML($('boatList'), Object.keys(VESSELS).map(k => {
+      const b = VESSELS[k], on = k === key;
+      const follow = b.mmsi ? '<a href="https://www.vesselfinder.com/vessels/details/' + b.mmsi + '" target="_blank" rel="noopener">Follow ›</a>' : '<a href="https://www.vesselfinder.com/vessels?name=GOVERNOR+CURTIS" target="_blank" rel="noopener">Find ›</a>';
+      return '<div class="boat' + (on ? ' on' : '') + '"><span class="name">' + b.name + '<small>' + b.sub + '</small></span><span class="acts">' + (on ? '<span class="onrun">On the run</span>' : '<button data-boat="' + k + '">This one</button>') + follow + '</span></div>';
+    }).join(''));
+    const note = document.querySelector('.chart-note'); if (note) note.textContent = 'Scheduled position · ' + B.short;
+  }
+  function agoHours(a) {
+    if (a == null || a === '') return null;
+    if (typeof a === 'number' || /^\d{9,13}$/.test(String(a))) { let n = +a; if (n < 1e11) n *= 1000; return (Date.now() - n) / 3.6e6; }
+    const s = String(a).toLowerCase();
+    if (/just now|second|moment/.test(s)) return 0;
+    const m = /(\d+|an?|one)\s*(min|hour|hr|day|week|month)/.exec(s); if (!m) return null;
+    const n = /^\d+$/.test(m[1]) ? +m[1] : 1;
+    return { min: n / 60, hour: n, hr: n, day: n * 24, week: n * 168, month: n * 720 }[m[2]];
+  }
+  // reports: { henrylee: {lat, lon, ago, dest}, philbrook: {...} } read off each boat's VesselFinder page.
+  function judgeAIS(reports) {
+    const look = {};
+    for (const k of ['henrylee', 'philbrook']) {
+      const r = reports && reports[k]; if (!r) { look[k] = null; continue; }
+      const hrs = agoHours(r.ago), lon = (r.lon === '' || r.lon == null) ? null : +r.lon, lat = (r.lat === '' || r.lat == null) ? null : +r.lat;
+      // VesselFinder shows logged-out visitors whole degrees: -68 is the Bass Harbor side, -69 is Rockland and Vinalhaven.
+      const rounded = lon != null && Number.isInteger(lon);
+      const near = lon != null && isFinite(lon) && (rounded ? lon === -68 : Math.abs(lon + 68.39) < 0.25 && (lat == null || !isFinite(lat) || Math.abs(lat - 44.19) < 0.2));
+      const dest = String(r.dest || '').toUpperCase();
+      look[k] = { hrs, fresh: hrs != null && hrs <= 18, near, destHit: /SWAN|BASS|FRENCH|\bS\.?\s?I\b|\bB\.?\s?H\b/.test(dest), dest };
+    }
+    const on = k => !!(look[k] && look[k].fresh && (look[k].near || look[k].destHit));
+    const away = k => !!(look[k] && look[k].fresh && !look[k].near && !look[k].destHit);
+    const hl = on('henrylee'), pb = on('philbrook');
+    if (hl && !pb) return { boat: 'henrylee', sure: true, look };
+    if (pb && !hl) return { boat: 'philbrook', sure: true, look };
+    if (hl && pb && look.henrylee.destHit !== look.philbrook.destHit) return { boat: look.henrylee.destHit ? 'henrylee' : 'philbrook', sure: false, look };
+    if (away('henrylee') && away('philbrook')) return { boat: 'curtis', sure: false, look };
+    return { boat: null, look };
+  }
+  async function boatReport(reports) {
+    const j = judgeAIS(reports), cur = currentBoat();
+    if (!j.boat) return { ok: true, boat: null, changed: false, note: 'AIS didn’t settle it; kept ' + (cur ? cur.boat : 'the default'), look: j.look };
+    if (cur && cur.src !== 'auto' && !j.sure && Date.now() - cur.at < 36 * 3600e3) return { ok: true, boat: cur.boat, changed: false, note: 'kept the recent pick by ' + cur.src, look: j.look };
+    const changed = !cur || cur.boat !== j.boat;
+    if (changed || Date.now() - cur.at > 20 * 3600e3) await publish('b', { boat: j.boat, src: 'auto', sure: j.sure, at: Date.now() });
+    return { ok: true, boat: j.boat, sure: j.sure, changed, look: j.look };
+  }
+
+  /* ----- Linking the phones (Info tab) ----- */
+  function familyLink(to) { return APP_URL + '#join=' + FAM.raw + (to ? '&who=' + to : ''); }
+  function renderFam() {
+    const b = $('famBody'), who = me(), other = otherOf(who);
+    if (!hasCrypto()) { setHTML(b, '<p class="small">This browser can’t do the encryption that sharing needs.</p>'); return; }
+    if (FAM.linked) {
+      const status = (SYNC.lastOk ? 'Last checked ' + fmtWhen(SYNC.lastOk) : 'Not checked yet') + (SYNC.outbox.length ? ' · ' + SYNC.outbox.length + ' waiting to send' : '') + (SYNC.lastSent ? ' · last sent ' + fmtWhen(SYNC.lastSent) : '');
+      setHTML(b, '<p><b>This phone is linked' + (who ? ' as ' + who + '’s' : '') + '.</b> Planned trips, the reservation counts and the boat of the day are shared between your two phones, sealed so only your phones can read them.</p>' +
+        '<p class="small muted">' + status + '</p>' +
+        '<div class="btnrow"><button class="btn navy" data-act="sendlink" data-to="' + (other || '') + '">' + (other ? 'Send ' + other + ' the link' : 'Share the link') + '</button><button class="btn" data-act="whoami">Change whose phone</button></div>' +
+        (who ? '<h3>Get a buzz when ' + (other || 'the other phone') + ' plans a trip</h3><p class="small">Optional. Install the free <b>ntfy</b> app, tap +, and subscribe to this topic. When ' + (other || 'the other phone') + ' saves a trip, your phone pings.</p><div class="phone"><div class="n" style="font-size:14px">' + esc(FAM.notify[who] || '') + '</div><div class="btnrow"><button class="btn copy" data-copy="' + esc(FAM.notify[who] || '') + '">Copy</button></div></div>' : ''));
+    } else {
+      setHTML(b, '<p>Link this phone to share planned trips and the car reservation counts with ' + (other || 'the family') + '.</p><p class="small">Open the link Josh texted you <b>on this phone</b>. If it opened in a different browser, copy the link and paste it here:</p><div class="field"><input type="text" id="famPaste" placeholder="https://hectrvictorious.github.io/swans-island-boat/#join=…" autocomplete="off" autocapitalize="off" spellcheck="false"></div><div class="btnrow" style="margin-top:8px"><button class="btn navy" data-act="linkpaste">Link this phone</button></div><div class="warnline" id="famMsg"></div>');
+    }
+  }
+  async function sendLink(to) {
+    const url = familyLink(to);
+    const text = 'Tap this to link your Swan’s Island Boat app with mine, so planned trips show up on both phones:';
+    try { if (navigator.share) { await navigator.share({ title: 'Swan’s Island Boat', text, url }); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(text + ' ' + url); toast('Link copied. Paste it in a text' + (to ? ' to ' + to : '') + '.'); } catch (e) { toast('Couldn’t share from this browser'); }
+  }
+
+  /* ----- Bottom sheet: plan a trip, or paste a traffic post ----- */
+  let SHEET = null, pendingReload = null;
+  const sheetOpen = () => !$('sheet').hidden;
+  function showSheet(html) {
+    const s = $('sheet'), b = $('sheetBack');
+    $('sheetIn').innerHTML = html; s.hidden = false; b.hidden = false; s.scrollTop = 0;
+    requestAnimationFrame(() => requestAnimationFrame(() => { s.classList.add('show'); b.classList.add('show'); }));
+    document.body.style.overflow = 'hidden';
+    try { history.pushState({ sheet: 1 }, '', location.href); } catch (e) {}
+    const t = $('sheetTitle'); if (t) { t.setAttribute('tabindex', '-1'); try { t.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  function hideSheet(fromPop) {
+    const s = $('sheet'), b = $('sheetBack');
+    if (s.hidden) return;
+    s.classList.remove('show'); b.classList.remove('show'); document.body.style.overflow = '';
+    SHEET = null;
+    setTimeout(() => { if (!SHEET) { s.hidden = true; b.hidden = true; $('sheetIn').innerHTML = ''; } }, 230);
+    if (!fromPop && history.state && history.state.sheet) { try { history.back(); } catch (e) {} }
+    if (pendingReload) { const go = pendingReload; pendingReload = null; setTimeout(go, 400); }
+  }
+  function openTripSheet(key, from, t, back) {
+    const p = parseKey(key), plan = E.dayPlan(p.y, p.m, p.d);
+    const hit = tripForLeg(key, from, t), tr = hit ? hit.trip : null;
+    const base = tr ? { from: tr.from, t: tr.t } : { from, t };
+    const leg = plan.legs.find(L => L.from === base.from && L.t === base.t && L.to !== 'fb');
+    if (!leg || leg.nopax) return;
+    if (!tr && (key < todayKey() || (key === todayKey() && leg.t <= NOW.min))) { toast('That boat has already left'); return; }
+    const who = me();
+    SHEET = { mode: 'trip', key, plan, leg, tid: tr ? tr.tid : null,
+      f: tr ? { who: tr.who, car: !!tr.car, res: tr.res || 'none', tix: tr.tix || 'need', back: tr.back ? tr.back.t : null, note: tr.note || '' }
+            : { who: who || 'Both', car: false, res: 'none', tix: who || 'need', back: back != null ? back : null, note: '' } };
+    showSheet(tripSheetHTML());
+    syncSheet();
+  }
+  function tripSheetHTML() {
+    const S = SHEET, L = S.leg, plan = S.plan, to = L.to;
+    const opt = (field, v, label) => '<button data-f="' + field + '" data-v="' + v + '">' + label + '</button>';
+    const backs = plan.legs.filter(x => x.from === to && x.to === L.from && !x.nopax && x.t > L.arr);
+    const info = [];
+    const r = rideAt(plan.y, plan.m, plan.d, L.t);
+    if (r) info.push('<div class="box">' + rideChip(r) + ' <b>' + TIERS[r.tier].label + '</b>' + ([windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).length ? ' · ' + [windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).join(' · ') : '') + '<div style="margin-top:4px">' + TIERS[r.tier].expect + '</div>' + rideNotes(r).map(n => '<div class="small muted" style="margin-top:3px">' + n + '</div>').join('') + (r.tier >= 3 ? '<div class="small" style="margin-top:6px">' + QUEASY + '</div>' : '') + '</div>');
+    const rr = resRow(S.key, L.from, L.t);
+    if (rr) info.push('<div class="box"><b>Reservations on this boat</b><div>' + (rr.full ? 'Car reservations are full (' + rr.cars + ' of ' + E.CAR_RES + ').' : rr.cars + ' of ' + E.CAR_RES + ' car reservations taken.') + (rr.truck ? ' ' + rr.truck + ' feet of truck reserved.' : '') + '</div><div class="small muted">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '.</div></div>');
+    else { const st = resStatus(S.key); if (st.warn && st.warn.level === 'red') info.push('<div class="box"><b style="color:var(--bad)">' + st.warn.title + '</b><div class="small">' + st.warn.text + '</div></div>'); }
+    dayWarnings(plan).forEach(w => info.push('<div class="note busy">' + w.text + '</div>'));
+    const other = otherOf(me());
+    return '<div><div class="eyebrow">' + (S.tid ? 'Planned trip' : 'Plan a trip') + ' · ' + DAYS[plan.wd] + ', ' + MONTHS[plan.m - 1] + ' ' + plan.d + '</div><h2 id="sheetTitle">' + E.fmt(L.t) + ' from ' + PLACE[L.from] + '</h2><div class="sub">Arrives ' + PLACE[to] + ' ' + E.fmt(L.arr) + ' · be in line by ' + E.fmt(L.t - lineUpMins(plan)) + '</div></div>' +
+      (info.length ? '<div class="info">' + info.join('') + '</div>' : '') +
+      '<div class="field"><div class="eyebrow">Who’s going</div><div class="opts">' + opt('who', 'Josh', 'Josh') + opt('who', 'Sarah', 'Sarah') + opt('who', 'Both', 'Both of us') + '</div></div>' +
+      '<div class="field"><div class="eyebrow">Car</div><div class="opts">' + opt('car', '0', 'Walking on') + opt('car', '1', 'Taking the car') + '</div></div>' +
+      '<div class="field" id="fResWrap"><div class="eyebrow">Car reservation</div><div class="opts">' + opt('res', 'none', 'None yet') + opt('res', 'Josh', 'Josh has it') + opt('res', 'Sarah', 'Sarah has it') + '</div><div class="warnline" id="fResWarn"></div></div>' +
+      '<div class="field"><div class="eyebrow">Tickets</div><div class="opts">' + opt('tix', 'Josh', 'On Josh’s phone') + opt('tix', 'Sarah', 'On Sarah’s phone') + opt('tix', 'need', 'Still need to buy') + '</div></div>' +
+      '<div class="field"><div class="eyebrow">Coming back from ' + PLACE[to] + '</div><div class="opts">' + opt('back', '', 'Not today') + backs.map(b => opt('back', String(b.t), E.fmt(b.t))).join('') + '</div><div class="small muted" id="fBackNote"></div></div>' +
+      '<div class="field"><label class="eyebrow" for="fNote">Note (optional)</label><input type="text" id="fNote" maxlength="80" autocomplete="off" placeholder="Dentist at 10:30, groceries…" value="' + esc(S.f.note) + '"></div>' +
+      '<div class="btnrow sheet-actions"><button class="btn primary" id="sheetSave">' + (S.tid ? 'Save changes' : 'Save trip') + '</button><button class="btn" id="sheetCancel">Cancel</button>' + (S.tid ? '<button class="btn danger" id="sheetDelete">Remove trip</button>' : '') + '</div>' +
+      '<p class="small muted" style="margin:0">' + (FAM.linked ? 'Saving shares it with ' + (other ? other + '’s phone' : 'the other phone') + ' in a minute or two.' : 'This phone isn’t linked yet, so the trip stays here. Link the phones on the Info tab to share trips.') + '</p>';
+  }
+  function syncSheet() {
+    const S = SHEET; if (!S || S.mode !== 'trip') return;
+    document.querySelectorAll('#sheetIn [data-f]').forEach(b => {
+      const f = b.dataset.f, cur = f === 'car' ? (S.f.car ? '1' : '0') : f === 'back' ? (S.f.back == null ? '' : String(S.f.back)) : String(S.f[f]);
+      b.setAttribute('aria-pressed', cur === b.dataset.v ? 'true' : 'false');
+    });
+    $('fResWrap').hidden = !S.f.car;
+    const rr = resRow(S.key, S.leg.from, S.leg.t), busy = busyDay(S.plan);
+    $('fResWarn').textContent = S.f.car && S.f.res === 'none' ? (rr && rr.full ? 'Car reservations on this boat are already full. Without one, get in line early.' : busy.any ? 'Busy day: reserve a car spot (207-244-3254) or get in line early.' : '') : '';
+    const bn = $('fBackNote');
+    if (S.f.back != null) { const lay = E.layover(S.leg.t, S.f.back); bn.textContent = lay.free >= 0 ? E.fmtDur(lay.free) + ' in ' + PLACE[S.leg.to] + ' before you need to be back in line.' : ''; } else bn.textContent = '';
+  }
+  async function saveTrip() {
+    const S = SHEET; if (!S || S.mode !== 'trip') return;
+    const p = { tid: S.tid || rid(9), date: S.key, from: S.leg.from, t: S.leg.t, who: S.f.who, car: !!S.f.car, res: S.f.car ? S.f.res : 'none', tix: S.f.tix, back: S.f.back != null ? { t: S.f.back } : null, note: ($('fNote').value || '').trim().slice(0, 80), by: me() || '', at: Date.now() };
+    const isNew = !S.tid;
+    hideSheet();
+    toast(FAM.linked ? (isNew ? 'Trip saved and shared' : 'Trip updated') : 'Trip saved on this phone');
+    await publish('t', p, isNew ? 'planned a trip' : 'changed a trip');
+  }
+  async function deleteTrip() {
+    const S = SHEET; if (!S || !S.tid) return;
+    const tid = S.tid; hideSheet(); toast('Trip removed');
+    await publish('t', { tid, del: true, by: me() || '', at: Date.now() }, 'removed a trip');
+  }
+  function openPasteSheet() {
+    SHEET = { mode: 'paste' };
+    showSheet('<div><div class="eyebrow">Car reservations</div><h2 id="sheetTitle">Paste the traffic post</h2><div class="sub">In the Swan’s Island Facebook group, open the “Traffic” post, copy all of it, and paste it here. The app picks out the date and each boat.</div></div>' +
+      '<div class="field"><textarea id="fPaste" placeholder="Wacky Wednesday 11/4&#10;SI Traffic&#10;6:45 ⭕&#39; of truck, 4 cars&#10;…"></textarea><div class="warnline" id="fPasteMsg"></div></div>' +
+      '<div class="btnrow sheet-actions"><button class="btn primary" id="pasteGo">Use this post</button><button class="btn" id="sheetCancel">Cancel</button></div>');
+  }
+  async function pasteGo() {
+    const r = await importTraffic($('fPaste').value, 'pasted', null);
+    if (!r.ok) { $('fPasteMsg').textContent = r.error; return; }
+    hideSheet(); toast('Got ' + r.sailings + ' boats for ' + r.label + (FAM.linked ? ', shared' : ''));
+  }
+
+  /* ----- For the daily check on Josh's computer (Claude opens this page in its browser and calls these) ----- */
+  function exposeAPI() {
+    const done = r => { window.__boatLast = r; return r; };
+    window.boatAPI = {
+      version: APP_VERSION,
+      async state() {
+        await FAM.ready; await poll(); await loadArchive();
+        const tk = todayKey(), tm = tomorrowKey(), v = currentBoat();
+        return done({ version: APP_VERSION, linked: FAM.linked, today: tk, haveToday: !!D.traffic[tk], haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: v ? Math.round((Date.now() - v.at) / 3.6e6) : null, fbGroup: store.get('fbGroup', null), waiting: SYNC.outbox.length });
+      },
+      async importTraffic(text, src, url) { await FAM.ready; const r = await importTraffic(text, src, url); return done(Object.assign(r, { waiting: SYNC.outbox.length })); },
+      async reportProblem(reason, note) {
+        await FAM.ready; if (!FAM.linked) return done({ ok: false, error: 'not linked' });
+        await publish('p', { reason: String(reason || 'error').slice(0, 20), note: String(note || '').slice(0, 200), at: Date.now() });
+        return done({ ok: true, waiting: SYNC.outbox.length });
+      },
+      async boatReport(reports) { await FAM.ready; const r = await boatReport(reports); return done(Object.assign(r, { waiting: SYNC.outbox.length })); },
+      async setVessel(boat, src) { await FAM.ready; if (!VESSELS[boat]) return done({ ok: false, error: 'unknown boat' }); await publish('b', { boat, src: String(src || me() || 'auto').slice(0, 20), at: Date.now() }); return done({ ok: true, boat, waiting: SYNC.outbox.length }); },
+      setFacebookGroup(url) { if (!/^https:\/\/(www\.)?facebook\.com\/groups\/[^/?#]+/.test(url || '')) return done({ ok: false }); const u = /^https:\/\/(www\.)?facebook\.com\/groups\/[^/?#]+/.exec(url)[0]; store.set('fbGroup', u); return done({ ok: true, url: u }); }
+    };
+  }
+
+  /* ----- What's new (one line per release, shown once) ----- */
+  function renderNews() {
+    const box = $('newsBox'), seen = store.get('seenVersion', null);
+    if (seen === APP_VERSION) { box.hidden = true; return; }
+    const returning = store.get('cond', null) !== null || store.get('who', null) !== null || store.get('factIdx', null) !== null;
+    if (!returning) { store.set('seenVersion', APP_VERSION); box.hidden = true; return; }
+    setHTML(box, '<b>New in the boat app</b><div>Tap any boat on the <a href="#plan">Plan</a> tab to plan a trip. It shows up on both phones, with who has the tickets and the car reservation. Each boat now gets a ride level from 1 (flat calm) to 5 (may cancel), and the car reservation counts from the island’s Facebook traffic post show on the schedule.</div>' +
+      (FAM.linked ? '' : '<div class="small">' + (me() === 'Sarah' ? 'To share trips with Josh, open the link he texts you.' : 'To share trips, link the phones on the Info tab.') + '</div>') +
+      '<div class="btnrow"><button class="btn" data-act="newsok">Got it</button></div>');
+    box.hidden = false;
+  }
+
+  function renderAll() {
+    applyWho();
+    renderNow(); renderBoat(); renderFam(); renderNews();
+    if (!$('view-plan').hidden) renderPlan();
+    if (sheetOpen() && SHEET && SHEET.mode === 'trip') syncSheet();
+  }
+
+  // Updates arrive on their own: a new service worker caches the new build, takes over, and says so. The page
+  // reloads once if its own build is older (right away if the phone was in a pocket, otherwise after the plan
+  // sheet closes), never more than twice in two minutes. Nothing to reinstall.
   function setupWorker() {
     if (!window.__STANDALONE_SITE__ || !('serviceWorker' in navigator)) return;
-    try { navigator.serviceWorker.register('./sw.js').catch(() => {}); } catch (e) {}
+    const mine = 'boat-' + (window.__BUILD__ || '');
+    let reloading = false;
+    const reload = () => {
+      if (reloading) return;
+      const now = Date.now(), recent = (store.get('swReloads', []) || []).filter(t => now - t < 120000);
+      if (recent.length >= 2) return;
+      recent.push(now); store.set('swReloads', recent);
+      reloading = true; location.reload();
+    };
+    const consider = v => { if (!v || !window.__BUILD__ || v === mine) return; if (document.hidden || !sheetOpen()) reload(); else pendingReload = reload; };
+    const hello = () => { try { const c = navigator.serviceWorker.controller; if (c) c.postMessage({ type: 'boat-hello' }); } catch (e) {} };
+    navigator.serviceWorker.addEventListener('message', e => {
+      const d = e.data || {};
+      if (d.type === 'boat-updated') { try { e.source && e.source.postMessage({ type: 'boat-ack' }); } catch (err) {} consider(d.version); }
+      else if (d.type === 'boat-version') consider(d.version);
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', hello);
+    hello();
+    try {
+      navigator.serviceWorker.register('./sw.js').then(reg => {
+        let last = Date.now();
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - last > 10 * 60000) { last = Date.now(); reg.update().catch(() => {}); } });
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   /* ----- Views ----- */
@@ -1159,21 +2015,56 @@ p { margin: 0 0 8px; }
 
   /* ----- Wire up ----- */
   function init() {
+    const startHash = location.hash || '';
+    const joining = /[#&]join=/.test(startHash);
     buildChart();
     NOW = nowNY(); selected = { y: NOW.y, m: NOW.m, d: NOW.d };
+    FAM.ready = (async () => { try { await loadFamily(); if (joining) await handleJoin(startHash); } catch (e) { /* stays unlinked */ } })();
+    COND.file = store.get('cond', null); CURRENT = merged();
+    derive();
     renderNow(); renderFacts(); renderFares(); rides(0);
-    COND.file = store.get('cond', null); paint(); loadConditions(); loadLive();
+    applyWho(); renderBoat(); renderFam(); renderNews(); paint();
+    loadConditions(); loadLive();
     setInterval(loadConditions, 30 * 60000); setInterval(loadLive, 20 * 60000);
-    applyWho(); setupInstall(); loadPhotos(); setupWorker();
+    setupInstall(); loadPhotos(); setupWorker(); exposeAPI();
     if (!window.__STANDALONE_SITE__) $('movedBox').hidden = false;
-    document.querySelectorAll('#whoBox [data-who]').forEach(b => b.addEventListener('click', () => { store.set('who', b.dataset.who); applyWho(); if (b.dataset.who) toast('Hi, ' + b.dataset.who); }));
-    showView((location.hash || '#now').slice(1));
-    window.addEventListener('hashchange', () => showView(location.hash.slice(1)));
-    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showView(t.dataset.view)));
+    FAM.ready.then(() => { derive(); renderAll(); if (FAM.linked) { loadArchive(); poll(); } });
+    document.querySelectorAll('#whoBox [data-who]').forEach(b => b.addEventListener('click', () => { store.set('who', b.dataset.who); renderAll(); if (b.dataset.who) toast('Hi, ' + b.dataset.who); }));
+    showView(joining ? 'now' : startHash.slice(1) || 'now');
+    window.addEventListener('hashchange', () => { const h = location.hash; if (/[#&]join=/.test(h)) { FAM.ready = FAM.ready.then(() => handleJoin(h)).then(() => { derive(); renderAll(); }); showView('now'); } else showView(h.slice(1)); });
+    window.addEventListener('popstate', () => { if (sheetOpen()) hideSheet(true); });
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { if (sheetOpen()) hideSheet(); showView(t.dataset.view); }));
     document.addEventListener('click', e => {
-      const b = e.target.closest('.factNext'); if (b) { nextFact(); return; }
-      const c = e.target.closest('.copy'); if (c) { const v = c.dataset.copy; (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => toast('Copied ' + v)).catch(() => { const n = c.closest('.phone').querySelector('.n'); const r = document.createRange(); r.selectNodeContents(n); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); toast('Number selected, copy it from there'); }); return; }
-      const ch = e.target.closest('#outChips button, #retChips button'); if (ch && !ch.disabled) { const t = +ch.dataset.t; if (ch.parentElement.id === 'outChips') { plannerOut = (plannerOut === t ? null : t); } else { plannerRet = (plannerRet === t ? null : t); } renderPlan(); return; }
+      const t = e.target;
+      if (t.closest('.factNext')) { nextFact(); return; }
+      const c = t.closest('.copy'); if (c) { const v = c.dataset.copy; (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => toast('Copied ' + v)).catch(() => { const n = c.closest('.phone').querySelector('.n'); const r = document.createRange(); r.selectNodeContents(n); const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected, copy it from there'); }); return; }
+      const ch = t.closest('#outChips button, #retChips button'); if (ch && !ch.disabled) { const v = +ch.dataset.t; if (ch.parentElement.id === 'outChips') { plannerOut = (plannerOut === v ? null : v); } else { plannerRet = (plannerRet === v ? null : v); } renderPlan(); return; }
+      // the sheet
+      if (t.closest('#sheetBack')) { hideSheet(); return; }
+      const f = t.closest('#sheetIn [data-f]'); if (f && SHEET && SHEET.mode === 'trip') { const k = f.dataset.f, v = f.dataset.v; if (k === 'car') SHEET.f.car = v === '1'; else if (k === 'back') SHEET.f.back = v === '' ? null : +v; else SHEET.f[k] = v; syncSheet(); return; }
+      if (t.closest('#sheetSave')) { saveTrip(); return; }
+      if (t.closest('#sheetCancel')) { hideSheet(); return; }
+      if (t.closest('#sheetDelete')) { deleteTrip(); return; }
+      if (t.closest('#pasteGo')) { pasteGo(); return; }
+      // tap a boat on a schedule board, or a planned trip
+      const li = t.closest('[data-leg]'); if (li) { const [k, from, tm] = li.dataset.leg.split('|'); openTripSheet(k, from, +tm); return; }
+      const tc = t.closest('.trip[data-tid]'); if (tc && !t.closest('a')) { const tr = D.trips[tc.dataset.tid]; if (tr) openTripSheet(tr.date, tr.from, tr.t); return; }
+      const wd = t.closest('#week [data-day]'); if (wd) { selected = parseKey(wd.dataset.day); plannerOut = plannerRet = null; renderPlan(); const top = $('view-plan').getBoundingClientRect().top + window.scrollY - 6; window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); return; }
+      const bt = t.closest('[data-boat]'); if (bt) { const k = bt.dataset.boat; publish('b', { boat: k, src: me() || 'This phone', at: Date.now() }).then(() => toast(VESSELS[k].name + (FAM.linked ? ', on both phones' : ''))); return; }
+      const a = t.closest('[data-act]'); if (a) {
+        const act = a.dataset.act;
+        if (act === 'paste') openPasteSheet();
+        else if (act === 'newsok') { store.set('seenVersion', APP_VERSION); $('newsBox').hidden = true; }
+        else if (act === 'sendlink') sendLink(a.dataset.to || '');
+        else if (act === 'whoami') { store.set('who', null); renderAll(); showView('now'); }
+        else if (act === 'linkpaste') { const v = ($('famPaste') && $('famPaste').value) || ''; const m = /join=([A-Za-z0-9_-]{43})/.exec(v) || /^\s*([A-Za-z0-9_-]{43})\s*$/.exec(v); if (!m) { $('famMsg').textContent = 'That doesn’t look like the family link. It should have “join=” in it.'; return; } const w = /who=(Josh|Sarah)/i.exec(v); FAM.ready = FAM.ready.then(() => handleJoin('#join=' + m[1] + (w ? '&who=' + w[1] : ''))).then(() => { derive(); renderAll(); }); }
+        else if (act === 'planpair' && plannerOut !== null && plannerRet !== null) openTripSheet(E.dateKey(selected.y, selected.m, selected.d), plannerFrom, plannerOut, plannerRet);
+        return;
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && sheetOpen()) { hideSheet(); return; }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-leg], .trip[data-tid], #week [data-day]')) { e.preventDefault(); e.target.click(); }
     });
     $('fromSI').addEventListener('click', () => { plannerFrom = 'si'; plannerOut = plannerRet = null; $('fromSI').setAttribute('aria-pressed', 'true'); $('fromBH').setAttribute('aria-pressed', 'false'); renderPlan(); });
     $('fromBH').addEventListener('click', () => { plannerFrom = 'bh'; plannerOut = plannerRet = null; $('fromBH').setAttribute('aria-pressed', 'true'); $('fromSI').setAttribute('aria-pressed', 'false'); renderPlan(); });
@@ -1184,9 +2075,12 @@ p { margin: 0 0 8px; }
     $('rideBuy').addEventListener('click', () => { rides(2); toast('Two rides added'); });
     $('rideUse').addEventListener('click', () => { rides(-1); toast('One ride used'); });
     $('rideReset').addEventListener('click', () => { rides(0, true); toast('Tally reset'); });
-    setInterval(renderNow, 20000);
+    setInterval(() => { renderNow(); if (!$('view-plan').hidden && !sheetOpen()) renderPlan(); }, 20000);
     setInterval(() => { if (!$('view-now').hidden || !$('view-tickets').hidden) nextFact(); }, 25000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) renderNow(); });
+    setInterval(() => { if (!document.hidden) poll(); }, 75000);
+    setInterval(loadArchive, 30 * 60000);
+    let lastWake = Date.now();
+    document.addEventListener('visibilitychange', () => { if (document.hidden) return; renderNow(); if (Date.now() - lastWake > 15000) { lastWake = Date.now(); poll(); } });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

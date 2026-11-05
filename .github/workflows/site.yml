@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '*/30 * * * *'   # refresh conditions.json (511 notices, forecast backup) every half hour
+    - cron: '*/30 * * * *'   # refresh conditions.json and archive the shared (encrypted) trip messages every half hour
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # to commit site/data/sync.json, the archive of sealed messages from the relay
   pages: write
   id-token: write
 
@@ -21,11 +21,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
       - name: Refresh conditions.json
         run: python3 tools/fetch_conditions.py site/conditions.json || echo "feeds unavailable, keeping the committed file"
+      - name: Archive shared trips (sealed; this step never sees the family key)
+        env:
+          SYNC_TOPIC: sibferry-fpu8hwfns6miyy6d3c0z
+          SYNC_FP: fb4061f5
+        run: |
+          out=$(python3 tools/merge_sync.py site/data/sync.json || true)
+          echo "$out"
+          if echo "$out" | grep -q '^changed'; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add site/data/sync.json
+            git commit -q -m "Archive shared trip messages"
+            for i in 1 2 3; do
+              git push -q origin HEAD:main && break
+              git fetch -q origin main && git rebase --autostash -q origin/main || { git rebase --abort 2>/dev/null; break; }
+              sleep 3
+            done
+          fi
       - uses: actions/configure-pages@v5
         with:
           enablement: true
