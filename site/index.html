@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0239';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0318';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -335,6 +335,35 @@ p { margin: 0 0 8px; }
 .resinfo { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; color: var(--ink-2); padding: 9px 11px; border-radius: 10px; background: var(--surface-2); border-left: 4px solid var(--navy); }
 .resinfo b { font-family: var(--font-display); font-size: 15px; color: var(--ink); }
 .resinfo .btn { padding: 6px 10px; font-size: 14px; }
+.rb.fill { color: var(--t2); background: color-mix(in srgb, var(--t2) 16%, transparent); }
+.board li.next .rb.fill { background: #fff; }
+/* "Getting on with a car": one row per level, in the same colors as the car badges */
+.bsum { display: grid; gap: 7px; }
+.bsum .bs { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: baseline; font-size: 13.5px; color: var(--ink); }
+.lv { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.lv.l1 { color: var(--good); background: color-mix(in srgb, var(--good) 15%, transparent); }
+.lv.l2 { color: var(--t2); background: color-mix(in srgb, var(--t2) 16%, transparent); }
+.lv.l3 { color: var(--t3); background: color-mix(in srgb, var(--t3) 18%, transparent); }
+.lv.l4 { color: #fff; background: var(--bad); }
+.ridesum b.k { font-family: var(--font-display); color: var(--ink); }
+.sheet .info .bline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+/* Rides on hand */
+.rperson { display: grid; gap: 8px; padding: 12px 0 2px; border-top: 1px solid var(--line); }
+.rperson:first-child { border-top: 0; padding-top: 0; }
+.rp-head { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.rrow { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+.rrow .rl { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.2; }
+.rrow .rl small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 12.5px; color: var(--muted); }
+.rrow .ri svg { width: 28px; height: 19px; fill: var(--ink-2); display: block; }
+.rrow .rn { font-family: var(--font-display); font-weight: 700; font-size: 32px; line-height: 1; text-align: right; font-variant-numeric: tabular-nums; }
+.rrow .rn small { font-size: 13px; font-weight: 600; margin-left: 4px; color: var(--ink-2); }
+.rrow .rn.zero { color: var(--bad); }
+.rrow .btnrow { grid-column: 1 / -1; }
+.rrow .btn { font-size: 14px; padding: 7px 10px; }
+.rrow .btn:disabled { opacity: .45; cursor: default; }
+.btn.ghost { background: transparent; }
+.rrow .fixlink { display: block; margin: 5px 0 0 auto; padding: 0; border: 0; background: none; color: var(--ink-2); font-family: var(--font-display); font-weight: 600; font-size: 12.5px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.field input[type="number"] { font: inherit; font-family: var(--font-display); font-size: 22px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--ink); width: 7em; }
 .tag.plan { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
 .board li { flex-wrap: wrap; column-gap: 8px; }
 .board li .t { white-space: nowrap; }
@@ -553,14 +582,11 @@ p { margin: 0 0 8px; }
       <p class="lede">The state sells round-trip tickets online for this crossing. Both halves of a round trip work in either direction, and tickets aren't tied to a sailing, so buy ahead and keep them on your phone.</p>
       <a class="btn primary block" href="https://secure.rocket-rez.com/RocketWeb2/756a86b20bd996e6?ro=zym" target="_blank" rel="noopener">Buy Bass Harbor – Swan's Island tickets ›</a>
       <p class="small muted" style="margin:8px 0 0">Opens the Maine State Ferry Service webstore directly on this route. Download the PDF from the confirmation email before you get to the terminal: reception in the boarding lane is spotty, and the deckhand scans the barcode off your screen.</p>
-      <div class="tally" style="margin-top:14px">
-        <div><div class="eyebrow">Rides on hand</div><div class="count num" id="rideCount">0</div><div class="small muted">on this phone</div></div>
-        <div class="btnrow">
-          <button class="btn" id="rideBuy">+ bought a round trip</button>
-          <button class="btn" id="rideUse">− took a ride</button>
-          <button class="btn" id="rideReset" title="Set to zero">reset</button>
-        </div>
-      </div>
+    </div>
+    <div class="card" id="ridesCard">
+      <div class="cond-head"><h2>Rides on hand</h2><span class="chip" id="ridesChip"></span></div>
+      <p class="lede small" style="margin-top:6px">A round trip is two rides. Tap what happened, and both phones keep the same count.</p>
+      <div id="ridesBody"></div>
     </div>
     <div class="fact" id="factCardTickets"></div>
     <div class="card">
@@ -957,7 +983,24 @@ p { margin: 0 0 8px; }
     return { date: dateKey(date.y, date.m, date.d), label, rows };
   }
 
-  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic };
+  /* ----- Getting a car on: how much of the car deck is already spoken for -----
+     About 16 cars fit on the boat. A reserved car takes one space; trucks take about one space per 18 feet.
+     All 4 car reservations gone means demand is high, so it's at least Busy. Summer (mid-June through August)
+     and Frenchboro days (fewer Swan's Island boats) each add a notch. Levels: 1 Plenty of room, 2 Filling up,
+     3 Busy, 4 Tight. Without counts (more than a day out), only the season and Frenchboro notches apply. */
+  const CAR_SPACES = 16, FT_PER_SPACE = 18;
+  function carSpace(rr, busy) {
+    let level = 1, spaces = null;
+    if (rr) {
+      spaces = (rr.cars || 0) + (rr.truck || 0) / FT_PER_SPACE;
+      level = spaces <= 2.5 ? 1 : spaces <= 5 ? 2 : spaces <= 8 ? 3 : 4;
+      if (rr.full || (rr.cars || 0) >= CAR_RES) level = Math.max(level, 3);
+    }
+    const bump = (busy && busy.summer ? 1 : 0) + (busy && busy.fb ? 1 : 0);
+    return { level: Math.min(4, level + bump), base: level, spaces: spaces == null ? null : Math.round(spaces), known: !!rr, bump };
+  }
+
+  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, CAR_SPACES, carSpace, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FerryEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -995,7 +1038,7 @@ p { margin: 0 0 8px; }
   const setHTML = (el, html) => { if (el && el.__html !== html) { el.innerHTML = html; el.__html = html; } };
 
   /* ----- App identity, people, and the shared relay ----- */
-  const APP_VERSION = '2026.11.05';
+  const APP_VERSION = '2026.11.05b';
   const APP_URL = 'https://hectrvictorious.github.io/swans-island-boat/';
   const NTFY = 'https://ntfy.sh/';
   const SYNC_TOPIC = 'sibferry-fpu8hwfns6miyy6d3c0z';   // public relay channel; everything sent through it is encrypted with the family key
@@ -1136,7 +1179,9 @@ p { margin: 0 0 8px; }
     plan.legs.forEach(L => { if (L.to === 'fb' || L.from === 'fb' || L.nopax || past || (isToday && L.t <= nowMin)) return; eligible++; const r = rideAt(plan.y, plan.m, plan.d, L.t); if (r) rides.set(L, r); });
     const tiers = [...rides.values()].map(r => r.tier);
     const uniform = tiers.length > 1 && tiers.length === eligible && tiers.every(t => t === tiers[0]);
-    const sum = uniform ? '<div class="ridesum">' + rideChip(rides.values().next().value) + '<span><b>' + TIERS[tiers[0]].label + '</b> on every boat' + (isToday ? ' still to go today' : ' this day') + '. Tap one for what to expect.</span></div>' : '';
+    const sum = uniform ? '<div class="ridesum"><b class="k">Crossing (weather):</b>' + rideChip(rides.values().next().value) + '<span>on every boat' + (isToday ? ' still to go today' : ' this day') + '. Tap one for what to expect.</span></div>'
+      : tiers.length ? '<div class="ridesum"><b class="k">Crossing (weather):</b><span>changes through the day, so each boat shows its own.</span></div>' : '';
+    const busy = busyDay(plan);
     const col = (from) => {
       const items = plan.legs.filter(L => L.from === from && L.to !== 'fb');
       const nextL = isToday ? items.find(L => L.t > nowMin && !L.nopax) : null;
@@ -1156,7 +1201,7 @@ p { margin: 0 0 8px; }
         if (rr && rr.truck) chips.push(truckBadge(rr.truck));
         const tappable = !L.nopax && (!gone || hit);
         // With reservation counts in, the badge takes the top-right spot and the countdown or arrival moves down a line.
-        const top = rr ? resBadge(rr) : '<span class="c">' + c + '</span>';
+        const top = rr ? resBadge(rr, E.carSpace(rr, busy).level) : '<span class="c">' + c + '</span>';
         const second = (rr ? '<span class="sub2">' + c + '</span>' : '') + chips.join('');
         return '<li class="' + cls + '"' + (tappable ? ' role="button" tabindex="0" data-leg="' + plan.key + '|' + from + '|' + L.t + '" aria-label="' + E.fmt(L.t) + ' from ' + PLACE[from] + (rr ? (rr.full ? ', car reservations full' : ', ' + rr.cars + ' of 4 car reservations taken') : '') + (hit ? ', planned trip' : ', tap to plan a trip') + '"' : '') + '><span class="t">' + boardTime(L.t) + '</span>' + top + (second ? '<span class="r2">' + second + '</span>' : '') + '</li>';
       }).join('') + '</ul></div>';
@@ -1204,7 +1249,7 @@ p { margin: 0 0 8px; }
       const busy = busyDay(p).any;
       const chips = [];
       const r = rideAt(p.y, p.m, p.d, L.t); if (r) chips.push(rideChip(r));
-      const rr = resRow(p.key, from, L.t); if (rr) chips.push(resChip(rr));
+      const rr = resRow(p.key, from, L.t); if (rr) chips.push(resChip(rr, E.carSpace(rr, busyDay(p)).level));
       const hit = tripForLeg(p.key, from, L.t); if (hit) chips.unshift('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
       return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">' + timeHTML(L.t) + '</div><div class="in' + (soon ? ' soon' : '') + '">' + when + (soon ? ' · be there' : '') + '</div><div class="where">to ' + PLACE[L.to] + ' · arrives ' + E.fmt(L.arr) + (busy ? '<br><b>Busy day:</b> line up by ' + E.fmt(L.t - 30) : '') + '</div>' + (chips.length ? '<div class="r2" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">' + chips.join('') + '</div>' : '') + '</div>';
     });
@@ -1223,7 +1268,7 @@ p { margin: 0 0 8px; }
     renderTrips();
     const st = resStatus(plan.key);
     setHTML($('resWarnNow'), st.warn && st.warn.level === 'red' ? redHTML(st.warn) : '');
-    setHTML($('todayRes'), resPanel(plan.key, { red: false }));
+    setHTML($('todayRes'), resPanel(plan.key, { red: false, isToday: true }));
     $('todayFoot').textContent = 'Be at the terminal ' + lineUpMins(plan) + ' minutes before departure' + (busyDay(plan).any ? ' today' : '') + '. Crossing is about 40 minutes. Tap a boat to plan a trip.';
     const st2 = E.boatStatus(plan, NOW.min);
     statusText(plan, st2, NOW.min);
@@ -1237,7 +1282,7 @@ p { margin: 0 0 8px; }
     $('planTitle').innerHTML = longDate(plan) + ' <span class="chip' + (plan.holiday ? ' accent' : '') + '">' + plan.label + '</span>';
     renderBoards(plan, $('planBoards'), NOW.min, isToday);
     $('planHint').hidden = plan.key < todayKey();
-    setHTML($('planRes'), resPanel(plan.key, { red: true, unlinked: true }));
+    setHTML($('planRes'), resPanel(plan.key, { red: true, unlinked: true, isToday: plan.key === todayKey() }));
     renderNotes(plan, $('planNotes'));
     setHTML($('planTrips'), tripsOn(plan.key).sort((a, b) => a.t - b.t).map(tripCard).join(''));
     renderPlanner(plan);
@@ -1302,10 +1347,48 @@ p { margin: 0 0 8px; }
     $('commuterMath').textContent = 'Commuter math right now: $' + c + ' for five round trips is $' + (c / 5).toFixed(2) + ' each instead of $' + a.toFixed(2) + ', a saving of $' + (a * 5 - c).toFixed(2) + ' if you make five crossings within two weeks.';
   }
 
-  /* ----- Rides tally (this device) ----- */
-  function rides(delta, reset) {
-    let n = store.get('rides', 0); if (reset) n = 0; else n = Math.max(0, n + delta);
-    store.set('rides', n); $('rideCount').textContent = n;
+  /* ----- Rides on hand: each person's car (vehicle and driver) and passenger tickets, shared between the phones -----
+     Each tap is a small shared message (+2 bought a round trip, -1 took a ride, or "set to N" from Fix); every
+     phone adds them up in order, so both phones show the same counts. */
+  const PERSON_ICON = '<svg viewBox="0 0 24 16" aria-hidden="true"><circle cx="12" cy="4.2" r="3.4"/><path d="M5.5 15.6c0-3.9 2.9-6.6 6.5-6.6s6.5 2.7 6.5 6.6z"/></svg>';
+  const rideCount = a => (D.rides && D.rides[a]) || 0;
+  const rideName = a => { const [p, k] = a.split('.'); return k === 'car' ? p + '’s car' : p + '’s passenger tickets'; };
+  function renderRides() {
+    const host = $('ridesBody'); if (!host) return;
+    const mine = me(), order = mine === 'Sarah' ? ['Sarah', 'Josh'] : ['Josh', 'Sarah'];
+    setHTML(host, order.map(p => '<div class="rperson"><div class="rp-head">' + p + (p === mine ? ' <span class="chip">this phone</span>' : '') + '</div>' +
+      [['car', CAR_ICON, p + '’s car', 'vehicle and driver'], ['pass', PERSON_ICON, 'Passenger', 'one person']].map(([k, icon, name, sub]) => {
+        const a = p + '.' + k, n = rideCount(a);
+        return '<div class="rrow"><div class="rl"><span class="ri">' + icon + '</span><span>' + name + '<small>' + sub + '</small></span></div><div class="rn' + (n === 0 ? ' zero' : '') + '">' + n + '<small>' + (n === 1 ? 'ride' : 'rides') + '</small><button class="fixlink" data-ridefix="' + a + '" aria-label="Fix the count for ' + rideName(a) + '">Fix count</button></div>' +
+          '<div class="btnrow"><button class="btn" data-ride="' + a + '" data-d="2">+ Bought a round trip</button><button class="btn" data-ride="' + a + '" data-d="-1"' + (n === 0 ? ' disabled' : '') + '>− Took a ride</button></div></div>';
+      }).join('') + '</div>').join(''));
+    const c = $('ridesChip'); if (c) { c.className = 'chip' + (FAM.linked ? (SYNC.outbox.length ? ' wait' : ' ok') : ''); c.textContent = FAM.linked ? (SYNC.outbox.length ? 'waiting for signal' : 'shared') : 'this phone only'; }
+  }
+  async function rideChange(a, d) {
+    if (d < 0 && rideCount(a) <= 0) return;
+    await publish('r', { acct: a, d, by: me() || '', at: Date.now() });
+    const n = rideCount(a); toast(rideName(a) + ': ' + n + (n === 1 ? ' ride' : ' rides') + ' on hand');
+  }
+  function openFixSheet(a) {
+    SHEET = { mode: 'fix', acct: a };
+    showSheet('<div><div class="eyebrow">Rides on hand</div><h2 id="sheetTitle">' + rideName(a) + '</h2><div class="sub">Set the exact number of rides on hand. A round trip is two rides.</div></div>' +
+      '<div class="field"><label class="eyebrow" for="fixN">Rides on hand</label><input type="number" id="fixN" min="0" max="99" inputmode="numeric" value="' + rideCount(a) + '"></div>' +
+      (a.endsWith('.pass') ? '<div class="btnrow"><button class="btn" data-act="fixadd" data-n="10">+10 · commuter book (5 round trips)</button></div>' : '') +
+      '<div class="btnrow sheet-actions"><button class="btn primary" data-act="fixsave">Save</button><button class="btn" id="sheetCancel">Cancel</button></div>');
+  }
+  async function fixSave() {
+    const S = SHEET; if (!S || S.mode !== 'fix') return;
+    const v = Math.max(0, Math.min(99, parseInt($('fixN').value, 10) || 0)), a = S.acct;
+    hideSheet();
+    await publish('r', { acct: a, set: v, by: me() || '', at: Date.now() });
+    toast(rideName(a) + ': ' + v + (v === 1 ? ' ride' : ' rides'));
+  }
+  // The single count from the first version becomes this phone's car count, once.
+  async function migrateOldRides() {
+    const old = store.get('rides', 0), who = me();
+    if (!old || !who) return;
+    if (!Object.values(SYNC.ev).some(e => e.k === 'r' && e.p.acct === who + '.car')) await publish('r', { acct: who + '.car', set: old, by: who, at: Date.now() });
+    store.set('rides', 0);
   }
 
   /* ----- Facts ----- */
@@ -1378,7 +1461,7 @@ p { margin: 0 0 8px; }
   // the hourly forecast as a backup, and the marine forecast for the crossing's seas. Rules are in FerryEngine.rideTier.
   const TIERS = [null,
     { label: 'Flat calm', chip: 'Calm', expect: 'Glassy or close to it. You won’t feel the boat move: walk around, coffee stays in the cup, and the outside deck is the best seat on the boat.' },
-    { label: 'Easy', chip: 'Easy', expect: 'A light chop and the odd gentle sway, mostly in the open middle of the crossing. Fine for everyone; walk around as you like.' },
+    { label: 'Easy crossing', chip: 'Easy crossing', expect: 'A light chop and the odd gentle sway, mostly in the open middle of the crossing. Fine for everyone; walk around as you like.' },
     { label: 'Choppy', chip: 'Choppy', expect: 'A steady roll in the open middle of the crossing, with some spray off the bow. Hold the rail on the stairs. Most people are fine; if you get queasy, sit low near the middle of the boat and keep your eyes on the horizon.' },
     { label: 'Rough', chip: 'Rough', expect: 'Real pitching and rolling, with spray over the bow and onto the car deck. Stay seated, keep kids and pets close, and stow anything loose in the car. The car will come off salty.' },
     { label: 'Cancellation risk', chip: 'May cancel', expect: 'The state delays or cancels boats in weather like this. Check the notices here and call the terminal before you leave the house. If it does run, it will be a hard ride.' }
@@ -1428,7 +1511,7 @@ p { margin: 0 0 8px; }
     const T = TIERS[r.tier];
     const facts = [windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).join(' · ');
     const notes = rideNotes(r);
-    return '<div class="stat ride r' + r.tier + '"><div class="k">The ride · ' + label + '</div><div class="v">' + T.label + '<span class="meter">' + [1, 2, 3, 4, 5].map(i => '<i' + (i <= r.tier ? ' class="on"' : '') + '></i>').join('') + '</span></div><div class="s">' + r.tier + ' of 5</div>' + (facts ? '<div class="for">' + facts + '</div>' : '') + '<div class="x">' + T.expect + '</div>' + (notes.length ? '<ul>' + notes.map(n => '<li>' + n + '</li>').join('') + '</ul>' : '') + '</div>';
+    return '<div class="stat ride r' + r.tier + '"><div class="k">Crossing (weather) · ' + label + '</div><div class="v">' + T.label + '<span class="meter">' + [1, 2, 3, 4, 5].map(i => '<i' + (i <= r.tier ? ' class="on"' : '') + '></i>').join('') + '</span></div><div class="s">' + r.tier + ' of 5</div>' + (facts ? '<div class="for">' + facts + '</div>' : '') + '<div class="x">' + T.expect + '</div>' + (notes.length ? '<ul>' + notes.map(n => '<li>' + n + '</li>').join('') + '</ul>' : '') + '</div>';
   }
   function nextBoatAny() {
     let plan = E.dayPlan(NOW.y, NOW.m, NOW.d), first = false;
@@ -1479,7 +1562,7 @@ p { margin: 0 0 8px; }
     const queasy = worry.length ? '<div class="queasy"><b>' + (top >= 4 ? 'Rough water ahead' : 'A choppy ride ahead') + ' (' + esc(worry.map(w => w.what).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3).join(', ')) + ').</b> ' + QUEASY + '</div>' : '';
     $('condAlerts').innerHTML = alertsHTML + queasy;
     $('condPeriods').innerHTML = periods.slice(0, 4).map((p, i) => { const t = periodTier(p, i); return '<div class="period"><b>' + esc(p.name) + '<span class="ridetag t' + t + '">' + t + ' · ' + esc(TIERS[t].label) + '</span></b><span>' + esc((p.text || '').replace(/\s*Wave Detail:.*$/i, '')) + '</span></div>'; }).join('') +
-      '<div class="legend">Ride levels: ' + [1, 2, 3, 4, 5].map(t => rideChip({ tier: t })).join('') + '</div>';
+      '<div class="legend">Crossing levels: ' + [1, 2, 3, 4, 5].map(t => rideChip({ tier: t })).join('') + '</div>';
     // 511 notices
     const PRETTY = { '2971': "Swan's Island → Bass Harbor", '2972': "Bass Harbor → Swan's Island", '2976': 'Bass Harbor → Frenchboro', '2980': 'Frenchboro → Bass Harbor' };
     const f511 = c.ferry511 || [];
@@ -1528,8 +1611,6 @@ p { margin: 0 0 8px; }
   /* ----- Whose phone, install prompt, photos ----- */
   function applyWho() {
     const who = store.get('who', null);
-    const lbl = document.querySelector('#view-tickets .tally .small');
-    if (lbl) lbl.textContent = who ? ('on ' + who + '’s phone') : 'on this phone';
     const unlinked = unlinkedNow() && hasCrypto() && who !== '';
     $('linkBox').hidden = !unlinked;
     $('whoBox').hidden = who !== null || unlinked;
@@ -1570,7 +1651,7 @@ p { margin: 0 0 8px; }
   const FAM = { linked: false, loading: true, raw: null, key: null, fp: null, notify: {}, ready: Promise.resolve() };
   const unlinkedNow = () => !FAM.linked && !FAM.loading;   // known not to be linked (not just still reading the key)
   const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false };
-  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null };
+  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null, rides: {} };
   const aadOf = e => enc.encode('v1|' + e.fp + '|' + e.id + '|' + e.k + '|' + e.ts);
   async function seal(k, payload, id, ts) {
     const env = { v: 1, fp: FAM.fp, id: id || rid(12), k, ts: ts || Date.now() };
@@ -1612,6 +1693,7 @@ p { margin: 0 0 8px; }
     if (k === 'x') return /^\d{4}-\d\d-\d\d$/.test(p.date) && Array.isArray(p.rows) && p.rows.length < 80;
     if (k === 'b') return Object.prototype.hasOwnProperty.call(VESSELS, p.boat);
     if (k === 'p') return typeof p.reason === 'string';
+    if (k === 'r') return /^(Josh|Sarah)\.(car|pass)$/.test(p.acct) && (Number.isInteger(p.set) ? p.set >= 0 && p.set < 1000 : Number.isInteger(p.d) && Math.abs(p.d) <= 20);
     return false;
   }
   function prune() {
@@ -1619,13 +1701,14 @@ p { margin: 0 0 8px; }
     for (const [id, e] of Object.entries(SYNC.ev)) {
       if (e.k === 't') { if (now - e.ts < 400 * 864e5) keep[id] = e; }
       else if (e.k === 'x') { if (now - e.ts < 21 * 864e5) keep[id] = e; }
+      else if (e.k === 'r') { if (now - e.ts < 1100 * 864e5) keep[id] = e; }
       else if (last[e.k]) last[e.k].push([id, e]);
     }
     for (const k of ['b', 'p']) last[k].sort((a, b) => b[1].ts - a[1].ts).slice(0, 6).forEach(([id, e]) => { keep[id] = e; });
     SYNC.ev = keep;
   }
   function derive() {
-    const trips = {}, tripAt = {}, traffic = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null;
+    const trips = {}, tripAt = {}, traffic = {}, rides = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null;
     const evs = Object.values(SYNC.ev).sort((a, b) => ((a.p && a.p.at) || a.ts) - ((b.p && b.p.at) || b.ts));
     for (const e of evs) {
       const p = e.p, at = p.at || e.ts;
@@ -1633,9 +1716,10 @@ p { margin: 0 0 8px; }
       else if (e.k === 'x') { if (!traffic[p.date] || at >= traffic[p.date].at) traffic[p.date] = Object.assign({}, p, { at }); if (p.src !== 'pasted') lastX = Math.max(lastX, at); if (p.url) fbUrl = p.url; }
       else if (e.k === 'b') { if (!vessel || at >= vessel.at) vessel = Object.assign({}, p, { at }); }
       else if (e.k === 'p') { if (!problem || at >= problem.at) problem = Object.assign({}, p, { at }); }
+      else if (e.k === 'r') { rides[p.acct] = Math.max(0, Math.min(999, Number.isInteger(p.set) ? p.set : (rides[p.acct] || 0) + p.d)); }
     }
     Object.keys(trips).forEach(k => { if (!trips[k]) delete trips[k]; });
-    D = { trips, traffic, vessel, problem, lastX, fbUrl };
+    D = { trips, traffic, vessel, problem, lastX, fbUrl, rides };
   }
   async function ingest(list) {
     if (!FAM.linked) return false;
@@ -1722,10 +1806,10 @@ p { margin: 0 0 8px; }
     tags.push('<span class="tag">' + (tr.tix === 'need' ? 'Tickets: to buy' : tr.tix === 'car' ? 'Tickets: in the car' : 'Tickets: ' + esc(tr.tix) + '’s phone') + '</span>');
     if (tr.back) tags.push('<span class="tag">Back ' + E.fmt(tr.back.t) + '</span>');
     if (!past) { const r = rideAt(p.y, p.m, p.d, tr.t); if (r) tags.push(rideChip(r)); }
-    const rr = resRow(tr.date, tr.from, tr.t); if (rr) tags.push(resChip(rr));
+    const rr = resRow(tr.date, tr.from, tr.t), cs = E.carSpace(rr, busyDay(plan)); if (rr) tags.push(resChip(rr, cs.level));
     const warns = [];
     if (!past) {
-      if (tr.car && (!tr.res || tr.res === 'none')) { if (rr && rr.full) warns.push('Car reservations on this boat are full. Get in line early.'); else if (busyDay(plan).any) warns.push('Busy day and no car reservation. Call 207-244-3254 or get in line early.'); }
+      if (tr.car && (!tr.res || tr.res === 'none')) { if (cs.level >= 4) warns.push('Tight for cars and no reservation: you may not get on. Call 207-244-3254 or get in line very early.'); else if (cs.level === 3 || (!cs.known && busyDay(plan).any)) warns.push('Busy for cars and no reservation: get in line at least 30 minutes early, or reserve (207-244-3254).'); }
       if (tr.tix === 'need') warns.push('Tickets still to buy (Tickets tab).');
     }
     let when = E.fmt(tr.t) + ' from ' + PLACE[tr.from] + ' → ' + PLACE[OTHER_SIDE[tr.from]];
@@ -1736,6 +1820,7 @@ p { margin: 0 0 8px; }
       '<div class="by">' + (tr.by ? 'Planned by ' + esc(tr.by) : 'Planned') + (tr.at ? ' · ' + fmtWhen(tr.at) : '') + '</div></div>';
   }
   function renderSyncBits() {
+    renderRides();
     const c = $('syncChip'); if (c) {
       if (!FAM.linked) { c.className = 'chip'; c.textContent = 'this phone only'; }
       else if (SYNC.outbox.length) { c.className = 'chip wait'; c.textContent = SYNC.flushing ? 'sending…' : 'waiting for signal'; }
@@ -1762,7 +1847,14 @@ p { margin: 0 0 8px; }
   };
   function resRow(key, from, t) { const tr = D.traffic[key]; if (!tr) return null; return tr.rows.find(r => r.sec === from && r.t === t) || null; }
   const CAR_ICON = '<svg viewBox="0 0 24 16" aria-hidden="true"><path d="M5 7.2 7 2.6C7.4 1.6 8.2 1 9.3 1h5.4c1.1 0 1.9.6 2.3 1.6l2 4.6h.9A2.1 2.1 0 0 1 22 9.3V13h-2.1a2.6 2.6 0 0 1-5.2 0H9.3a2.6 2.6 0 0 1-5.2 0H2V9.3a2.1 2.1 0 0 1 2.1-2.1zm2.4 0h9.2l-1.5-3.6c-.2-.4-.5-.6-1-.6H9.9c-.5 0-.8.2-1 .6z"/></svg>';
-  function resBadge(r) { const n = Math.min(r.cars, 9); return '<span class="rb ' + (r.full ? 'full' : n >= 3 ? 'mid' : 'ok') + '" title="' + (r.full ? 'Car reservations full' : n + ' of ' + E.CAR_RES + ' car reservations taken') + '">' + CAR_ICON + (r.full ? 'FULL' : n + '/' + E.CAR_RES) + '</span>'; }
+  // How hard it'll be to get a car on (FerryEngine.carSpace): the car badge wears these colors.
+  const SPACE = [null,
+    { label: 'Plenty of room', advice: 'The usual 15 minutes ahead is fine.' },
+    { label: 'Filling up', advice: 'Give yourself a little extra time in line.' },
+    { label: 'Busy', advice: 'Without a reservation, get in line at least 30 minutes ahead.' },
+    { label: 'Tight', advice: 'Without a reservation you may not get on. Call Bass Harbor (207-244-3254) to reserve, or get in line very early.' }
+  ];
+  function resBadge(r, level) { const n = Math.min(r.cars, 9), lv = level || (r.full ? 4 : n >= 3 ? 3 : 1); return '<span class="rb ' + ['', 'ok', 'fill', 'mid', 'full'][lv] + '" title="' + (r.full ? 'Car reservations full' : n + ' of ' + E.CAR_RES + ' car reservations taken') + (level ? '. Getting on with a car: ' + SPACE[level].label : '') + '">' + CAR_ICON + (r.full ? 'FULL' : n + '/' + E.CAR_RES) + '</span>'; }
   function truckBadge(ft) {
     const L = Math.max(4.5, Math.min(26, ft / 4.5)), W = L + 8, f = n => n.toFixed(1);
     const svg = '<svg viewBox="0 0 ' + f(W) + ' 10" style="width:' + f(W * 1.18) + 'px;height:11.8px" aria-hidden="true">' +
@@ -1774,7 +1866,7 @@ p { margin: 0 0 8px; }
       '<circle class="tr" cx="' + f(L + 4.8) + '" cy="8.4" r="1.4"/></svg>';
     return '<span class="trk" title="' + ft + ' feet of truck reserved">' + svg + ft + '′</span>';
   }
-  function resChip(r) { return resBadge(r) + (r.truck ? truckBadge(r.truck) : ''); }
+  function resChip(r, level) { return resBadge(r, level) + (r.truck ? truckBadge(r.truck) : ''); }
   function resStatus(key) {
     if (!FAM.linked) return {};
     const tr = D.traffic[key]; if (tr) return { tr };
@@ -1796,12 +1888,29 @@ p { margin: 0 0 8px; }
     const fb = D.fbUrl || store.get('fbGroup', null);
     return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow"><a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
   }
+  // "Getting on with a car" for a day: every boat still to go, grouped Tight / Busy / Filling up / Plenty of room.
+  function boardingHTML(key, isToday) {
+    const tr = D.traffic[key], p = parseKey(key), plan = E.dayPlan(p.y, p.m, p.d), busy = busyDay(plan);
+    const groups = { 1: [], 2: [], 3: [], 4: [] };
+    plan.legs.forEach(L => {
+      if (L.to === 'fb' || L.from === 'fb' || L.nopax || (isToday && L.t <= NOW.min)) return;
+      const rr = resRow(key, L.from, L.t); if (rr) groups[E.carSpace(rr, busy).level].push(L);
+    });
+    const names = list => ['si', 'bh'].map(f => { const ts = list.filter(L => L.from === f).map(L => E.fmt(L.t)); return ts.length ? ts.join(', ') + ' from ' + PLACE[f] : ''; }).filter(Boolean).join(' · ');
+    const shown = [4, 3, 2].filter(l => groups[l].length);
+    const rows = shown.map(l => '<div class="bs"><span class="lv l' + l + '">' + SPACE[l].label + '</span><span>' + names(groups[l]) + '</span></div>');
+    if (groups[1].length) rows.push('<div class="bs"><span class="lv l1">' + SPACE[1].label + '</span><span>' + (shown.length && groups[1].length >= 3 ? 'the other ' + groups[1].length + ' boats' : names(groups[1])) + '</span></div>');
+    if (!rows.length) return '';
+    const plus = busy.summer || busy.fb ? ' It counts ' + (busy.summer && busy.fb ? 'summer and the Frenchboro run' : busy.summer ? 'summer traffic' : 'the Frenchboro run') + ' too.' : '';
+    return '<div class="resinfo bsum"><div><b>Getting on with a car</b></div>' + rows.join('') +
+      '<div class="small muted">On each boat, ' + resBadge({ cars: 3, full: false }, 3) + ' is car reservations taken (of 4) and ' + truckBadge(60) + ' is feet of truck reserved. The color shows how hard it’ll be to get a car on.' + plus + ' From the island’s Facebook traffic post' + (tr.label ? ' “' + esc(tr.label) + '”' : '') + (tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(tr.at) + '. Walking on? Passenger space is rarely the problem.</div></div>';
+  }
   // The labeled place to check reservations, above the schedule (Plan tab: also the red box and the link prompt).
   function resPanel(key, opts) {
     opts = opts || {};
     if (!FAM.linked) return (opts.unlinked && unlinkedNow() && hasCrypto() && store.get('who', null) !== '') ? '<div class="resinfo"><span><b>Car reservations</b> show on each boat once this phone is linked.</span><button class="btn navy" data-act="golink">Link this phone</button></div>' : '';
     const st = resStatus(key);
-    if (st.tr) return '<div class="resinfo"><span><b>Car reservations</b> are on each boat: ' + resBadge({ cars: 3, full: false }) + ' means 3 of the boat’s 4 car reservations are taken, and ' + truckBadge(60) + ' is feet of truck reserved (the bigger the truck, the more deck it takes). From the island’s Facebook traffic post' + (st.tr.label ? ' “' + esc(st.tr.label) + '”' : '') + (st.tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(st.tr.at) + '.</span></div>';
+    if (st.tr) return boardingHTML(key, !!opts.isToday);
     if (st.warn && st.warn.level === 'red') return opts.red ? redHTML(st.warn) : '';
     if (st.warn && st.warn.level === 'quiet') return '<div class="resinfo"><span><b>Car reservations:</b> ' + st.warn.text + '</span></div>';
     return '';
@@ -1942,11 +2051,20 @@ p { margin: 0 0 8px; }
     const opt = (field, v, label) => '<button data-f="' + field + '" data-v="' + v + '">' + label + '</button>';
     const backs = plan.legs.filter(x => x.from === to && x.to === L.from && !x.nopax && x.t > L.arr);
     const info = [];
+    const busy = busyDay(plan), rr = resRow(S.key, L.from, L.t);
+    if (rr) {
+      const cs = E.carSpace(rr, busy), SP = SPACE[cs.level];
+      const what = (rr.full ? 'All ' + E.CAR_RES + ' car reservations are taken' : rr.cars + ' of ' + E.CAR_RES + ' car reservations are taken') + (rr.truck ? ', plus ' + rr.truck + ' feet of truck' : '');
+      const share = cs.spaces < 1 ? 'hardly any of the boat’s ~16 car spaces are spoken for' : 'about ' + cs.spaces + ' of the boat’s ~16 car spaces are spoken for';
+      const plus = cs.bump ? ' ' + (busy.summer && busy.fb ? 'Summer and the Frenchboro run make it busier.' : busy.summer ? 'Summer traffic makes it busier.' : 'The Frenchboro run makes it busier.') : '';
+      info.push('<div class="box"><div class="eyebrow">Getting on with a car</div><div class="bline">' + resChip(rr, cs.level) + ' <span class="lv l' + cs.level + '">' + SP.label + '</span></div><div style="margin-top:6px">' + what + ': ' + share + '.' + plus + ' ' + SP.advice + '</div><div class="small muted" style="margin-top:4px">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '. Walking on? Passenger space is rarely the problem.</div></div>');
+    } else {
+      const st = resStatus(S.key);
+      if (st.warn && st.warn.level === 'red') info.push('<div class="box"><b style="color:var(--bad)">' + st.warn.title + '</b><div class="small">' + st.warn.text + '</div></div>');
+      else info.push('<div class="box"><div class="eyebrow">Getting on with a car</div><div>' + (FAM.linked ? 'No reservation counts for this boat yet. They come from the island’s traffic post the evening before.' : 'Link this phone to see the reservation counts.') + (busy.any ? ' ' + (busy.summer ? 'It’s summer, so expect busy boats.' : 'It’s a Frenchboro day, so expect busy boats.') : '') + '</div></div>');
+    }
     const r = rideAt(plan.y, plan.m, plan.d, L.t);
-    if (r) info.push('<div class="box">' + rideChip(r) + ' <b>' + TIERS[r.tier].label + '</b>' + ([windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).length ? ' · ' + [windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).join(' · ') : '') + '<div style="margin-top:4px">' + TIERS[r.tier].expect + '</div>' + rideNotes(r).map(n => '<div class="small muted" style="margin-top:3px">' + n + '</div>').join('') + (r.tier >= 3 ? '<div class="small" style="margin-top:6px">' + QUEASY + '</div>' : '') + '</div>');
-    const rr = resRow(S.key, L.from, L.t);
-    if (rr) info.push('<div class="box"><b>Reservations on this boat</b><div>' + (rr.full ? 'Car reservations are full (' + rr.cars + ' of ' + E.CAR_RES + ').' : rr.cars + ' of ' + E.CAR_RES + ' car reservations taken.') + (rr.truck ? ' ' + truckBadge(rr.truck) + ' ' + rr.truck + ' feet of truck reserved.' : '') + '</div><div class="small muted">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '.</div></div>');
-    else { const st = resStatus(S.key); if (st.warn && st.warn.level === 'red') info.push('<div class="box"><b style="color:var(--bad)">' + st.warn.title + '</b><div class="small">' + st.warn.text + '</div></div>'); }
+    if (r) { const facts = [windText(r), r.mp && r.mp.seasHi != null ? 'seas ' + seasText(r.mp) : ''].filter(Boolean).join(' · '); info.push('<div class="box"><div class="eyebrow">Crossing (weather)</div><div class="bline">' + rideChip(r) + (facts ? ' <span class="small muted">' + facts + '</span>' : '') + '</div><div style="margin-top:6px">' + TIERS[r.tier].expect + '</div>' + rideNotes(r).map(n => '<div class="small muted" style="margin-top:3px">' + n + '</div>').join('') + (r.tier >= 3 ? '<div class="small" style="margin-top:6px">' + QUEASY + '</div>' : '') + '</div>'); }
     dayWarnings(plan).forEach(w => info.push('<div class="note busy">' + w.text + '</div>'));
     const other = otherOf(me());
     return '<div><div class="eyebrow">' + (S.tid ? 'Planned trip' : 'Plan a trip') + ' · ' + DAYS[plan.wd] + ', ' + MONTHS[plan.m - 1] + ' ' + plan.d + '</div><h2 id="sheetTitle">' + E.fmt(L.t) + ' from ' + PLACE[L.from] + '</h2><div class="sub">Arrives ' + PLACE[to] + ' ' + E.fmt(L.arr) + ' · be in line by ' + E.fmt(L.t - lineUpMins(plan)) + '</div></div>' +
@@ -1967,8 +2085,8 @@ p { margin: 0 0 8px; }
       b.setAttribute('aria-pressed', cur === b.dataset.v ? 'true' : 'false');
     });
     $('fResWrap').hidden = !S.f.car;
-    const rr = resRow(S.key, S.leg.from, S.leg.t), busy = busyDay(S.plan);
-    $('fResWarn').textContent = S.f.car && S.f.res === 'none' ? (rr && rr.full ? 'Car reservations on this boat are already full. Without one, get in line early.' : busy.any ? 'Busy day: reserve a car spot (207-244-3254) or get in line early.' : '') : '';
+    const rr = resRow(S.key, S.leg.from, S.leg.t), busy = busyDay(S.plan), cs = E.carSpace(rr, busy);
+    $('fResWarn').textContent = S.f.car && S.f.res === 'none' ? (cs.level >= 4 ? 'Tight for cars on this boat: without a reservation you may not get on.' : (cs.level === 3 || (!cs.known && busy.any)) ? 'Busy for cars: reserve a spot (207-244-3254) or get in line at least 30 minutes early.' : '') : '';
     const bn = $('fBackNote');
     if (S.f.back != null) { const lay = E.layover(S.leg.t, S.f.back); bn.textContent = lay.free >= 0 ? E.fmtDur(lay.free) + ' in ' + PLACE[S.leg.to] + ' before you need to be back in line.' : ''; } else bn.textContent = '';
   }
@@ -2065,7 +2183,7 @@ p { margin: 0 0 8px; }
     if (seen === APP_VERSION) { box.hidden = true; return; }
     const returning = store.get('cond', null) !== null || store.get('who', null) !== null || store.get('factIdx', null) !== null;
     if (!returning) { store.set('seenVersion', APP_VERSION); box.hidden = true; return; }
-    setHTML(box, '<b>New in the boat app</b><div>Tap any boat on the <a href="#plan">Plan</a> tab to plan a trip. It shows up on both phones, with who has the tickets and the car reservation. Each boat now gets a ride level from 1 (flat calm) to 5 (may cancel), and the car reservation counts from the island’s Facebook traffic post show on the schedule.</div>' +
+    setHTML(box, '<b>New in the boat app</b><div>Tap any boat on the <a href="#plan">Plan</a> tab to plan a trip; it shows up on both phones. Each boat shows its car reservations and how hard it’ll be to get a car on, and the crossing weather is rated separately. Rides on hand (Tickets tab) now counts each of your cars and passenger tickets, on both phones.</div>' +
       (FAM.linked ? '' : '<div class="small">' + (me() === 'Sarah' ? 'To share trips with Josh, open the link he texts you.' : 'To share trips, link the phones on the Info tab.') + '</div>') +
       '<div class="btnrow"><button class="btn" data-act="newsok">Got it</button></div>');
     box.hidden = false;
@@ -2073,7 +2191,7 @@ p { margin: 0 0 8px; }
 
   function renderAll() {
     applyWho();
-    renderNow(); renderBoat(); renderFam(); renderNews();
+    renderNow(); renderBoat(); renderFam(); renderNews(); renderRides();
     if (!$('view-plan').hidden) renderPlan();
     if (sheetOpen() && SHEET && SHEET.mode === 'trip') syncSheet();
   }
@@ -2134,13 +2252,13 @@ p { margin: 0 0 8px; }
     FAM.ready = (async () => { try { await loadFamily(); if (joining) await handleJoin(startHash); } catch (e) { /* stays unlinked */ } FAM.loading = false; })();
     COND.file = store.get('cond', null); CURRENT = merged();
     derive();
-    renderNow(); renderFacts(); renderFares(); rides(0);
+    renderNow(); renderFacts(); renderFares(); renderRides();
     applyWho(); renderBoat(); renderFam(); renderNews(); paint();
     loadConditions(); loadLive();
     setInterval(loadConditions, 30 * 60000); setInterval(loadLive, 20 * 60000);
     setupInstall(); loadPhotos(); setupWorker(); exposeAPI();
     if (!window.__STANDALONE_SITE__) $('movedBox').hidden = false;
-    FAM.ready.then(() => { derive(); renderAll(); if (FAM.linked) { loadArchive(); poll(); } });
+    FAM.ready.then(() => { derive(); renderAll(); migrateOldRides(); if (FAM.linked) { loadArchive(); poll(); } });
     document.querySelectorAll('#whoBox [data-who]').forEach(b => b.addEventListener('click', () => { store.set('who', b.dataset.who); renderAll(); if (b.dataset.who) toast('Hi, ' + b.dataset.who); }));
     showView(joining ? 'now' : startHash.slice(1) || 'now');
     window.addEventListener('hashchange', () => { const h = location.hash; if (/[#&]join=/.test(h)) { FAM.ready = FAM.ready.then(() => handleJoin(h)).then(() => { derive(); renderAll(); }); showView('now'); } else showView(h.slice(1)); });
@@ -2162,6 +2280,8 @@ p { margin: 0 0 8px; }
       const li = t.closest('[data-leg]'); if (li) { const [k, from, tm] = li.dataset.leg.split('|'); openTripSheet(k, from, +tm); return; }
       const tc = t.closest('.trip[data-tid]'); if (tc && !t.closest('a')) { const tr = D.trips[tc.dataset.tid]; if (tr) openTripSheet(tr.date, tr.from, tr.t); return; }
       const wd = t.closest('#week [data-day]'); if (wd) { selected = parseKey(wd.dataset.day); plannerOut = plannerRet = null; renderPlan(); const top = $('view-plan').getBoundingClientRect().top + window.scrollY - 6; window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); return; }
+      const rb = t.closest('[data-ride]'); if (rb && !rb.disabled) { rideChange(rb.dataset.ride, +rb.dataset.d); return; }
+      const rf = t.closest('[data-ridefix]'); if (rf) { openFixSheet(rf.dataset.ridefix); return; }
       const bt = t.closest('[data-boat]'); if (bt) { const k = bt.dataset.boat; publish('b', { boat: k, src: me() || 'This phone', at: Date.now() }).then(() => toast(VESSELS[k].name + (FAM.linked ? ', on both phones' : ''))); return; }
       const a = t.closest('[data-act]'); if (a) {
         const act = a.dataset.act;
@@ -2171,6 +2291,8 @@ p { margin: 0 0 8px; }
         else if (act === 'whoami') { store.set('who', null); renderAll(); showView('now'); }
         else if (act === 'linkpaste') linkFrom(($('famPaste') && $('famPaste').value) || '', $('famMsg'));
         else if (act === 'golink') openLinkSheet();
+        else if (act === 'fixadd') { const fi = $('fixN'); fi.value = Math.min(99, (parseInt(fi.value, 10) || 0) + (+a.dataset.n)); }
+        else if (act === 'fixsave') fixSave();
         else if (act === 'visitor') { store.set('who', ''); renderAll(); }
         else if (act === 'pasteclip') { (navigator.clipboard && navigator.clipboard.readText ? navigator.clipboard.readText() : Promise.reject()).then(t => { $('famPaste2').value = (t || '').trim(); }).catch(() => { $('famMsg2').textContent = 'This phone wouldn’t share the clipboard. Press and hold in the box above, then tap Paste.'; }); }
         else if (act === 'linkpaste2') { if (linkFrom($('famPaste2').value, $('famMsg2'))) hideSheet(); }
@@ -2188,9 +2310,6 @@ p { margin: 0 0 8px; }
     $('prevDay').addEventListener('click', () => { selected = addDays(selected.y, selected.m, selected.d, -1); plannerOut = plannerRet = null; renderPlan(); });
     $('nextDay').addEventListener('click', () => { selected = addDays(selected.y, selected.m, selected.d, 1); plannerOut = plannerRet = null; renderPlan(); });
     $('planToday').addEventListener('click', () => { selected = { y: NOW.y, m: NOW.m, d: NOW.d }; plannerOut = plannerRet = null; renderPlan(); });
-    $('rideBuy').addEventListener('click', () => { rides(2); toast('Two rides added'); });
-    $('rideUse').addEventListener('click', () => { rides(-1); toast('One ride used'); });
-    $('rideReset').addEventListener('click', () => { rides(0, true); toast('Tally reset'); });
     setInterval(() => { renderNow(); if (!$('view-plan').hidden && !sheetOpen()) renderPlan(); }, 20000);
     setInterval(() => { if (!$('view-now').hidden || !$('view-tickets').hidden) nextFact(); }, 25000);
     setInterval(() => { if (!document.hidden) poll(); }, 75000);

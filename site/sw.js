@@ -5,7 +5,7 @@
    twice in two minutes; pages from before this existed don't answer, so those get reloaded from here once.
    Nothing ever needs reinstalling.
    conditions.json, data/sync.json and the government weather feeds are network-first with a cached fallback. */
-const BUILD = '20261105T0239';
+const BUILD = '20261105T0318';
 const VERSION = 'boat-' + BUILD;
 const SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 let isUpdate = false;
