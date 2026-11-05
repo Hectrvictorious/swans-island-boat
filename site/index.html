@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0148';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0154';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -891,9 +891,17 @@ p { margin: 0 0 8px; }
     const plan = dayPlan(date.y, date.m, date.d);
     const legsFor = sec => plan.legs.filter(L => sec === 'fb' ? (L.to === 'fb' || L.from === 'fb') : (L.from === sec && L.to !== 'fb'));
     const num = s => (s && /^\d+$/.test(s)) ? +s : 0;
-    const rows = []; let sec = null;
+    // Facebook draws emoji as pictures, so copied text loses each ⭕ and breaks the line there:
+    // "6:45" / "’ of truck, 4 cars". Rejoin those pieces onto the sailing line before reading it.
+    const body = [];
     for (let i = i0; i < lines.length; i++) {
-      const ln = lines[i];
+      const ln = lines[i], prev = body[body.length - 1];
+      if (prev && /^\d{1,2}[:.]\d{2}\b/.test(prev) && !/^\d{1,2}[:.]\d{2}\b/.test(ln) && !/\btraffic\b/i.test(ln) && /^(['’′`]|(of\s+)?trucks?\b|\d*\s*cars?\b|⭕|,)/i.test(ln)) { body[body.length - 1] = prev + ' ' + ln; continue; }
+      body.push(ln);
+    }
+    const rows = []; let sec = null;
+    for (let i = 0; i < body.length; i++) {
+      const ln = body[i];
       const h = /^(SI|S\.I\.|Swan'?s?(?:\s+Island)?|BH|B\.H\.|Bass\s+Harbou?r|FB|F\.B\.|French\s*boro)\b.*\btraffic\b/i.exec(ln) || /^(SI|BH|FB)\s*:?\s*$/i.exec(ln);
       if (h) { const w = h[1].toLowerCase().replace(/[^a-z]/g, ''); sec = /^(si|swan)/.test(w) ? 'si' : /^(bh|bass)/.test(w) ? 'bh' : 'fb'; continue; }
       if (/^(like|comment|share|reply|all reactions:?|write a (public )?comment|most relevant|view more comments|see translation)\b/i.test(ln)) break;   // Facebook's buttons and the comments below the post
@@ -904,7 +912,7 @@ p { margin: 0 0 8px; }
       if (hh > 23 || mm > 59) continue;
       const tm = /(\d+|⭕️?|[oø0]|no)\s*(?:['’′`]+|ft\.?|feet)?\s*(?:of\s+)?trucks?\b/i.exec(rest);
       const cm = /(\d+|⭕️?|[oø0]|no)\s*cars?\b/i.exec(rest);
-      if (!tm && !cm && !/full/i.test(rest)) continue;
+      if (!tm && !cm && !/full|trucks?\b|cars?\b/i.test(rest)) continue;   // a word with no number is a ⭕ (zero) that Facebook drew as a picture
       const cands = ap ? [(hh % 12 + (ap === 'p' ? 12 : 0)) * 60 + mm] : hh >= 13 ? [hh * 60 + mm] : [(hh % 12) * 60 + mm, (hh % 12 + 12) * 60 + mm];
       const legs = legsFor(sec);
       let leg = null;
