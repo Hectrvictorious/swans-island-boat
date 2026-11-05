@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0217';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0234';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -322,9 +322,24 @@ p { margin: 0 0 8px; }
 .rc.t1 { --tc: var(--t1); } .rc.t2 { --tc: var(--t2); } .rc.t3 { --tc: var(--t3); } .rc.t4 { --tc: var(--t4); } .rc.t5 { --tc: var(--t5); }
 .rc.t1 i:nth-of-type(-n+1), .rc.t2 i:nth-of-type(-n+2), .rc.t3 i:nth-of-type(-n+3), .rc.t4 i:nth-of-type(-n+4), .rc.t5 i { opacity: 1; }
 .res.full { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
+/* Car reservation badge: a car and "3/4" (3 of the boat's 4 car reservations taken), green / amber / red FULL */
+.rb { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-display); font-weight: 700; font-size: 13px; line-height: 1; padding: 3px 7px; border-radius: 999px; white-space: nowrap; }
+.rb svg { width: 15px; height: 10px; fill: currentColor; flex: none; }
+.rb.ok { color: var(--good); background: color-mix(in srgb, var(--good) 15%, transparent); }
+.rb.mid { color: var(--t3); background: color-mix(in srgb, var(--t3) 18%, transparent); }
+.rb.full { color: #fff; background: var(--bad); }
+.board li > .rb { margin-left: auto; }
+.board li.next .rb.ok, .board li.next .rb.mid { background: #fff; }
+.board li .r2 .sub2 { font-family: var(--font-display); font-size: 12.5px; color: var(--ink-2); margin-right: 2px; align-self: center; }
+.board li.next .r2 .sub2 { color: var(--accent-ink); }
+.resinfo { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; color: var(--ink-2); padding: 9px 11px; border-radius: 10px; background: var(--surface-2); border-left: 4px solid var(--navy); }
+.resinfo b { font-family: var(--font-display); font-size: 15px; color: var(--ink); }
+.resinfo .btn { padding: 6px 10px; font-size: 14px; }
 .tag.plan { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
 .board li { flex-wrap: wrap; column-gap: 8px; }
 .board li .t { white-space: nowrap; }
+.board li .t small { font-size: 12px; font-weight: 600; margin-left: 2px; letter-spacing: .02em; }
+.board li .rb { font-size: 12.5px; padding: 3px 6px; gap: 3px; }
 .board li .c { margin-left: auto; }
 .board li .r2 { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
 .ridesum { grid-column: 1 / -1; display: flex; align-items: center; flex-wrap: wrap; gap: 4px 6px; font-family: var(--font-display); font-size: 14px; color: var(--ink-2); padding: 2px 0 2px; }
@@ -456,6 +471,10 @@ p { margin: 0 0 8px; }
       <div><b>Whose phone is this?</b><span>So trips you plan carry your name, and the rides tally is yours.</span></div>
       <div class="btnrow"><button class="btn navy" data-who="Josh">Josh</button><button class="btn navy" data-who="Sarah">Sarah</button><button class="btn" data-who="">Just visiting</button></div>
     </div>
+    <div class="who" id="linkBox" hidden>
+      <div><b>Link this phone to see car reservations</b><span>The reservations on each boat, the boat that's actually running today, and the trips you plan together come through your private family link. It's a one-time step.</span></div>
+      <div class="btnrow"><button class="btn navy" data-act="golink">Link this phone</button><button class="btn" data-act="visitor">Just visiting</button></div>
+    </div>
     <div class="news" id="newsBox" hidden></div>
     <div id="noticeBox" class="notices"></div>
     <div id="resWarnNow"></div>
@@ -476,8 +495,8 @@ p { margin: 0 0 8px; }
         <span class="eyebrow" id="todayLabel">Today</span>
         <span class="chip" id="todaySeason"></span>
       </div>
+      <div id="todayRes" style="margin-top:10px"></div>
       <div class="boards" id="todayBoards" style="margin-top:10px"></div>
-      <div id="todayRes"></div>
       <div class="notes" id="todayNotes"></div>
       <p class="small muted" style="margin:10px 0 0" id="todayFoot">Be at the terminal 15 minutes before departure. Crossing is about 40 minutes. Tap a boat to plan a trip.</p>
     </div>
@@ -497,7 +516,6 @@ p { margin: 0 0 8px; }
       <div id="planRes" style="margin-top:10px"></div>
       <div class="boards" id="planBoards" style="margin-top:10px"></div>
       <p class="tapnote" id="planHint"><b>Tap a boat to plan a trip.</b> It shows up on both phones, with who has the tickets and the car reservation.</p>
-      <div id="planResLine"></div>
       <div class="notes" id="planNotes"></div>
       <div class="trips" id="planTrips" style="margin-top:10px"></div>
     </div>
@@ -1127,13 +1145,18 @@ p { margin: 0 0 8px; }
         const chips = [];
         if (hit) chips.push('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
         if (!uniform && rides.has(L)) chips.push(rideChip(rides.get(L)));
-        if (!L.nopax && !gone) { const rr = resRow(plan.key, from, L.t); if (rr) chips.push(resChip(rr)); }
+        const rr = (!L.nopax && !gone) ? resRow(plan.key, from, L.t) : null;
+        if (rr && rr.truck) chips.push('<span class="tag" title="Feet of truck reserved">' + rr.truck + '′ truck</span>');
         const tappable = !L.nopax && (!gone || hit);
-        return '<li class="' + cls + '"' + (tappable ? ' role="button" tabindex="0" data-leg="' + plan.key + '|' + from + '|' + L.t + '" aria-label="' + E.fmt(L.t) + ' from ' + PLACE[from] + (hit ? ', planned trip' : ', tap to plan a trip') + '"' : '') + '><span class="t">' + E.fmt(L.t) + '</span><span class="c">' + c + '</span>' + (chips.length ? '<span class="r2">' + chips.join('') + '</span>' : '') + '</li>';
+        // With reservation counts in, the badge takes the top-right spot and the countdown or arrival moves down a line.
+        const top = rr ? resBadge(rr) : '<span class="c">' + c + '</span>';
+        const second = (rr ? '<span class="sub2">' + c + '</span>' : '') + chips.join('');
+        return '<li class="' + cls + '"' + (tappable ? ' role="button" tabindex="0" data-leg="' + plan.key + '|' + from + '|' + L.t + '" aria-label="' + E.fmt(L.t) + ' from ' + PLACE[from] + (rr ? (rr.full ? ', car reservations full' : ', ' + rr.cars + ' of 4 car reservations taken') : '') + (hit ? ', planned trip' : ', tap to plan a trip') + '"' : '') + '><span class="t">' + boardTime(L.t) + '</span>' + top + (second ? '<span class="r2">' + second + '</span>' : '') + '</li>';
       }).join('') + '</ul></div>';
     };
     setHTML(host, sum + col('si') + col('bh'));
   }
+  function boardTime(min) { const s = E.fmt(min), i = s.indexOf(' '); return s.slice(0, i) + '<small>' + s.slice(i + 1) + '</small>'; }
   function dayWarnings(plan) {
     const b = busyDay(plan), out = [];
     if (b.fb) out.push({ kind: 'busy', text: '<b>Frenchboro day: be there early.</b> With the Frenchboro run in the middle of the day there are fewer Swan’s Island boats, and the ones that run are packed. Get in line at least 30 minutes ahead, or have a car reservation.' });
@@ -1193,7 +1216,7 @@ p { margin: 0 0 8px; }
     renderTrips();
     const st = resStatus(plan.key);
     setHTML($('resWarnNow'), st.warn && st.warn.level === 'red' ? redHTML(st.warn) : '');
-    setHTML($('todayRes'), resHTML(plan.key, false));
+    setHTML($('todayRes'), resPanel(plan.key, { red: false }));
     $('todayFoot').textContent = 'Be at the terminal ' + lineUpMins(plan) + ' minutes before departure' + (busyDay(plan).any ? ' today' : '') + '. Crossing is about 40 minutes. Tap a boat to plan a trip.';
     const st2 = E.boatStatus(plan, NOW.min);
     statusText(plan, st2, NOW.min);
@@ -1207,9 +1230,7 @@ p { margin: 0 0 8px; }
     $('planTitle').innerHTML = longDate(plan) + ' <span class="chip' + (plan.holiday ? ' accent' : '') + '">' + plan.label + '</span>';
     renderBoards(plan, $('planBoards'), NOW.min, isToday);
     $('planHint').hidden = plan.key < todayKey();
-    const pst = resStatus(plan.key);
-    setHTML($('planRes'), pst.warn && pst.warn.level === 'red' ? redHTML(pst.warn) : '');
-    setHTML($('planResLine'), resHTML(plan.key, false));
+    setHTML($('planRes'), resPanel(plan.key, { red: true, unlinked: true }));
     renderNotes(plan, $('planNotes'));
     setHTML($('planTrips'), tripsOn(plan.key).sort((a, b) => a.t - b.t).map(tripCard).join(''));
     renderPlanner(plan);
@@ -1502,7 +1523,9 @@ p { margin: 0 0 8px; }
     const who = store.get('who', null);
     const lbl = document.querySelector('#view-tickets .tally .small');
     if (lbl) lbl.textContent = who ? ('on ' + who + '’s phone') : 'on this phone';
-    $('whoBox').hidden = who !== null;
+    const unlinked = unlinkedNow() && hasCrypto() && who !== '';
+    $('linkBox').hidden = !unlinked;
+    $('whoBox').hidden = who !== null || unlinked;
   }
   let deferredInstall = null;
   const standalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
@@ -1537,7 +1560,8 @@ p { margin: 0 0 8px; }
   async function sha256hex(bytes) { const h = await crypto.subtle.digest('SHA-256', bytes); return Array.from(new Uint8Array(h), x => x.toString(16).padStart(2, '0')).join(''); }
   async function fetchT(url, opts, ms) { const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms || 10000); try { return await fetch(url, Object.assign({ signal: ctl.signal }, opts || {})); } finally { clearTimeout(t); } }
 
-  const FAM = { linked: false, raw: null, key: null, fp: null, notify: {}, ready: Promise.resolve() };
+  const FAM = { linked: false, loading: true, raw: null, key: null, fp: null, notify: {}, ready: Promise.resolve() };
+  const unlinkedNow = () => !FAM.linked && !FAM.loading;   // known not to be linked (not just still reading the key)
   const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false };
   let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null };
   const aadOf = e => enc.encode('v1|' + e.fp + '|' + e.id + '|' + e.k + '|' + e.ts);
@@ -1730,7 +1754,9 @@ p { margin: 0 0 8px; }
     error: 'The daily check hit a snag reading Facebook.'
   };
   function resRow(key, from, t) { const tr = D.traffic[key]; if (!tr) return null; return tr.rows.find(r => r.sec === from && r.t === t) || null; }
-  function resChip(r) { return '<span class="res' + (r.full ? ' full' : '') + '" title="Car reservations taken on this boat, from the Facebook traffic post">Cars ' + Math.min(r.cars, 9) + '/' + E.CAR_RES + (r.full ? ' full' : '') + '</span>' + (r.truck ? '<span class="res" title="Feet of truck reserved">Trucks ' + r.truck + '′</span>' : ''); }
+  const CAR_ICON = '<svg viewBox="0 0 24 16" aria-hidden="true"><path d="M5 7.2 7 2.6C7.4 1.6 8.2 1 9.3 1h5.4c1.1 0 1.9.6 2.3 1.6l2 4.6h.9A2.1 2.1 0 0 1 22 9.3V13h-2.1a2.6 2.6 0 0 1-5.2 0H9.3a2.6 2.6 0 0 1-5.2 0H2V9.3a2.1 2.1 0 0 1 2.1-2.1zm2.4 0h9.2l-1.5-3.6c-.2-.4-.5-.6-1-.6H9.9c-.5 0-.8.2-1 .6z"/></svg>';
+  function resBadge(r) { const n = Math.min(r.cars, 9); return '<span class="rb ' + (r.full ? 'full' : n >= 3 ? 'mid' : 'ok') + '" title="' + (r.full ? 'Car reservations full' : n + ' of ' + E.CAR_RES + ' car reservations taken') + '">' + CAR_ICON + (r.full ? 'FULL' : n + '/' + E.CAR_RES) + '</span>'; }
+  function resChip(r) { return resBadge(r) + (r.truck ? '<span class="tag" title="Feet of truck reserved">' + r.truck + '′ truck</span>' : ''); }
   function resStatus(key) {
     if (!FAM.linked) return {};
     const tr = D.traffic[key]; if (tr) return { tr };
@@ -1752,11 +1778,14 @@ p { margin: 0 0 8px; }
     const fb = D.fbUrl || store.get('fbGroup', null);
     return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow"><a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
   }
-  function resHTML(key, withRed) {
+  // The labeled place to check reservations, above the schedule (Plan tab: also the red box and the link prompt).
+  function resPanel(key, opts) {
+    opts = opts || {};
+    if (!FAM.linked) return (opts.unlinked && unlinkedNow() && hasCrypto() && store.get('who', null) !== '') ? '<div class="resinfo"><span><b>Car reservations</b> show on each boat once this phone is linked.</span><button class="btn navy" data-act="golink">Link this phone</button></div>' : '';
     const st = resStatus(key);
-    if (st.tr) return '<p class="resline">“Cars 2/4” is car reservations taken on that boat (four per boat), from the island’s Facebook traffic post' + (st.tr.label ? ' “' + esc(st.tr.label) + '”' : '') + (st.tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(st.tr.at) + '.</p>';
-    if (st.warn && st.warn.level === 'red') return withRed ? redHTML(st.warn) : '';
-    if (st.warn && st.warn.level === 'quiet') return '<p class="quiet-note">' + st.warn.text + '</p>';
+    if (st.tr) return '<div class="resinfo"><span><b>Car reservations</b> are on each boat: ' + resBadge({ cars: 3, full: false }) + ' means 3 of the boat’s 4 car reservations are taken. From the island’s Facebook traffic post' + (st.tr.label ? ' “' + esc(st.tr.label) + '”' : '') + (st.tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(st.tr.at) + '.</span></div>';
+    if (st.warn && st.warn.level === 'red') return opts.red ? redHTML(st.warn) : '';
+    if (st.warn && st.warn.level === 'quiet') return '<div class="resinfo"><span><b>Car reservations:</b> ' + st.warn.text + '</span></div>';
     return '';
   }
   async function importTraffic(text, src, url) {
@@ -1783,16 +1812,17 @@ p { margin: 0 0 8px; }
     const v = currentBoat(), key = v ? v.boat : 'henrylee', B = VESSELS[key];
     $('plate').textContent = B.plate;
     let src;
-    if (!v) src = 'The usual boat. The app hasn’t heard otherwise' + (FAM.linked ? ' yet.' : '; link the phones on this tab to get the daily check.');
+    if (!v && unlinkedNow()) src = 'Usually the Henry Lee, but this phone can’t tell which boat is running until it’s linked. Link it on this tab (top card) to get the daily check.';
+    else if (!v) src = 'The usual boat. The app hasn’t heard otherwise yet.';
     else if (v.src === 'auto') src = 'From the boats’ AIS signals' + (v.sure === false ? ' (best guess)' : '') + ', checked ' + fmtWhen(v.at);
     else src = esc(v.src) + ' picked it, ' + fmtWhen(v.at);
-    setHTML($('boatNow'), '<b>' + B.name + '</b><span class="small muted">' + src + '</span>');
+    setHTML($('boatNow'), '<b>' + (!v && unlinkedNow() ? 'Not known yet' : B.name) + '</b><span class="small muted">' + src + '</span>');
     setHTML($('boatList'), Object.keys(VESSELS).map(k => {
       const b = VESSELS[k], on = k === key;
       const follow = b.mmsi ? '<a href="https://www.vesselfinder.com/vessels/details/' + b.mmsi + '" target="_blank" rel="noopener">Follow ›</a>' : '<a href="https://www.vesselfinder.com/vessels?name=GOVERNOR+CURTIS" target="_blank" rel="noopener">Find ›</a>';
       return '<div class="boat' + (on ? ' on' : '') + '"><span class="name">' + b.name + '<small>' + b.sub + '</small></span><span class="acts">' + (on ? '<span class="onrun">On the run</span>' : '<button data-boat="' + k + '">This one</button>') + follow + '</span></div>';
     }).join(''));
-    const note = document.querySelector('.chart-note'); if (note) note.textContent = 'Scheduled position · ' + B.short;
+    const note = document.querySelector('.chart-note'); if (note) note.textContent = 'Scheduled position' + (v ? ' · ' + B.short : '');
   }
   function agoHours(a) {
     if (a == null || a === '') return null;
@@ -1937,6 +1967,20 @@ p { margin: 0 0 8px; }
     const tid = S.tid; hideSheet(); toast('Trip removed');
     await publish('t', { tid, del: true, by: me() || '', at: Date.now() }, 'removed a trip');
   }
+  function openLinkSheet() {
+    SHEET = { mode: 'link' };
+    showSheet('<div><div class="eyebrow">Shared between Josh &amp; Sarah</div><h2 id="sheetTitle">Link this phone</h2><div class="sub">Once it’s linked, this phone shows the car reservations on each boat and the boat that’s actually running, and trips you plan show up on both phones. You only do this once.</div></div>' +
+      '<div class="field"><div class="eyebrow">Easiest</div><div>Open the family link on this phone: tap it in your texts, or in Josh’s Claude chat. A phone that’s already linked can send it from Info → “Send … the link”.</div></div>' +
+      '<div class="field"><label class="eyebrow" for="famPaste2">Or copy the link and paste it here</label><input type="text" id="famPaste2" placeholder="https://hectrvictorious.github.io/swans-island-boat/#join=…" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="btnrow"><button class="btn" data-act="pasteclip">Paste</button></div><div class="warnline" id="famMsg2"></div></div>' +
+      '<div class="btnrow sheet-actions"><button class="btn primary" data-act="linkpaste2">Link this phone</button><button class="btn" id="sheetCancel">Cancel</button></div>');
+  }
+  function linkFrom(v, msgEl) {
+    const m = /join=([A-Za-z0-9_-]{43})/.exec(v || '') || /^\s*([A-Za-z0-9_-]{43})\s*$/.exec(v || '');
+    if (!m) { if (msgEl) msgEl.textContent = 'That doesn’t look like the family link. It should have “join=” in it.'; return false; }
+    const w = /who=(Josh|Sarah)/i.exec(v);
+    FAM.ready = FAM.ready.then(() => handleJoin('#join=' + m[1] + (w ? '&who=' + w[1] : ''))).then(() => { derive(); renderAll(); });
+    return true;
+  }
   function openPasteSheet() {
     SHEET = { mode: 'paste' };
     showSheet('<div><div class="eyebrow">Car reservations</div><h2 id="sheetTitle">Paste the traffic post</h2><div class="sub">In the Swan’s Island Facebook group, open the “Traffic” post, copy all of it, and paste it here. The app picks out the date and each boat.</div></div>' +
@@ -2069,7 +2113,7 @@ p { margin: 0 0 8px; }
     const joining = /[#&]join=/.test(startHash);
     buildChart();
     NOW = nowNY(); selected = { y: NOW.y, m: NOW.m, d: NOW.d };
-    FAM.ready = (async () => { try { await loadFamily(); if (joining) await handleJoin(startHash); } catch (e) { /* stays unlinked */ } })();
+    FAM.ready = (async () => { try { await loadFamily(); if (joining) await handleJoin(startHash); } catch (e) { /* stays unlinked */ } FAM.loading = false; })();
     COND.file = store.get('cond', null); CURRENT = merged();
     derive();
     renderNow(); renderFacts(); renderFares(); rides(0);
@@ -2107,7 +2151,11 @@ p { margin: 0 0 8px; }
         else if (act === 'newsok') { store.set('seenVersion', APP_VERSION); $('newsBox').hidden = true; }
         else if (act === 'sendlink') sendLink(a.dataset.to || '');
         else if (act === 'whoami') { store.set('who', null); renderAll(); showView('now'); }
-        else if (act === 'linkpaste') { const v = ($('famPaste') && $('famPaste').value) || ''; const m = /join=([A-Za-z0-9_-]{43})/.exec(v) || /^\s*([A-Za-z0-9_-]{43})\s*$/.exec(v); if (!m) { $('famMsg').textContent = 'That doesn’t look like the family link. It should have “join=” in it.'; return; } const w = /who=(Josh|Sarah)/i.exec(v); FAM.ready = FAM.ready.then(() => handleJoin('#join=' + m[1] + (w ? '&who=' + w[1] : ''))).then(() => { derive(); renderAll(); }); }
+        else if (act === 'linkpaste') linkFrom(($('famPaste') && $('famPaste').value) || '', $('famMsg'));
+        else if (act === 'golink') openLinkSheet();
+        else if (act === 'visitor') { store.set('who', ''); renderAll(); }
+        else if (act === 'pasteclip') { (navigator.clipboard && navigator.clipboard.readText ? navigator.clipboard.readText() : Promise.reject()).then(t => { $('famPaste2').value = (t || '').trim(); }).catch(() => { $('famMsg2').textContent = 'This phone wouldn’t share the clipboard. Press and hold in the box above, then tap Paste.'; }); }
+        else if (act === 'linkpaste2') { if (linkFrom($('famPaste2').value, $('famMsg2'))) hideSheet(); }
         else if (act === 'planpair' && plannerOut !== null && plannerRet !== null) openTripSheet(E.dateKey(selected.y, selected.m, selected.d), plannerFrom, plannerOut, plannerRet);
         return;
       }
