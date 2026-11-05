@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0331';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T1931';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -1654,8 +1654,12 @@ p { margin: 0 0 8px; }
 
   const FAM = { linked: false, loading: true, raw: null, key: null, fp: null, notify: {}, ready: Promise.resolve() };
   const unlinkedNow = () => !FAM.linked && !FAM.loading;   // known not to be linked (not just still reading the key)
-  const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false };
+  const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false,
+    arch: store.get('sync.arch', null) || {}, resent: store.get('sync.resent', null) || {}, archBusy: false, relayFail: 0 };
   let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null, rides: {} };
+  // A slip anywhere on the page must never stop the sharing from loading. The last one shows on Info, for Claude.
+  const DIAG = { err: null };
+  function safe(fn) { try { fn(); } catch (e) { DIAG.err = { msg: String((e && e.message) || e).slice(0, 140), at: Date.now() }; } }
   const aadOf = e => enc.encode('v1|' + e.fp + '|' + e.id + '|' + e.k + '|' + e.ts);
   async function seal(k, payload, id, ts) {
     const env = { v: 1, fp: FAM.fp, id: id || rid(12), k, ts: ts || Date.now() };
@@ -1712,16 +1716,18 @@ p { margin: 0 0 8px; }
     SYNC.ev = keep;
   }
   function derive() {
-    const trips = {}, tripAt = {}, traffic = {}, rides = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null;
+    const trips = {}, tripAt = {}, traffic = {}, rides = {}, racc = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null;
     const evs = Object.values(SYNC.ev).sort((a, b) => ((a.p && a.p.at) || a.ts) - ((b.p && b.p.at) || b.ts));
-    for (const e of evs) {
+    for (const e of evs) { try {
       const p = e.p, at = p.at || e.ts;
       if (e.k === 't') { if (!(p.tid in tripAt) || at >= tripAt[p.tid]) { tripAt[p.tid] = at; trips[p.tid] = p.del ? null : p; } }
       else if (e.k === 'x') { if (!traffic[p.date] || at >= traffic[p.date].at) traffic[p.date] = Object.assign({}, p, { at }); if (p.src !== 'pasted') lastX = Math.max(lastX, at); if (p.url) fbUrl = p.url; }
       else if (e.k === 'b') { if (!vessel || at >= vessel.at) vessel = Object.assign({}, p, { at }); }
       else if (e.k === 'p') { if (!problem || at >= problem.at) problem = Object.assign({}, p, { at }); }
-      else if (e.k === 'r') { rides[p.acct] = Math.max(0, Math.min(999, Number.isInteger(p.set) ? p.set : (rides[p.acct] || 0) + p.d)); }
-    }
+      else if (e.k === 'r') { racc[p.acct] = Number.isInteger(p.set) ? p.set : (racc[p.acct] || 0) + p.d; }
+    } catch (err) { /* skip it */ } }
+    // Rides are summed, then kept between 0 and 999, so two phones' taps add up the same whichever clock is ahead.
+    for (const a in racc) rides[a] = Math.max(0, Math.min(999, racc[a]));
     Object.keys(trips).forEach(k => { if (!trips[k]) delete trips[k]; });
     D = { trips, traffic, vessel, problem, lastX, fbUrl, rides };
   }
@@ -1733,7 +1739,7 @@ p { margin: 0 0 8px; }
       try { const p = await unseal(env); if (!validP(env.k, p)) throw new Error('shape'); SYNC.ev[env.id] = { k: env.k, ts: env.ts, p }; changed = true; }
       catch (e) { SYNC.bad[env.id] = 1; }
     }
-    if (changed) { prune(); saveSync(); derive(); renderAll(); }
+    if (changed) { prune(); saveSync(); safe(derive); safe(renderAll); }
     return changed;
   }
   async function publish(k, payload, buzz) {
@@ -1747,7 +1753,7 @@ p { margin: 0 0 8px; }
     } else {
       SYNC.ev['L' + rid(9)] = { k, ts: Date.now(), p: payload, local: true };
     }
-    prune(); saveSync(); derive(); renderAll();
+    prune(); saveSync(); safe(derive); safe(renderAll);
     return flush();
   }
   async function flush() {
@@ -1775,15 +1781,57 @@ p { margin: 0 0 8px; }
       if (r.ok) {
         const envs = [];
         (await r.text()).split('\n').forEach(line => { if (!line.trim()) return; try { const m = JSON.parse(line); if (m.event === 'message' && m.message) envs.push(JSON.parse(m.message)); } catch (e) { /* not ours */ } });
-        await ingest(envs); SYNC.lastOk = Date.now(); saveSync();
-      }
-    } catch (e) { /* offline */ }
+        await ingest(envs); SYNC.lastOk = Date.now(); SYNC.relayFail = 0; saveSync();
+      } else SYNC.relayFail = Date.now();
+    } catch (e) { SYNC.relayFail = Date.now(); /* offline */ }
     SYNC.polling = false;
     flush();
   }
-  async function loadArchive() {
-    if (!FAM.linked) return;
-    try { const r = await fetchT('data/sync.json', { cache: 'no-store' }, 15000); if (r.ok) { const j = await r.json(); await ingest(j.events || []); } } catch (e) { /* not there yet */ }
+  // The saved copy of the shared messages (data/sync.json). Each read also notes whether this phone could download it
+  // and whether its messages are sealed with this phone's family link, so the red box can say what's really wrong.
+  function loadArchive() {
+    if (!FAM.linked) return Promise.resolve();
+    if (!SYNC.archP) { SYNC.archBusy = true; SYNC.archP = readArchive().catch(() => {}).then(() => { SYNC.archBusy = false; SYNC.archP = null; }); }
+    return SYNC.archP;   // a second caller (the daily check's state()) waits for the read already under way
+  }
+  async function readArchive() {
+    if (SYNC.arch.fp !== FAM.fp) SYNC.arch = { fp: FAM.fp };
+    const a = SYNC.arch;
+    let evs = null;
+    try {
+      const r = await fetchT('data/sync.json', { cache: 'no-store' }, 15000);
+      if (r.ok) { const j = await r.json(); evs = Array.isArray(j && j.events) ? j.events : []; }
+      else if (r.status === 404) evs = [];
+      else throw new Error('status ' + r.status);
+    } catch (e) { a.fail = Date.now(); a.err = e && e.name === 'AbortError' ? 'it timed out' : 'no connection'; }
+    if (evs) {
+      Object.assign(a, { ok: Date.now(), n: evs.length, mine: evs.filter(e => e && e.fp === FAM.fp).length, err: '' });
+      try { await ingest(evs); } catch (e) {}
+      try { await keepAlive(evs); } catch (e) {}
+    }
+    store.set('sync.arch', a);
+    safe(renderNow); if (!$('view-plan').hidden) safe(renderPlan); safe(renderFam);
+  }
+  // GitHub runs the half-hourly copy only every few hours, and the relay forgets a message after 12. So a phone that
+  // has a message the saved copy is still missing (3+ hours on) sends it again, with the same id so it's kept once.
+  async function keepAlive(evs) {
+    const have = new Set(evs.map(e => e && e.id)), now = Date.now(), resent = SYNC.resent;
+    const queued = new Set(SYNC.outbox.map(o => o.env && o.env.id));
+    const newest = {}, latest = {};
+    for (const e of evs) if (e && (e.k === 'b' || e.k === 'p')) newest[e.k] = Math.max(newest[e.k] || 0, e.ts || 0);
+    for (const [id, e] of Object.entries(SYNC.ev)) if ((e.k === 'b' || e.k === 'p') && (!latest[e.k] || e.ts > SYNC.ev[latest[e.k]].ts)) latest[e.k] = id;
+    for (const id of Object.keys(resent)) if (have.has(id) || !SYNC.ev[id]) delete resent[id];
+    const out = [];
+    for (const [id, e] of Object.entries(SYNC.ev)) {
+      if (out.length >= 12) break;
+      if (have.has(id) || queued.has(id) || e.local || !e.p || !/^[A-Za-z0-9_-]{8,40}$/.test(id)) continue;
+      if (now - e.ts < 3 * 3600e3 || now - (resent[id] || 0) < 6 * 3600e3) continue;
+      if ((e.k === 'b' || e.k === 'p') && (latest[e.k] !== id || e.ts <= (newest[e.k] || 0))) continue;
+      const env = await seal(e.k, e.p, id, e.ts); resent[id] = now;
+      if (env.ct.length <= 8000) out.push(env);   // the saved copy turns away anything bigger, so don't keep trying
+    }
+    store.set('sync.resent', resent);
+    if (out.length) { out.forEach(env => SYNC.outbox.push({ env })); saveSync(); flush(); }
   }
 
   /* ----- Planned trips ----- */
@@ -1872,6 +1920,16 @@ p { margin: 0 0 8px; }
       '<circle class="tr" cx="' + f(L + 4.8) + '" cy="8.4" r="1.4"/></svg>';
     return '<span class="trk" title="' + ft + ' feet of truck reserved">' + svg + ft + '′</span>';
   }
+  // Is this phone itself the problem? It can't download the saved copy, or its link doesn't match the family's.
+  function phoneTrouble() {
+    const a = SYNC.arch || {};
+    if (a.fp !== FAM.fp || (!a.ok && !a.fail)) return { loading: true };
+    if (!a.ok) return { text: 'This phone couldn’t download the shared reservation counts (' + (a.err || 'no connection') + ', ' + fmtWhen(a.fail) + '). Check the signal, then close the app and open it again.' };
+    if (a.n > 0 && a.mine === 0) return { fix: 'link', text: 'This phone’s family link doesn’t match the one Josh’s computer uses, so it can’t read the shared counts. Tap “Link again” and paste the family link.' };
+    if (a.fail > a.ok && Date.now() - a.ok > 3 * 3600e3) return { text: 'This phone hasn’t been able to download the shared counts since ' + fmtWhen(a.ok) + '. Check the signal, then close the app and open it again.' };
+    return null;
+  }
+  const dayTag = key => { const p = parseKey(key); return DAYS[E.weekdayOf(p.y, p.m, p.d)].slice(0, 3) + ' ' + p.m + '/' + p.d; };
   function resStatus(key) {
     if (!FAM.linked) return {};
     const tr = D.traffic[key]; if (tr) return { tr };
@@ -1881,17 +1939,21 @@ p { margin: 0 0 8px; }
     if (key === tk) { const plan = E.dayPlan(NOW.y, NOW.m, NOW.d); const last = plan.legs.filter(L => L.to !== 'fb' && L.from !== 'fb').pop(); if (last && NOW.min > last.t) return {}; }
     const due = key === tk ? NOW.min >= 6 * 60 + 15 : NOW.min >= 21 * 60 + 30;
     if (!due) return { warn: { level: 'quiet', text: key === tk ? 'Today’s reservation counts aren’t in yet.' : 'Tomorrow’s reservation counts usually come in during the evening.' } };
+    const title = 'Couldn’t reach ' + (key === tk ? 'today’s' : 'tomorrow’s') + ' reservations (' + dayTag(key) + ')';
+    const ph = phoneTrouble();
+    if (ph && ph.loading) return { warn: { level: 'quiet', text: 'Getting the shared reservation counts…' } };
+    if (ph) return { warn: { level: 'red', title, text: ph.text, fix: ph.fix } };
     const p = D.problem, lastX = D.lastX || 0, now = Date.now();
     if (key === tm && p && p.reason === 'notyet' && p.at > lastX && now - p.at < 30 * 3600e3) return { warn: { level: 'quiet', text: 'Tomorrow’s traffic post wasn’t up yet when the app checked at ' + fmtWhen(p.at) + '. It checks again early in the morning.' } };
     let why;
     if (p && p.at > lastX && now - p.at < 30 * 3600e3) why = (PROBLEM[p.reason] || PROBLEM.error) + ' (' + fmtWhen(p.at) + ')';
     else if (!lastX || now - lastX > 20 * 3600e3) why = 'The daily check on Josh’s computer hasn’t come through' + (lastX ? ' since ' + fmtWhen(lastX) : '') + '. The computer may be asleep, or the Claude app closed.';
     else why = 'The traffic post for ' + (key === tk ? 'today' : 'tomorrow') + ' wasn’t on Facebook when the app last checked, ' + fmtWhen(lastX) + '.';
-    return { warn: { level: 'red', title: 'Couldn’t reach ' + (key === tk ? 'today’s' : 'tomorrow’s') + ' reservations', text: why } };
+    return { warn: { level: 'red', title, text: why } };
   }
   function redHTML(w) {
     const fb = D.fbUrl || store.get('fbGroup', null);
-    return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow"><a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
+    return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow">' + (w.fix === 'link' ? '<button class="btn navy" data-act="golink">Link again</button>' : '') + '<a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
   }
   // The labeled place to check reservations, above the schedule (Plan tab: also the red box and the link prompt).
   function resPanel(key, opts) {
@@ -1984,10 +2046,12 @@ p { margin: 0 0 8px; }
     const b = $('famBody'), who = me(), other = otherOf(who);
     if (!hasCrypto()) { setHTML(b, '<p class="small">This browser can’t do the encryption that sharing needs.</p>'); return; }
     if (FAM.linked) {
-      const status = (SYNC.lastOk ? 'Last checked ' + fmtWhen(SYNC.lastOk) : 'Not checked yet') + (SYNC.outbox.length ? ' · ' + SYNC.outbox.length + ' waiting to send' : '') + (SYNC.lastSent ? ' · last sent ' + fmtWhen(SYNC.lastSent) : '');
+      const a = SYNC.arch || {}, ph = phoneTrouble();
+      const status = 'Sharing check: ' + Object.keys(SYNC.ev).length + ' shared messages on this phone · latest checked ' + (SYNC.lastOk ? fmtWhen(SYNC.lastOk) : 'not yet') + (SYNC.relayFail > SYNC.lastOk ? ' (last try failed, ' + fmtWhen(SYNC.relayFail) + ')' : '') + ' · saved copy read ' + (a.fp === FAM.fp && a.ok ? fmtWhen(a.ok) : 'not yet') + (SYNC.outbox.length ? ' · ' + SYNC.outbox.length + ' waiting to send' : '') + (SYNC.lastSent ? ' · last sent ' + fmtWhen(SYNC.lastSent) : '') +
+        (ph && ph.text ? '<br><b>' + ph.text + '</b>' : '') + (DIAG.err ? '<br>Last hiccup on this phone (for Claude): ' + esc(DIAG.err.msg) + ', ' + fmtWhen(DIAG.err.at) : '');
       setHTML(b, '<p><b>This phone is linked' + (who ? ' as ' + who + '’s' : '') + '.</b> Planned trips, the reservation counts and the boat of the day are shared between your two phones, sealed so only your phones can read them.</p>' +
         '<p class="small muted">' + status + '</p>' +
-        '<div class="btnrow"><button class="btn navy" data-act="sendlink" data-to="' + (other || '') + '">' + (other ? 'Send ' + other + ' the link' : 'Share the link') + '</button><button class="btn" data-act="whoami">Change whose phone</button></div>' +
+        '<div class="btnrow">' + (ph && ph.fix === 'link' ? '<button class="btn navy" data-act="golink">Link again</button>' : '') + '<button class="btn navy" data-act="sendlink" data-to="' + (other || '') + '">' + (other ? 'Send ' + other + ' the link' : 'Share the link') + '</button><button class="btn" data-act="whoami">Change whose phone</button></div>' +
         (who ? '<h3>Get a buzz when ' + (other || 'the other phone') + ' plans a trip</h3><p class="small">Optional. Install the free <b>ntfy</b> app, tap +, and subscribe to this topic. When ' + (other || 'the other phone') + ' saves a trip, your phone pings.</p><div class="phone"><div class="n" style="font-size:14px">' + esc(FAM.notify[who] || '') + '</div><div class="btnrow"><button class="btn copy" data-copy="' + esc(FAM.notify[who] || '') + '">Copy</button></div></div>' : ''));
     } else {
       setHTML(b, '<p>Link this phone to share planned trips and the car reservation counts with ' + (other || 'the family') + '.</p><p class="small">Open the link Josh texted you <b>on this phone</b>. If it opened in a different browser, copy the link and paste it here:</p><div class="field"><input type="text" id="famPaste" placeholder="https://hectrvictorious.github.io/swans-island-boat/#join=…" autocomplete="off" autocapitalize="off" spellcheck="false"></div><div class="btnrow" style="margin-top:8px"><button class="btn navy" data-act="linkpaste">Link this phone</button></div><div class="warnline" id="famMsg"></div>');
@@ -2102,7 +2166,7 @@ p { margin: 0 0 8px; }
     const m = /join=([A-Za-z0-9_-]{43})/.exec(v || '') || /^\s*([A-Za-z0-9_-]{43})\s*$/.exec(v || '');
     if (!m) { if (msgEl) msgEl.textContent = 'That doesn’t look like the family link. It should have “join=” in it.'; return false; }
     const w = /who=(Josh|Sarah)/i.exec(v);
-    FAM.ready = FAM.ready.then(() => handleJoin('#join=' + m[1] + (w ? '&who=' + w[1] : ''))).then(() => { derive(); renderAll(); });
+    FAM.ready = FAM.ready.then(() => handleJoin('#join=' + m[1] + (w ? '&who=' + w[1] : ''))).then(() => { safe(derive); safe(renderAll); });
     return true;
   }
   function openPasteSheet() {
@@ -2132,7 +2196,7 @@ p { margin: 0 0 8px; }
         if (FAM.linked && !D.traffic[want]) todo.push('traffic');
         if (FAM.linked && morning && (boatAge == null || boatAge >= 20)) todo.push('boat');
         const g = /^https:\/\/(www\.)?facebook\.com\/groups\/[^/?#]+/.exec(D.fbUrl || '');
-        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, haveToday: !!D.traffic[tk], haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), waiting: SYNC.outbox.length });
+        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, haveToday: !!D.traffic[tk], sharing: { messages: Object.keys(SYNC.ev).length, savedCopyRead: SYNC.arch.ok ? new Date(SYNC.arch.ok).toISOString() : null, savedCopyMessages: SYNC.arch.n, readable: SYNC.arch.mine, trouble: (t => t ? (t.loading ? 'loading' : t.fix || t.text) : null)(phoneTrouble()) }, haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), waiting: SYNC.outbox.length });
       },
       // posts: the text of the newest one or two Traffic posts on the group page, newest first. Imports any for
       // today or later; if the one wanted now isn't among them, records that so the phones can say why.
@@ -2239,17 +2303,16 @@ p { margin: 0 0 8px; }
     NOW = nowNY(); selected = { y: NOW.y, m: NOW.m, d: NOW.d };
     FAM.ready = (async () => { try { await loadFamily(); if (joining) await handleJoin(startHash); } catch (e) { /* stays unlinked */ } FAM.loading = false; })();
     COND.file = store.get('cond', null); CURRENT = merged();
-    derive();
-    renderNow(); renderFacts(); renderFares(); renderRides();
-    applyWho(); renderBoat(); renderFam(); renderNews(); paint();
+    safe(derive);
+    [renderNow, renderFacts, renderFares, renderRides, applyWho, renderBoat, renderFam, renderNews, paint].forEach(safe);
     loadConditions(); loadLive();
     setInterval(loadConditions, 30 * 60000); setInterval(loadLive, 20 * 60000);
     setupInstall(); loadPhotos(); setupWorker(); exposeAPI();
     if (!window.__STANDALONE_SITE__) $('movedBox').hidden = false;
-    FAM.ready.then(() => { derive(); renderAll(); migrateOldRides(); if (FAM.linked) { loadArchive(); poll(); } });
+    FAM.ready.then(() => { if (FAM.linked) { loadArchive(); poll(); } safe(derive); safe(renderAll); migrateOldRides().catch(() => {}); });
     document.querySelectorAll('#whoBox [data-who]').forEach(b => b.addEventListener('click', () => { store.set('who', b.dataset.who); renderAll(); if (b.dataset.who) toast('Hi, ' + b.dataset.who); }));
     showView(joining ? 'now' : startHash.slice(1) || 'now');
-    window.addEventListener('hashchange', () => { const h = location.hash; if (/[#&]join=/.test(h)) { FAM.ready = FAM.ready.then(() => handleJoin(h)).then(() => { derive(); renderAll(); }); showView('now'); } else showView(h.slice(1)); });
+    window.addEventListener('hashchange', () => { const h = location.hash; if (/[#&]join=/.test(h)) { FAM.ready = FAM.ready.then(() => handleJoin(h)).then(() => { safe(derive); safe(renderAll); }); showView('now'); } else showView(h.slice(1)); });
     window.addEventListener('popstate', () => { if (sheetOpen()) hideSheet(true); });
     document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { if (sheetOpen()) hideSheet(); showView(t.dataset.view); }));
     document.addEventListener('click', e => {

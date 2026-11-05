@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '*/30 * * * *'   # refresh conditions.json and archive the shared (encrypted) trip messages every half hour
+    - cron: '7,37 * * * *'   # every half hour, off the busy :00/:30 marks (GitHub delays those the most): refresh conditions.json and archive the shared (encrypted) messages
   workflow_dispatch:
 
 permissions:
