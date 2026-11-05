@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0318';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0331';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -337,14 +337,15 @@ p { margin: 0 0 8px; }
 .resinfo .btn { padding: 6px 10px; font-size: 14px; }
 .rb.fill { color: var(--t2); background: color-mix(in srgb, var(--t2) 16%, transparent); }
 .board li.next .rb.fill { background: #fff; }
-/* "Getting on with a car": one row per level, in the same colors as the car badges */
-.bsum { display: grid; gap: 7px; }
-.bsum .bs { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: baseline; font-size: 13.5px; color: var(--ink); }
+/* Getting-on tags (Roomy, Filling up, Busy, Tight), in the same colors as the car badges */
 .lv { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
 .lv.l1 { color: var(--good); background: color-mix(in srgb, var(--good) 15%, transparent); }
 .lv.l2 { color: var(--t2); background: color-mix(in srgb, var(--t2) 16%, transparent); }
 .lv.l3 { color: var(--t3); background: color-mix(in srgb, var(--t3) 18%, transparent); }
 .lv.l4 { color: #fff; background: var(--bad); }
+.board li .lv { font-size: 12px; padding: 2px 7px; }
+.board li.next .lv { background: #fff; }
+.board li.next .lv.l4 { color: var(--bad); }
 .ridesum b.k { font-family: var(--font-display); color: var(--ink); }
 .sheet .info .bline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 /* Rides on hand */
@@ -404,6 +405,7 @@ p { margin: 0 0 8px; }
 .trip .when { font-family: var(--font-display); font-size: 17px; font-weight: 700; line-height: 1.2; }
 .trip .when small { font-weight: 500; color: var(--ink-2); font-size: 14px; }
 .trip .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.rgrp { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; max-width: 100%; }
 .trip .tnote { font-style: italic; color: var(--ink-2); font-size: 13.5px; }
 .trip .twarn { font-size: 13px; color: var(--bad); }
 .trip .by { font-size: 12px; color: var(--muted); }
@@ -1194,14 +1196,16 @@ p { margin: 0 0 8px; }
         else if (isToday && !gone) c = 'in ' + E.fmtDur(L.t - nowMin);
         else if (gone) c = 'departed';
         else c = 'arr ' + E.fmt(L.arr).replace(' ', ' ');
+        const rr = (!L.nopax && !gone) ? resRow(plan.key, from, L.t) : null;
+        const lvl = rr ? E.carSpace(rr, busy).level : 0;
         const chips = [];
+        if (rr) chips.push(spaceTag(lvl));
+        if (rr && rr.truck) chips.push(truckBadge(rr.truck));
         if (hit) chips.push('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
         if (!uniform && rides.has(L)) chips.push(rideChip(rides.get(L)));
-        const rr = (!L.nopax && !gone) ? resRow(plan.key, from, L.t) : null;
-        if (rr && rr.truck) chips.push(truckBadge(rr.truck));
         const tappable = !L.nopax && (!gone || hit);
-        // With reservation counts in, the badge takes the top-right spot and the countdown or arrival moves down a line.
-        const top = rr ? resBadge(rr, E.carSpace(rr, busy).level) : '<span class="c">' + c + '</span>';
+        // With reservation counts in, the car badge takes the top-right spot; the arrival, the getting-on tag and the truck go underneath.
+        const top = rr ? resBadge(rr, lvl) : '<span class="c">' + c + '</span>';
         const second = (rr ? '<span class="sub2">' + c + '</span>' : '') + chips.join('');
         return '<li class="' + cls + '"' + (tappable ? ' role="button" tabindex="0" data-leg="' + plan.key + '|' + from + '|' + L.t + '" aria-label="' + E.fmt(L.t) + ' from ' + PLACE[from] + (rr ? (rr.full ? ', car reservations full' : ', ' + rr.cars + ' of 4 car reservations taken') : '') + (hit ? ', planned trip' : ', tap to plan a trip') + '"' : '') + '><span class="t">' + boardTime(L.t) + '</span>' + top + (second ? '<span class="r2">' + second + '</span>' : '') + '</li>';
       }).join('') + '</ul></div>';
@@ -1248,8 +1252,8 @@ p { margin: 0 0 8px; }
       const soon = !tomorrow && mins <= 30;
       const busy = busyDay(p).any;
       const chips = [];
+      const rr = resRow(p.key, from, L.t); if (rr) chips.push(getOn(rr, E.carSpace(rr, busyDay(p)).level));
       const r = rideAt(p.y, p.m, p.d, L.t); if (r) chips.push(rideChip(r));
-      const rr = resRow(p.key, from, L.t); if (rr) chips.push(resChip(rr, E.carSpace(rr, busyDay(p)).level));
       const hit = tripForLeg(p.key, from, L.t); if (hit) chips.unshift('<span class="tag plan">' + (hit.leg === 'back' ? 'Return · ' : 'Planned · ') + esc(whoText(hit.trip.who)) + '</span>');
       return '<div class="tile"><div class="from">Next from ' + PLACE[from] + '</div><div class="time">' + timeHTML(L.t) + '</div><div class="in' + (soon ? ' soon' : '') + '">' + when + (soon ? ' · be there' : '') + '</div><div class="where">to ' + PLACE[L.to] + ' · arrives ' + E.fmt(L.arr) + (busy ? '<br><b>Busy day:</b> line up by ' + E.fmt(L.t - 30) : '') + '</div>' + (chips.length ? '<div class="r2" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">' + chips.join('') + '</div>' : '') + '</div>';
     });
@@ -1805,8 +1809,8 @@ p { margin: 0 0 8px; }
     tags.push('<span class="tag">' + (tr.car ? (tr.res && tr.res !== 'none' ? 'Car · res: ' + esc(tr.res) : 'Car · no reservation') : 'Walking on') + '</span>');
     tags.push('<span class="tag">' + (tr.tix === 'need' ? 'Tickets: to buy' : tr.tix === 'car' ? 'Tickets: in the car' : 'Tickets: ' + esc(tr.tix) + '’s phone') + '</span>');
     if (tr.back) tags.push('<span class="tag">Back ' + E.fmt(tr.back.t) + '</span>');
+    const rr = resRow(tr.date, tr.from, tr.t), cs = E.carSpace(rr, busyDay(plan)); if (rr) tags.push(getOn(rr, cs.level));
     if (!past) { const r = rideAt(p.y, p.m, p.d, tr.t); if (r) tags.push(rideChip(r)); }
-    const rr = resRow(tr.date, tr.from, tr.t), cs = E.carSpace(rr, busyDay(plan)); if (rr) tags.push(resChip(rr, cs.level));
     const warns = [];
     if (!past) {
       if (tr.car && (!tr.res || tr.res === 'none')) { if (cs.level >= 4) warns.push('Tight for cars and no reservation: you may not get on. Call 207-244-3254 or get in line very early.'); else if (cs.level === 3 || (!cs.known && busyDay(plan).any)) warns.push('Busy for cars and no reservation: get in line at least 30 minutes early, or reserve (207-244-3254).'); }
@@ -1849,11 +1853,13 @@ p { margin: 0 0 8px; }
   const CAR_ICON = '<svg viewBox="0 0 24 16" aria-hidden="true"><path d="M5 7.2 7 2.6C7.4 1.6 8.2 1 9.3 1h5.4c1.1 0 1.9.6 2.3 1.6l2 4.6h.9A2.1 2.1 0 0 1 22 9.3V13h-2.1a2.6 2.6 0 0 1-5.2 0H9.3a2.6 2.6 0 0 1-5.2 0H2V9.3a2.1 2.1 0 0 1 2.1-2.1zm2.4 0h9.2l-1.5-3.6c-.2-.4-.5-.6-1-.6H9.9c-.5 0-.8.2-1 .6z"/></svg>';
   // How hard it'll be to get a car on (FerryEngine.carSpace): the car badge wears these colors.
   const SPACE = [null,
-    { label: 'Plenty of room', advice: 'The usual 15 minutes ahead is fine.' },
+    { label: 'Roomy', advice: 'Plenty of room. The usual 15 minutes ahead is fine.' },
     { label: 'Filling up', advice: 'Give yourself a little extra time in line.' },
     { label: 'Busy', advice: 'Without a reservation, get in line at least 30 minutes ahead.' },
     { label: 'Tight', advice: 'Without a reservation you may not get on. Call Bass Harbor (207-244-3254) to reserve, or get in line very early.' }
   ];
+  const spaceTag = level => '<span class="lv l' + level + '" title="Getting on with a car">' + SPACE[level].label + '</span>';
+  const getOn = (rr, lv) => '<span class="rgrp">' + resBadge(rr, lv) + spaceTag(lv) + (rr.truck ? truckBadge(rr.truck) : '') + '</span>';
   function resBadge(r, level) { const n = Math.min(r.cars, 9), lv = level || (r.full ? 4 : n >= 3 ? 3 : 1); return '<span class="rb ' + ['', 'ok', 'fill', 'mid', 'full'][lv] + '" title="' + (r.full ? 'Car reservations full' : n + ' of ' + E.CAR_RES + ' car reservations taken') + (level ? '. Getting on with a car: ' + SPACE[level].label : '') + '">' + CAR_ICON + (r.full ? 'FULL' : n + '/' + E.CAR_RES) + '</span>'; }
   function truckBadge(ft) {
     const L = Math.max(4.5, Math.min(26, ft / 4.5)), W = L + 8, f = n => n.toFixed(1);
@@ -1866,7 +1872,6 @@ p { margin: 0 0 8px; }
       '<circle class="tr" cx="' + f(L + 4.8) + '" cy="8.4" r="1.4"/></svg>';
     return '<span class="trk" title="' + ft + ' feet of truck reserved">' + svg + ft + '′</span>';
   }
-  function resChip(r, level) { return resBadge(r, level) + (r.truck ? truckBadge(r.truck) : ''); }
   function resStatus(key) {
     if (!FAM.linked) return {};
     const tr = D.traffic[key]; if (tr) return { tr };
@@ -1888,29 +1893,12 @@ p { margin: 0 0 8px; }
     const fb = D.fbUrl || store.get('fbGroup', null);
     return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow"><a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
   }
-  // "Getting on with a car" for a day: every boat still to go, grouped Tight / Busy / Filling up / Plenty of room.
-  function boardingHTML(key, isToday) {
-    const tr = D.traffic[key], p = parseKey(key), plan = E.dayPlan(p.y, p.m, p.d), busy = busyDay(plan);
-    const groups = { 1: [], 2: [], 3: [], 4: [] };
-    plan.legs.forEach(L => {
-      if (L.to === 'fb' || L.from === 'fb' || L.nopax || (isToday && L.t <= NOW.min)) return;
-      const rr = resRow(key, L.from, L.t); if (rr) groups[E.carSpace(rr, busy).level].push(L);
-    });
-    const names = list => ['si', 'bh'].map(f => { const ts = list.filter(L => L.from === f).map(L => E.fmt(L.t)); return ts.length ? ts.join(', ') + ' from ' + PLACE[f] : ''; }).filter(Boolean).join(' · ');
-    const shown = [4, 3, 2].filter(l => groups[l].length);
-    const rows = shown.map(l => '<div class="bs"><span class="lv l' + l + '">' + SPACE[l].label + '</span><span>' + names(groups[l]) + '</span></div>');
-    if (groups[1].length) rows.push('<div class="bs"><span class="lv l1">' + SPACE[1].label + '</span><span>' + (shown.length && groups[1].length >= 3 ? 'the other ' + groups[1].length + ' boats' : names(groups[1])) + '</span></div>');
-    if (!rows.length) return '';
-    const plus = busy.summer || busy.fb ? ' It counts ' + (busy.summer && busy.fb ? 'summer and the Frenchboro run' : busy.summer ? 'summer traffic' : 'the Frenchboro run') + ' too.' : '';
-    return '<div class="resinfo bsum"><div><b>Getting on with a car</b></div>' + rows.join('') +
-      '<div class="small muted">On each boat, ' + resBadge({ cars: 3, full: false }, 3) + ' is car reservations taken (of 4) and ' + truckBadge(60) + ' is feet of truck reserved. The color shows how hard it’ll be to get a car on.' + plus + ' From the island’s Facebook traffic post' + (tr.label ? ' “' + esc(tr.label) + '”' : '') + (tr.src === 'pasted' ? ', pasted in' : '') + ', ' + fmtWhen(tr.at) + '. Walking on? Passenger space is rarely the problem.</div></div>';
-  }
   // The labeled place to check reservations, above the schedule (Plan tab: also the red box and the link prompt).
   function resPanel(key, opts) {
     opts = opts || {};
     if (!FAM.linked) return (opts.unlinked && unlinkedNow() && hasCrypto() && store.get('who', null) !== '') ? '<div class="resinfo"><span><b>Car reservations</b> show on each boat once this phone is linked.</span><button class="btn navy" data-act="golink">Link this phone</button></div>' : '';
     const st = resStatus(key);
-    if (st.tr) return boardingHTML(key, !!opts.isToday);
+    if (st.tr) return '';
     if (st.warn && st.warn.level === 'red') return opts.red ? redHTML(st.warn) : '';
     if (st.warn && st.warn.level === 'quiet') return '<div class="resinfo"><span><b>Car reservations:</b> ' + st.warn.text + '</span></div>';
     return '';
@@ -2057,7 +2045,7 @@ p { margin: 0 0 8px; }
       const what = (rr.full ? 'All ' + E.CAR_RES + ' car reservations are taken' : rr.cars + ' of ' + E.CAR_RES + ' car reservations are taken') + (rr.truck ? ', plus ' + rr.truck + ' feet of truck' : '');
       const share = cs.spaces < 1 ? 'hardly any of the boat’s ~16 car spaces are spoken for' : 'about ' + cs.spaces + ' of the boat’s ~16 car spaces are spoken for';
       const plus = cs.bump ? ' ' + (busy.summer && busy.fb ? 'Summer and the Frenchboro run make it busier.' : busy.summer ? 'Summer traffic makes it busier.' : 'The Frenchboro run makes it busier.') : '';
-      info.push('<div class="box"><div class="eyebrow">Getting on with a car</div><div class="bline">' + resChip(rr, cs.level) + ' <span class="lv l' + cs.level + '">' + SP.label + '</span></div><div style="margin-top:6px">' + what + ': ' + share + '.' + plus + ' ' + SP.advice + '</div><div class="small muted" style="margin-top:4px">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '. Walking on? Passenger space is rarely the problem.</div></div>');
+      info.push('<div class="box"><div class="eyebrow">Getting on with a car</div><div class="bline">' + getOn(rr, cs.level) + '</div><div style="margin-top:6px">' + what + ': ' + share + '.' + plus + ' ' + SP.advice + '</div><div class="small muted" style="margin-top:4px">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '. Walking on? Passenger space is rarely the problem.</div></div>');
     } else {
       const st = resStatus(S.key);
       if (st.warn && st.warn.level === 'red') info.push('<div class="box"><b style="color:var(--bad)">' + st.warn.title + '</b><div class="small">' + st.warn.text + '</div></div>');
