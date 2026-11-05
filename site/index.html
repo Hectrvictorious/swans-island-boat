@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0139';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T0148';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -896,6 +896,7 @@ p { margin: 0 0 8px; }
       const ln = lines[i];
       const h = /^(SI|S\.I\.|Swan'?s?(?:\s+Island)?|BH|B\.H\.|Bass\s+Harbou?r|FB|F\.B\.|French\s*boro)\b.*\btraffic\b/i.exec(ln) || /^(SI|BH|FB)\s*:?\s*$/i.exec(ln);
       if (h) { const w = h[1].toLowerCase().replace(/[^a-z]/g, ''); sec = /^(si|swan)/.test(w) ? 'si' : /^(bh|bass)/.test(w) ? 'bh' : 'fb'; continue; }
+      if (/^(like|comment|share|reply|all reactions:?|write a (public )?comment|most relevant|view more comments|see translation)\b/i.test(ln)) break;   // Facebook's buttons and the comments below the post
       if (!sec) continue;
       const m = /^(\d{1,2})[:.](\d{2})(?:\s*([ap])\.?m\.?(?![a-z]))?\s*(.*)$/i.exec(ln);
       if (!m) { if (/traffic/i.test(ln)) sec = null; continue; }
@@ -1719,6 +1720,7 @@ p { margin: 0 0 8px; }
     const due = key === tk ? NOW.min >= 6 * 60 + 15 : NOW.min >= 21 * 60 + 30;
     if (!due) return { warn: { level: 'quiet', text: key === tk ? 'Today’s reservation counts aren’t in yet.' : 'Tomorrow’s reservation counts usually come in during the evening.' } };
     const p = D.problem, lastX = D.lastX || 0, now = Date.now();
+    if (key === tm && p && p.reason === 'notyet' && p.at > lastX && now - p.at < 30 * 3600e3) return { warn: { level: 'quiet', text: 'Tomorrow’s traffic post wasn’t up yet when the app checked at ' + fmtWhen(p.at) + '. It checks again early in the morning.' } };
     let why;
     if (p && p.at > lastX && now - p.at < 30 * 3600e3) why = (PROBLEM[p.reason] || PROBLEM.error) + ' (' + fmtWhen(p.at) + ')';
     else if (!lastX || now - lastX > 20 * 3600e3) why = 'The daily check on Josh’s computer hasn’t come through' + (lastX ? ' since ' + fmtWhen(lastX) : '') + '. The computer may be asleep, or the Claude app closed.';
@@ -1744,6 +1746,7 @@ p { margin: 0 0 8px; }
     const prev = D.traffic[r.date];
     const same = !!prev && JSON.stringify(prev.rows) === JSON.stringify(r.rows);
     const fbu = url && /^https:\/\/(www\.|m\.)?facebook\.com\//.test(url) ? String(url).split('?')[0] : store.get('fbGroup', null);
+    const grp = fbu && /^https:\/\/(www\.|m\.)?facebook\.com\/groups\/[^/?#]+/.exec(fbu); if (grp) store.set('fbGroup', grp[0].replace('://m.', '://www.'));
     await publish('x', { date: r.date, label: r.label, rows: r.rows, src: src === 'pasted' ? 'pasted' : 'facebook', url: fbu || null, by: me() || 'auto', at: Date.now() });
     return { ok: true, date: r.date, label: r.label, which, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, same, linked: FAM.linked, waiting: SYNC.outbox.length };
   }
@@ -1930,10 +1933,36 @@ p { margin: 0 0 8px; }
     const done = r => { window.__boatLast = r; return r; };
     window.boatAPI = {
       version: APP_VERSION,
+      // What the daily check should do now: todo lists 'traffic' (copy the Facebook post) and/or 'boat' (AIS check).
       async state() {
         await FAM.ready; await poll(); await loadArchive();
-        const tk = todayKey(), tm = tomorrowKey(), v = currentBoat();
-        return done({ version: APP_VERSION, linked: FAM.linked, today: tk, haveToday: !!D.traffic[tk], haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: v ? Math.round((Date.now() - v.at) / 3.6e6) : null, fbGroup: store.get('fbGroup', null), waiting: SYNC.outbox.length });
+        NOW = nowNY();
+        const tk = todayKey(), tm = tomorrowKey(), v = currentBoat(), morning = NOW.min < 12 * 60;
+        const want = morning ? tk : tm, wp = parseKey(want), boatAge = v ? (Date.now() - v.at) / 3.6e6 : null;
+        const todo = [];
+        if (FAM.linked && !D.traffic[want]) todo.push('traffic');
+        if (FAM.linked && morning && (boatAge == null || boatAge >= 20)) todo.push('boat');
+        const g = /^https:\/\/(www\.)?facebook\.com\/groups\/[^/?#]+/.exec(D.fbUrl || '');
+        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, haveToday: !!D.traffic[tk], haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), waiting: SYNC.outbox.length });
+      },
+      // posts: the text of the newest one or two Traffic posts on the group page, newest first. Imports any for
+      // today or later; if the one wanted now isn't among them, records that so the phones can say why.
+      async importPosts(posts, url) {
+        await FAM.ready; if (!FAM.linked) return done({ ok: false, error: 'not linked' });
+        NOW = nowNY();
+        const tk = todayKey(), want = NOW.min < 12 * 60 ? tk : tomorrowKey();
+        const list = (Array.isArray(posts) ? posts : [posts]).filter(x => typeof x === 'string' && x.trim()).slice(0, 4);
+        const got = [];
+        for (const text of list) {
+          const r = E.parseTraffic(text, { y: NOW.y, m: NOW.m, d: NOW.d });
+          if (r.error || r.date < tk || got.some(x => x.date === r.date)) continue;
+          await importTraffic(text, 'facebook', url);
+          got.push({ date: r.date, label: r.label, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length });
+        }
+        const haveWanted = !!D.traffic[want];
+        if (!haveWanted) await publish('p', { reason: list.length ? 'notyet' : 'notfound', note: list.length ? 'newest post seen: ' + (String(list[0]).split('\n').find(l => /\d\/\d/.test(l)) || '').slice(0, 60) : '', at: Date.now() });
+        await flush();
+        return done({ ok: true, want, got, haveWanted, waiting: SYNC.outbox.length });
       },
       async importTraffic(text, src, url) { await FAM.ready; const r = await importTraffic(text, src, url); return done(Object.assign(r, { waiting: SYNC.outbox.length })); },
       async reportProblem(reason, note) {
