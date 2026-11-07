@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261105T1931';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261107T2103';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -421,6 +421,20 @@ p { margin: 0 0 8px; }
 .news { display: grid; gap: 8px; border-radius: 14px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--accent); font-size: 14px; }
 .news b { font-family: var(--font-display); font-size: 17px; }
 .news[hidden] { display: none; }
+/* A package to pick up: the big banner at the top of Now */
+.pkg { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; align-items: start; border-radius: 16px; padding: 16px; background: color-mix(in srgb, var(--warn) 16%, var(--surface)); border: 2px solid var(--warn); box-shadow: var(--shadow); }
+.pkg[hidden] { display: none; }
+.pkg .pkg-ic { width: 52px; height: 52px; color: var(--warn); }
+.pkg h2 { font-family: var(--font-display); font-size: 24px; line-height: 1.1; margin: 0; color: var(--ink); }
+.pkg .pkg-who { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-top: 6px; color: var(--ink); }
+.pkg .pkg-who span { display: block; }
+.pkg .pkg-who small { font-weight: 500; font-size: 14px; color: var(--ink-2); }
+.pkg p { margin: 0; font-size: 13.5px; color: var(--ink-2); grid-column: 1 / -1; }
+.pkg .btnrow { grid-column: 1 / -1; }
+/* Mainesota Grill */
+.grill-head { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; margin-bottom: 10px; }
+.grill-head h2 { margin: 2px 0 4px; }
+.grill-ic { width: 40px; height: 40px; color: var(--accent); }
 
 /* Ride detail in the conditions card */
 .stat.ride { display: block; }
@@ -497,6 +511,7 @@ p { margin: 0 0 8px; }
 
   <!-- NOW -->
   <section class="view" id="view-now">
+    <div class="pkg" id="pkgBox" role="alert" hidden></div>
     <div class="install" id="movedBox" hidden>
       <div><b>The boat is an app now</b><span>Open the new address in your phone's browser and tap Install. It works without a signal and updates the wind on its own.</span></div>
       <div class="btnrow"><a class="btn primary" href="https://hectrvictorious.github.io/swans-island-boat/" target="_blank" rel="noopener">Open the app ›</a></div>
@@ -520,6 +535,13 @@ p { margin: 0 0 8px; }
     <div class="card" id="tripsCard" hidden>
       <div class="cond-head"><h2>Planned trips</h2><span class="chip" id="syncChip"></span></div>
       <div class="trips" id="tripsList" style="margin-top:10px"></div>
+    </div>
+    <div class="card grill" id="grillCard">
+      <div class="grill-head">
+        <svg class="grill-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v8M5 2v5a2 2 0 0 0 4 0V2M7 10v12M17 2c-2 1-3 4-3 7v3h3v10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><div class="eyebrow">Food on the island</div><h2>Mainesota Grill</h2><div class="small muted">The food trailer at 737 Atlantic Road. Order ahead and pick a pickup time; today’s hours and menu are on their Facebook page.</div></div>
+      </div>
+      <div class="btnrow"><a class="btn navy" id="grillOrder" href="https://cash.app/$mainesotagrill/l/CALL_CAESDUxTQVBBTTcwQlY3WEY">Order online</a><a class="btn" href="https://www.facebook.com/profile.php?id=61590444767215" target="_blank" rel="noopener">Menu &amp; hours</a><a class="btn" href="https://www.google.com/maps/dir/?api=1&amp;destination=737%20Atlantic%20Road%2C%20Swans%20Island%2C%20ME%2004685" target="_blank" rel="noopener">Directions</a></div>
     </div>
     <div class="card cond" id="condCard">
       <div class="cond-head"><h2>Conditions</h2><span class="chip" id="condStamp">loading…</span></div>
@@ -613,6 +635,10 @@ p { margin: 0 0 8px; }
     <div class="card" id="famCard">
       <h2>Shared between Josh &amp; Sarah</h2>
       <div id="famBody"><p class="small muted">Loading…</p></div>
+    </div>
+    <div class="card" id="pkgCard">
+      <h2>Packages at TIMS</h2>
+      <div id="pkgInfo" class="small"><p class="muted">Loading…</p></div>
     </div>
     <div class="card" id="photosCard" hidden>
       <h2 id="photosTitle">Our island</h2>
@@ -1002,7 +1028,51 @@ p { margin: 0 0 8px; }
     return { level: Math.min(4, level + bump), base: level, spaces: spaces == null ? null : Math.round(spaces), known: !!rr, bump };
   }
 
-  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, CAR_SPACES, carSpace, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic };
+  // ----- Packages: the daily "FedEx/UPS at TIMS (Saturday 11/7)" list in the HOPKINS FREIGHT group -----
+  // One name per line, with the count in parentheses before or after it: "(2) Sarah Greene", "Jane Doe (2)",
+  // "(1+1 in back room) …". Josh and Sarah are matched by their whole names, so a "Joshua Sarah Doe" or a
+  // "(3+1 for Josh) Mary Smith" line doesn't count. Only their lines come back; nobody else's name leaves here.
+  const PKG_WHO = [
+    ['Both', /^(?:josh(?:ua)?\s*(?:&|and|\+)\s*sarah?|sarah?\s*(?:&|and|\+)\s*josh(?:ua)?)\s+greene?$/],
+    ['Josh', /^josh(?:ua)?(?:\s+[a-z]\.?)?\s+greene?$/],
+    ['Sarah', /^sarah?(?:\s+[a-z]\.?)?\s+greene?$/],
+    ['Greene', /^(?:the\s+)?greenes?(?:\s+family)?$/]
+  ];
+  function pkgWho(name) {
+    let n = String(name).normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/['’`]/g, '')
+      .replace(/[^a-z&+,.\s]/g, ' ').replace(/\s+/g, ' ').trim().replace(/[.,\s]+$/, '');
+    const flip = /^([a-z]+)\s*,\s*([a-z][a-z.\s]*)$/.exec(n); if (flip) n = flip[2].trim() + ' ' + flip[1];   // "Greene, Sarah"
+    for (const [who, re] of PKG_WHO) if (re.test(n)) return who;
+    return null;
+  }
+  function parsePackages(text, today) {
+    const lines = String(text || '').replace(/\r/g, '').replace(/[   ]/g, ' ').split('\n').map(s => s.trim()).filter(Boolean);
+    let date = null, label = '', i0 = 0;
+    for (let i = 0; i < lines.length && !date; i++) {
+      const m = /(^|[^\d/:])(1[0-2]|0?[1-9])\/(3[01]|[12]\d|0?[1-9])(?:\/(\d{4}|\d{2}))?(?![\d/])/.exec(lines[i]);
+      if (m) { const y = m[4] ? (m[4].length === 2 ? 2000 + +m[4] : +m[4]) : nearestYear(+m[2], +m[3], today); date = { y, m: +m[2], d: +m[3] }; label = lines[i].slice(0, 80); i0 = i + 1; }
+    }
+    if (!date) return { error: 'There is no date like 11/7 in that text.' };
+    const hits = []; let names = 0;
+    for (let i = i0; i < lines.length; i++) {
+      const raw = lines[i].replace(/\s*…?\s*see (more|less)$/i, '').trim();
+      if (/^(like|comment|share|reply|all reactions:?|write a (public )?comment|comment as|most relevant|view more comments|see translation)\b/i.test(raw)) break;   // Facebook's buttons
+      if (!raw || /^[-–—_=*•.~\s]+$/.test(raw) || /^\d+$/.test(raw)) continue;
+      names++;
+      let count = null, note = '';
+      const name = raw.replace(/\(([^)]*)\)/g, (all, inner) => {
+        const c = /^\s*(\d+)(?:\s*\+\s*(\d+))?\s*(.*)$/.exec(inner);
+        if (c && count == null) { count = +c[1] + (c[2] ? +c[2] : 0); if (c[2] || c[3]) note = inner.trim(); }
+        else if (!note) note = inner.trim();
+        return ' ';
+      }).replace(/\s*(?:[-–—:]|x|×)\s*(\d+)\s*$/i, (all, n) => { if (count == null) count = +n; return ''; }).trim();
+      const who = pkgWho(name);
+      if (who) hits.push({ who, count, note: note.slice(0, 60), line: raw.slice(0, 80) });
+    }
+    return { date, key: dateKey(date.y, date.m, date.d), label, names, hits };
+  }
+
+  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, CAR_SPACES, carSpace, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic, parsePackages };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FerryEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1032,6 +1102,8 @@ p { margin: 0 0 8px; }
   function longDate(p) { return DAYS[p.wd] + ', ' + MONTHS[p.m - 1] + ' ' + p.d + ', ' + p.y; }
   const PLACE = { si: "Swan's Island", bh: 'Bass Harbor', fb: 'Frenchboro' };
   // Google Maps directions to each terminal (opens the Maps app on a phone)
+  // Packages: the HOPKINS FREIGHT group posts the day's "FedEx/UPS at TIMS" list (The Island Market & Supply).
+  const PKG_GROUP = 'https://www.facebook.com/groups/898931673972730/';
   const DIRECTIONS = {
     bh: 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent('45 Granville Rd, Bass Harbor, ME 04653'),
     si: 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent('118 Ferry Rd, Swans Island, ME 04685')
@@ -1040,7 +1112,7 @@ p { margin: 0 0 8px; }
   const setHTML = (el, html) => { if (el && el.__html !== html) { el.innerHTML = html; el.__html = html; } };
 
   /* ----- App identity, people, and the shared relay ----- */
-  const APP_VERSION = '2026.11.05b';
+  const APP_VERSION = '2026.11.07a';
   const APP_URL = 'https://hectrvictorious.github.io/swans-island-boat/';
   const NTFY = 'https://ntfy.sh/';
   const SYNC_TOPIC = 'sibferry-fpu8hwfns6miyy6d3c0z';   // public relay channel; everything sent through it is encrypted with the family key
@@ -1270,6 +1342,7 @@ p { margin: 0 0 8px; }
     renderNotes(plan, $('todayNotes'));
     renderNext(plan, NOW.min);
     renderTrips();
+    safe(renderPkg);
     const st = resStatus(plan.key);
     setHTML($('resWarnNow'), st.warn && st.warn.level === 'red' ? redHTML(st.warn) : '');
     setHTML($('todayRes'), resPanel(plan.key, { red: false, isToday: true }));
@@ -1656,7 +1729,7 @@ p { margin: 0 0 8px; }
   const unlinkedNow = () => !FAM.linked && !FAM.loading;   // known not to be linked (not just still reading the key)
   const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false,
     arch: store.get('sync.arch', null) || {}, resent: store.get('sync.resent', null) || {}, archBusy: false, relayFail: 0 };
-  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null, rides: {} };
+  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null, rides: {}, pkg: null, pkgAck: {} };
   // A slip anywhere on the page must never stop the sharing from loading. The last one shows on Info, for Claude.
   const DIAG = { err: null };
   function safe(fn) { try { fn(); } catch (e) { DIAG.err = { msg: String((e && e.message) || e).slice(0, 140), at: Date.now() }; } }
@@ -1701,6 +1774,8 @@ p { margin: 0 0 8px; }
     if (k === 'x') return /^\d{4}-\d\d-\d\d$/.test(p.date) && Array.isArray(p.rows) && p.rows.length < 80;
     if (k === 'b') return Object.prototype.hasOwnProperty.call(VESSELS, p.boat);
     if (k === 'p') return typeof p.reason === 'string';
+    if (k === 'f') return typeof p.ack === 'string' ? /^\d{4}-\d\d-\d\d$/.test(p.ack) && typeof p.sig === 'string' && p.sig.length < 200
+      : /^\d{4}-\d\d-\d\d$/.test(p.date) && Array.isArray(p.hits) && p.hits.length <= 10 && p.hits.every(h => h && Object.prototype.hasOwnProperty.call(PKG_NAME, h.who));
     if (k === 'r') return /^(Josh|Sarah)\.(car|pass)$/.test(p.acct) && (Number.isInteger(p.set) ? p.set >= 0 && p.set < 1000 : Number.isInteger(p.d) && Math.abs(p.d) <= 20);
     return false;
   }
@@ -1710,13 +1785,14 @@ p { margin: 0 0 8px; }
       if (e.k === 't') { if (now - e.ts < 400 * 864e5) keep[id] = e; }
       else if (e.k === 'x') { if (now - e.ts < 21 * 864e5) keep[id] = e; }
       else if (e.k === 'r') { if (now - e.ts < 1100 * 864e5) keep[id] = e; }
+      else if (e.k === 'f') { if (now - e.ts < 21 * 864e5) keep[id] = e; }
       else if (last[e.k]) last[e.k].push([id, e]);
     }
     for (const k of ['b', 'p']) last[k].sort((a, b) => b[1].ts - a[1].ts).slice(0, 6).forEach(([id, e]) => { keep[id] = e; });
     SYNC.ev = keep;
   }
   function derive() {
-    const trips = {}, tripAt = {}, traffic = {}, rides = {}, racc = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null;
+    const trips = {}, tripAt = {}, traffic = {}, rides = {}, racc = {}, pkgAck = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null, pkg = null;
     const evs = Object.values(SYNC.ev).sort((a, b) => ((a.p && a.p.at) || a.ts) - ((b.p && b.p.at) || b.ts));
     for (const e of evs) { try {
       const p = e.p, at = p.at || e.ts;
@@ -1725,11 +1801,12 @@ p { margin: 0 0 8px; }
       else if (e.k === 'b') { if (!vessel || at >= vessel.at) vessel = Object.assign({}, p, { at }); }
       else if (e.k === 'p') { if (!problem || at >= problem.at) problem = Object.assign({}, p, { at }); }
       else if (e.k === 'r') { racc[p.acct] = Number.isInteger(p.set) ? p.set : (racc[p.acct] || 0) + p.d; }
+      else if (e.k === 'f') { if (typeof p.ack === 'string') (pkgAck[p.ack] = pkgAck[p.ack] || []).push(p.sig); else if (!pkg || p.date > pkg.date || (p.date === pkg.date && at >= pkg.at)) pkg = Object.assign({}, p, { at }); }
     } catch (err) { /* skip it */ } }
     // Rides are summed, then kept between 0 and 999, so two phones' taps add up the same whichever clock is ahead.
     for (const a in racc) rides[a] = Math.max(0, Math.min(999, racc[a]));
     Object.keys(trips).forEach(k => { if (!trips[k]) delete trips[k]; });
-    D = { trips, traffic, vessel, problem, lastX, fbUrl, rides };
+    D = { trips, traffic, vessel, problem, lastX, fbUrl, rides, pkg, pkgAck };
   }
   async function ingest(list) {
     if (!FAM.linked) return false;
@@ -1978,6 +2055,35 @@ p { margin: 0 0 8px; }
     return { ok: true, date: r.date, label: r.label, which, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, same, linked: FAM.linked, waiting: SYNC.outbox.length };
   }
 
+  /* ----- Packages at TIMS: the big banner on Now, and what the last check saw on Info ----- */
+  const PKG_NAME = { Josh: 'Josh', Sarah: 'Sarah', Both: 'Josh & Sarah', Greene: '“Greene”' };
+  const PKG_ICON = '<svg class="pkg-ic" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 42 13v22L24 44 6 35V13Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M6 13l18 9 18-9M24 22v22M15 8.5l18 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg>';
+  const pkgSig = hits => (hits || []).map(h => h.who + ':' + (h.count == null ? '' : h.count)).sort().join(',');
+  const pkgLine = h => '<span>' + PKG_NAME[h.who] + (h.count ? ' · ' + h.count + (h.count === 1 ? ' package' : ' packages') : '') + (h.note ? ' <small>(' + esc(h.note) + ')</small>' : '') + '</span>';
+  function renderPkg() {
+    const P = D.pkg, box = $('pkgBox'), info = $('pkgInfo');
+    const ld = P ? parseKey(P.date) : null, day = ld ? DAYS[E.weekdayOf(ld.y, ld.m, ld.d)] + ' ' + ld.m + '/' + ld.d : '';
+    const age = ld ? Math.round((Date.UTC(NOW.y, NOW.m - 1, NOW.d) - Date.UTC(ld.y, ld.m - 1, ld.d)) / 864e5) : 99;
+    const show = !!(P && P.hits.length && age <= 3 && !(D.pkgAck[P.date] || []).includes(pkgSig(P.hits)));
+    if (show) {
+      const many = P.hits.length > 1 || P.hits.some(h => h.who === 'Both' || (h.count || 1) > 1);
+      setHTML(box, PKG_ICON + '<div><h2>' + (many ? 'Packages' : 'Package') + ' to pick up at TIMS</h2><div class="pkg-who">' + P.hits.map(pkgLine).join('') + '</div></div>' +
+        '<p>On the Hopkins Freight list for ' + day + (P.hits.some(h => h.who === 'Greene') ? '. That line just says “Greene,” so it could be either of you.' : '.') + ' Checked ' + fmtWhen(P.at) + '.</p>' +
+        '<div class="btnrow"><button class="btn navy" data-act="pkgok">Got it</button><a class="btn" href="' + PKG_GROUP + '" target="_blank" rel="noopener">See the list</a></div>');
+    } else setHTML(box, '');
+    box.hidden = !show;
+    if (!info) return;
+    let txt;
+    if (!P) txt = FAM.linked ? 'Not checked yet. The daily check on Josh’s computer reads the Hopkins Freight list (FedEx and UPS at TIMS) each morning and evening, and a big banner on the Now tab says when there’s a package for Josh or Sarah.' : 'Once this phone is linked, a big banner on the Now tab says when the daily list at TIMS has a package for Josh or Sarah.';
+    else txt = 'Last list checked: ' + esc(P.label || day) + ', ' + fmtWhen(P.at) + '. ' + (P.hits.length ? 'For you: ' + P.hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')).join(', ') + '.' : 'Nothing for Josh or Sarah' + (P.names ? ' among the ' + P.names + ' names on it' : '') + '.');
+    setHTML(info, '<p>' + txt + '</p><div class="btnrow"><a class="btn" href="' + PKG_GROUP + '" target="_blank" rel="noopener">Open the Hopkins Freight list</a></div>');
+  }
+  async function pkgGotIt() {
+    const P = D.pkg; if (!P) return;
+    await publish('f', { ack: P.date, sig: pkgSig(P.hits), by: me() || '', at: Date.now() });
+    toast(FAM.linked ? 'Got it. Cleared on both phones.' : 'Got it.');
+  }
+
   /* ----- Which boat is on the run ----- */
   const VESSELS = {
     henrylee: { name: 'Captain Henry Lee', short: 'Henry Lee', plate: 'CAPT. HENRY LEE · 130 ft', mmsi: '367334890', sub: 'the regular Swan’s Island boat · 130 ft · built 1992' },
@@ -2195,8 +2301,10 @@ p { margin: 0 0 8px; }
         const todo = [];
         if (FAM.linked && !D.traffic[want]) todo.push('traffic');
         if (FAM.linked && morning && (boatAge == null || boatAge >= 20)) todo.push('boat');
+        const pkgAge = D.pkg ? (Date.now() - D.pkg.at) / 3.6e6 : null;
+        if (FAM.linked && (pkgAge == null || pkgAge >= 6)) todo.push('packages');
         const g = /^https:\/\/(www\.)?facebook\.com\/groups\/[^/?#]+/.exec(D.fbUrl || '');
-        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, haveToday: !!D.traffic[tk], sharing: { messages: Object.keys(SYNC.ev).length, savedCopyRead: SYNC.arch.ok ? new Date(SYNC.arch.ok).toISOString() : null, savedCopyMessages: SYNC.arch.n, readable: SYNC.arch.mine, trouble: (t => t ? (t.loading ? 'loading' : t.fix || t.text) : null)(phoneTrouble()) }, haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), waiting: SYNC.outbox.length });
+        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, haveToday: !!D.traffic[tk], sharing: { messages: Object.keys(SYNC.ev).length, savedCopyRead: SYNC.arch.ok ? new Date(SYNC.arch.ok).toISOString() : null, savedCopyMessages: SYNC.arch.n, readable: SYNC.arch.mine, trouble: (t => t ? (t.loading ? 'loading' : t.fix || t.text) : null)(phoneTrouble()) }, haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), pkgGroup: PKG_GROUP, packages: D.pkg ? { list: D.pkg.date, forUs: D.pkg.hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')), checkedHoursAgo: Math.round(pkgAge) } : null, waiting: SYNC.outbox.length });
       },
       // posts: the text of the newest one or two Traffic posts on the group page, newest first. Imports any for
       // today or later; if the one wanted now isn't among them, records that so the phones can say why.
@@ -2217,6 +2325,26 @@ p { margin: 0 0 8px; }
         await flush();
         return done({ ok: true, want, got, haveWanted, waiting: SYNC.outbox.length });
       },
+      // posts: the newest one or two "FedEx/UPS at TIMS" posts from the HOPKINS FREIGHT group, newest first, either as
+      // text or as { title, lines, names } with only the lines that mention Greene. Finds Josh's and Sarah's packages.
+      async importPackages(posts) {
+        await FAM.ready; if (!FAM.linked) return done({ ok: false, error: 'not linked' });
+        NOW = nowNY();
+        const today = { y: NOW.y, m: NOW.m, d: NOW.d };
+        let best = null;
+        for (const x of (Array.isArray(posts) ? posts : [posts]).slice(0, 4)) {
+          const text = typeof x === 'string' ? x : (x && typeof x === 'object') ? [String(x.title || '')].concat(Array.isArray(x.lines) ? x.lines.map(String) : []).join('\n') : '';
+          const r = E.parsePackages(text, today);
+          if (r.error) continue;
+          if (x && typeof x === 'object' && Number.isInteger(x.names)) r.names = x.names;
+          if (!best || r.key > best.key) best = r;
+        }
+        if (!best) return done({ ok: true, found: false });
+        const hits = best.hits.slice(0, 10).map(h => ({ who: h.who, count: h.count, note: h.note, line: h.line }));
+        await publish('f', { date: best.key, label: best.label, hits, names: best.names, src: 'facebook', by: me() || 'auto', at: Date.now() });
+        await flush();
+        return done({ ok: true, found: true, list: best.key, label: best.label, names: best.names, forUs: hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')), banner: hits.length > 0 && !(D.pkgAck[best.key] || []).includes(pkgSig(hits)), waiting: SYNC.outbox.length });
+      },
       async importTraffic(text, src, url) { await FAM.ready; const r = await importTraffic(text, src, url); return done(Object.assign(r, { waiting: SYNC.outbox.length })); },
       async reportProblem(reason, note) {
         await FAM.ready; if (!FAM.linked) return done({ ok: false, error: 'not linked' });
@@ -2235,7 +2363,7 @@ p { margin: 0 0 8px; }
     if (seen === APP_VERSION) { box.hidden = true; return; }
     const returning = store.get('cond', null) !== null || store.get('who', null) !== null || store.get('factIdx', null) !== null;
     if (!returning) { store.set('seenVersion', APP_VERSION); box.hidden = true; return; }
-    setHTML(box, '<b>New in the boat app</b><div>Tap any boat on the <a href="#plan">Plan</a> tab to plan a trip; it shows up on both phones. Each boat shows its car reservations and how hard it’ll be to get a car on, and the crossing weather is rated separately. Rides on hand (Tickets tab) now counts each of your cars and passenger tickets, on both phones.</div>' +
+    setHTML(box, '<b>New in the boat app</b><div>Packages: when the daily FedEx and UPS list at TIMS has a package for Josh or Sarah, a big banner at the top of this tab says so. Tap Got it once you’ve seen it, and it clears on both phones. Hungry? The Mainesota Grill card further down opens their order-ahead page.</div>' +
       (FAM.linked ? '' : '<div class="small">' + (me() === 'Sarah' ? 'To share trips with Josh, open the link he texts you.' : 'To share trips, link the phones on the Info tab.') + '</div>') +
       '<div class="btnrow"><button class="btn" data-act="newsok">Got it</button></div>');
     box.hidden = false;
@@ -2342,6 +2470,7 @@ p { margin: 0 0 8px; }
         else if (act === 'whoami') { store.set('who', null); renderAll(); showView('now'); }
         else if (act === 'linkpaste') linkFrom(($('famPaste') && $('famPaste').value) || '', $('famMsg'));
         else if (act === 'golink') openLinkSheet();
+        else if (act === 'pkgok') pkgGotIt();
         else if (act === 'fixadd') { const fi = $('fixN'); fi.value = Math.min(99, (parseInt(fi.value, 10) || 0) + (+a.dataset.n)); }
         else if (act === 'fixsave') fixSave();
         else if (act === 'visitor') { store.set('who', ''); renderAll(); }

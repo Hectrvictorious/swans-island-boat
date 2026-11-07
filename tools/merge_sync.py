@@ -23,7 +23,7 @@ if not re.fullmatch(r'[A-Za-z0-9_-]{8,64}', TOPIC) or not re.fullmatch(r'[0-9a-f
 def valid(e):
     return (isinstance(e, dict) and e.get('v') == 1 and e.get('fp') == FP
             and isinstance(e.get('id'), str) and 8 <= len(e['id']) <= 40 and B64.match(e['id'])
-            and e.get('k') in ('t', 'x', 'b', 'p', 'r') and isinstance(e.get('ts'), int)
+            and e.get('k') in ('t', 'x', 'b', 'p', 'r', 'f') and isinstance(e.get('ts'), int)
             and isinstance(e.get('iv'), str) and len(e['iv']) <= 24 and B64.match(e['iv'])
             and isinstance(e.get('ct'), str) and len(e['ct']) <= 8000 and B64.match(e['ct']))
 
@@ -55,14 +55,15 @@ for line in (r.stdout or '').splitlines():
     keep['rt'] = int(m.get('time') or time.time())
     events.append(keep); have.add(e['id']); added += 1
 
-# Keep it small: trips for 400 days, ride counts for 3 years, reservation posts for 3 weeks, the last few boat and problem notes.
+# Keep it small: trips for 400 days, ride counts for 3 years, reservation posts and package lists for 3 weeks, the last few boat and problem notes.
 now = time.time()
 age = lambda e: now - (e.get('rt') or e['ts'] / 1000)
 trips = [e for e in events if e['k'] == 't' and age(e) < 400 * DAY]
 traffic = [e for e in events if e['k'] == 'x' and age(e) < 21 * DAY]
 rides = [e for e in events if e['k'] == 'r' and age(e) < 1100 * DAY]
+pkgs = [e for e in events if e['k'] == 'f' and age(e) < 21 * DAY]
 recent = lambda k: sorted([e for e in events if e['k'] == k], key=lambda e: e['ts'])[-6:]
-events = sorted(trips + traffic + rides + recent('b') + recent('p'), key=lambda e: e['ts'])
+events = sorted(trips + traffic + rides + pkgs + recent('b') + recent('p'), key=lambda e: e['ts'])
 
 if json.dumps(events, sort_keys=True) != before:
     os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
