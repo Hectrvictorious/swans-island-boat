@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261109T1314';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261109T1316';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -996,10 +996,10 @@ p { margin: 0 0 8px; }
       const hh = +m[1], mm = +m[2], ap = (m[3] || '').toLowerCase(), rest = m[4] || '';
       if (hh > 23 || mm > 59) continue;
       const tm = /(\d+|⭕️?|[oø0]|no)\s*(?:['’′`]+|ft\.?|feet)?\s*(?:of\s+)?trucks?\b/i.exec(rest);
-      const cm = /(\d+|⭕️?|[oø0]|no)\s*cars?\b/i.exec(rest);
+      const cm = /(\d+|⭕️?|[oø0]|no)\s*(?:cars?|veh(?:icles?)?)\b\.?/i.exec(rest);   // "2 veh" is how some posters write cars
       // "3:00- ⭕" (or "3:00-" once Facebook's ⭕ picture is lost) means nothing booked on that boat.
       const none = !tm && !cm && /^[\s\-–—:]*((⭕️?|0|none|no(thing)?)[\s.]*)*$/i.test(rest) && (/[-–—:⭕0]|^\s*$/i.test(rest) || /none|no/i.test(rest));
-      if (!tm && !cm && !none && !/full|trucks?\b|cars?\b/i.test(rest)) continue;   // a word with no number is a ⭕ (zero) that Facebook drew as a picture
+      if (!tm && !cm && !none && !/full|trucks?\b|cars?\b|veh/i.test(rest)) continue;   // a word with no number is a ⭕ (zero) that Facebook drew as a picture
       const cands = ap ? [(hh % 12 + (ap === 'p' ? 12 : 0)) * 60 + mm] : hh >= 13 ? [hh * 60 + mm] : [(hh % 12) * 60 + mm, (hh % 12 + 12) * 60 + mm];
       const legs = legsFor(sec);
       let leg = null;
