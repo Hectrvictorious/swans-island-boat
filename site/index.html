@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261109T1316';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261120T1422';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -334,6 +334,10 @@ p { margin: 0 0 8px; }
 .board li.next .r2 .sub2 { color: var(--accent-ink); }
 .resinfo { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; color: var(--ink-2); padding: 9px 11px; border-radius: 10px; background: var(--surface-2); border-left: 4px solid var(--navy); }
 .resinfo b { font-family: var(--font-display); font-size: 15px; color: var(--ink); }
+/* A post whose date the app corrected */
+.fixnote { font-size: 13.5px; line-height: 1.45; color: var(--ink); padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--warn) 13%, var(--surface)); border-left: 4px solid var(--warn); }
+.fixnote b { display: block; font-family: var(--font-display); font-size: 15px; margin-bottom: 2px; }
+.fixnote a { color: inherit; font-weight: 600; }
 .resinfo .btn { padding: 6px 10px; font-size: 14px; }
 .rb.fill { color: var(--t2); background: color-mix(in srgb, var(--t2) 16%, transparent); }
 .board li.next .rb.fill { background: #fff; }
@@ -965,9 +969,10 @@ p { margin: 0 0 8px; }
     }
     return best.y;
   }
-  function parseTraffic(text, today) {
+  function parseTraffic(text, today, opts) {
     const lines = String(text || '').replace(/\r/g, '').replace(/[   ]/g, ' ').split('\n').map(s => s.trim()).filter(Boolean);
     let date = null, label = '', i0 = 0;
+    if (opts && opts.date) { date = opts.date; label = (lines.find(l => /\d\s*\/\s*\d|\b(sun|mon|tue|wed|thu|fri|sat)[a-z]*\b|schedule|traffic|reservation/i.test(l)) || lines[0] || '').slice(0, 60); }
     for (let i = 0; i < lines.length && !date; i++) {
       const m = /(^|[^\d/:])(1[0-2]|0?[1-9])\/(3[01]|[12]\d|0?[1-9])(?:\/(\d{4}|\d{2}))?(?![\d/])/.exec(lines[i]);
       if (m) { const y = m[4] ? (m[4].length === 2 ? 2000 + +m[4] : +m[4]) : nearestYear(+m[2], +m[3], today); date = { y, m: +m[2], d: +m[3] }; label = lines[i].slice(0, 60); i0 = i + 1; }
@@ -1078,7 +1083,64 @@ p { margin: 0 0 8px; }
     return { date, key: dateKey(date.y, date.m, date.d), label, names, hits };
   }
 
-  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, CAR_SPACES, carSpace, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic, parsePackages };
+  /* ----- Which day is a reservations post really for? -----
+     Posters sometimes copy yesterday's date into the heading ("Wednesday 11/17" for Wednesday 11/18) or garble it
+     ("Friday's schedule 11/22026"). For each day from three back to three ahead, weigh: the weekday the heading
+     names, the date it states, how well the post's boat times fit that day's timetable, whether that day already
+     has a different post, and when the post is being read (the newest post is usually for tomorrow in the evening,
+     today in the morning). Returns parseTraffic's result for the best day, plus fix: { stated, why, sure } when the
+     best day isn't the date the heading states. ctx: { evening, known: { 'YYYY-MM-DD': signature } }. */
+  const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const rowsSig = rows => rows.map(r => r.sec + r.t + ':' + r.cars + '/' + r.truck).sort().join(',');
+  function readTraffic(text, today, ctx) {
+    ctx = ctx || {};
+    const lines = String(text || '').replace(/\r/g, '').split('\n').map(s => s.trim()).filter(Boolean);
+    const headIdx = Math.max(0, lines.findIndex(l => /\d\s*\/\s*\d|\b(sun|mon|tue|wed|thu|fri|sat)[a-z]*\b|schedule|traffic|reservation/i.test(l)));
+    const head = lines[headIdx] || '';
+    const wm = /\b(sun|mon|tues?|wed(?:nes)?|thur?s?|fri|sat(?:ur)?)(?:day)?(?:'?s)?\b/i.exec(head);
+    const wd = wm ? ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].indexOf(wm[1].slice(0, 3).toLowerCase()) : -1;
+    const plain = parseTraffic(text, today);
+    const stated = plain.error ? null : plain.date;
+    const loose = /(1[0-2]|0?[1-9])\s*\/\s*(\d{1,8})/.exec(head);   // "11/22026": the month, and day digits somewhere in there
+    const t0 = Date.UTC(today.y, today.m - 1, today.d), score = [];
+    for (let k = -3; k <= 3; k++) {
+      const dt = new Date(t0 + k * 864e5), C = { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate() }, key = dateKey(C.y, C.m, C.d);
+      const r = parseTraffic(text, today, { date: C });
+      if (r.error) continue;
+      const legs = dayPlan(C.y, C.m, C.d).legs.filter(L => !L.nopax);
+      const matched = r.rows.filter(x => x.matched), fit = matched.length / r.rows.length;
+      const cover = legs.length ? new Set(matched.map(x => x.t + x.to)).size / legs.length : 0;
+      let sc = 4 * fit + 1.5 * cover;
+      if (wd >= 0) sc += weekdayOf(C.y, C.m, C.d) === wd ? 3 : -3;
+      if (stated) { if (key === stated) sc += 2; }
+      else if (loose && +loose[1] === C.m && loose[2].includes(String(C.d))) sc += 1;
+      const other = !!(ctx.known && ctx.known[key] && ctx.known[key] !== rowsSig(r.rows));
+      if (other) sc -= 2;   // that day already has a different post
+      if (k === (ctx.evening ? 1 : 0)) sc += 1;
+      score.push({ key, C, r, sc, fit, other });
+    }
+    if (!score.length) return plain;
+    score.sort((a, b) => b.sc - a.sc);
+    const st = stated ? score.find(x => x.key === stated) : null;
+    // The heading's own date stands unless another day beats it clearly; with no readable date, the best day wins.
+    let best = score[0], sure;
+    if (st && (best === st || best.sc - st.sc < 2)) return plain;
+    if (st) sure = best.sc - st.sc >= 3;
+    else sure = !score[1] || best.sc - score[1].sc >= 2.5;
+    const out = Object.assign({}, best.r, { date: best.key, label: (plain.label || best.r.label || '').slice(0, 60) });
+    {
+      const B = best.C, bname = WEEKDAY[weekdayOf(B.y, B.m, B.d)], reasons = [];
+      const sp = stated ? stated.split('-').map(Number) : null;
+      if (!stated) reasons.push('the date in its heading is garbled');
+      else if (wd >= 0 && weekdayOf(sp[0], sp[1], sp[2]) !== wd) reasons.push(sp[1] + '/' + sp[2] + ' was a ' + WEEKDAY[weekdayOf(sp[0], sp[1], sp[2])] + ', not a ' + WEEKDAY[wd]);
+      if (st && st.other) reasons.push(WEEKDAY[weekdayOf(sp[0], sp[1], sp[2])] + ' already had its own post');
+      if (best.fit >= 0.85 && (!st || st.fit < best.fit - 0.1)) reasons.push('its boat times match ' + bname + '’s timetable');
+      out.fix = { stated: out.label, why: reasons.join('; '), sure, from: stated };
+    }
+    return out;
+  }
+
+  const api = { SCHED, SEASONS, HOLIDAY, CROSS, CROSS_FB, BOARD, CAR_RES, CAR_SPACES, carSpace, dayPlan, boatStatus, nextDeparture, fmt, fmtDur, layover, weekdayOf, dateKey, seasonFor, holidayName, nyParts, nyEpoch, marineWindows, parseMarine, rideTier, parseTraffic, readTraffic, rowsSig, parsePackages };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.FerryEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -2039,17 +2101,33 @@ p { margin: 0 0 8px; }
     return '<div class="reswarn" role="alert"><b>' + w.title + '</b><p>' + w.text + '</p><p>To check on a car spot, call Bass Harbor at 207-244-3254, or paste the post from Facebook.</p><div class="btnrow">' + (w.fix === 'link' ? '<button class="btn navy" data-act="golink">Link again</button>' : '') + '<a class="btn" href="tel:+12072443254">Call Bass Harbor</a><button class="btn" data-act="paste">Paste the post</button>' + (fb ? '<a class="btn" href="' + esc(fb) + '" target="_blank" rel="noopener">Open the group ›</a>' : '') + '</div></div>';
   }
   // The labeled place to check reservations, above the schedule (Plan tab: also the red box and the link prompt).
+  // "Heads up: the Facebook post had a typo in its date…" above a day whose post the app moved to the right day.
+  function fixNoteHTML(key, f) {
+    const p = parseKey(key), day = DAYS[E.weekdayOf(p.y, p.m, p.d)] + ' ' + p.m + '/' + p.d;
+    const why = String(f.why || '').split('; ').filter(Boolean).map(esc);
+    const list = why.length < 2 ? why.join('') : why.length === 2 ? why.join(', and ') : why.slice(0, -1).join(', ') + ', and ' + why[why.length - 1];
+    return '<div class="fixnote" role="note"><b>' + (f.sure ? 'Heads up: the Facebook post had a typo in its date.' : 'Heads up: the app isn’t sure which day this post is for.') + '</b>' +
+      'It was labeled “' + esc(f.stated) + '”' + (list ? ', but ' + list : '') + '. So the app is showing it for ' + day + '. ' +
+      (f.sure ? 'If it matters for your trip, <a href="tel:+12072443254">call Bass Harbor</a> (207-244-3254).' : 'Check with <a href="tel:+12072443254">Bass Harbor</a> (207-244-3254) before you count on it.') + '</div>';
+  }
   function resPanel(key, opts) {
     opts = opts || {};
     if (!FAM.linked) return (opts.unlinked && unlinkedNow() && hasCrypto() && store.get('who', null) !== '') ? '<div class="resinfo"><span><b>Car reservations</b> show on each boat once this phone is linked.</span><button class="btn navy" data-act="golink">Link this phone</button></div>' : '';
     const st = resStatus(key);
-    if (st.tr) return '';
+    if (st.tr) return st.tr.fix ? fixNoteHTML(key, st.tr.fix) : '';
     if (st.warn && st.warn.level === 'red') return opts.red ? redHTML(st.warn) : '';
     if (st.warn && st.warn.level === 'quiet') return '<div class="resinfo"><span><b>Car reservations:</b> ' + st.warn.text + '</span></div>';
     return '';
   }
+  // Which day a post is really for (posters sometimes slip on the date): the engine weighs the heading against the boat
+  // times, what each day already has, and whether it's evening (when the newest post is usually tomorrow's).
+  function readPost(text) {
+    const known = {};
+    for (const k in D.traffic) if (D.traffic[k] && Array.isArray(D.traffic[k].rows)) known[k] = E.rowsSig(D.traffic[k].rows);
+    return E.readTraffic(text, { y: NOW.y, m: NOW.m, d: NOW.d }, { evening: NOW.min >= 12 * 60, known });
+  }
   async function importTraffic(text, src, url) {
-    const r = E.parseTraffic(text, { y: NOW.y, m: NOW.m, d: NOW.d });
+    const r = readPost(text);
     if (r.error) return { ok: false, error: r.error };
     const tk = todayKey(), tm = tomorrowKey();
     const which = r.date === tk ? 'today' : r.date === tm ? 'tomorrow' : r.date < tk ? 'past' : 'later';
@@ -2057,8 +2135,8 @@ p { margin: 0 0 8px; }
     const same = !!prev && JSON.stringify(prev.rows) === JSON.stringify(r.rows);
     const fbu = url && /^https:\/\/(www\.|m\.)?facebook\.com\//.test(url) ? String(url).split('?')[0] : store.get('fbGroup', null);
     const grp = fbu && /^https:\/\/(www\.|m\.)?facebook\.com\/groups\/[^/?#]+/.exec(fbu); if (grp) store.set('fbGroup', grp[0].replace('://m.', '://www.'));
-    await publish('x', { date: r.date, label: r.label, rows: r.rows, src: src === 'pasted' ? 'pasted' : 'facebook', url: fbu || null, by: me() || 'auto', at: Date.now() });
-    return { ok: true, date: r.date, label: r.label, which, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, same, linked: FAM.linked, waiting: SYNC.outbox.length };
+    await publish('x', Object.assign({ date: r.date, label: r.label, rows: r.rows, src: src === 'pasted' ? 'pasted' : 'facebook', url: fbu || null, by: me() || 'auto', at: Date.now() }, r.fix ? { fix: r.fix } : {}));
+    return { ok: true, date: r.date, label: r.label, which, fix: r.fix || null, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, same, linked: FAM.linked, waiting: SYNC.outbox.length };
   }
 
   /* ----- Packages at TIMS: the big banner on Now, and what the last check saw on Info ----- */
@@ -2221,7 +2299,7 @@ p { margin: 0 0 8px; }
       const what = (rr.full ? 'All ' + E.CAR_RES + ' car reservations are taken' : rr.cars + ' of ' + E.CAR_RES + ' car reservations are taken') + (rr.truck ? ', plus ' + rr.truck + ' feet of truck' : '');
       const share = cs.spaces < 1 ? 'hardly any of the boat’s ~16 car spaces are spoken for' : 'about ' + cs.spaces + ' of the boat’s ~16 car spaces are spoken for';
       const plus = cs.bump ? ' ' + (busy.summer && busy.fb ? 'Summer and the Frenchboro run make it busier.' : busy.summer ? 'Summer traffic makes it busier.' : 'The Frenchboro run makes it busier.') : '';
-      info.push('<div class="box"><div class="eyebrow">Getting on with a car</div><div class="bline">' + getOn(rr, cs.level) + '</div><div style="margin-top:6px">' + what + ': ' + share + '.' + plus + ' ' + SP.advice + '</div><div class="small muted" style="margin-top:4px">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + '. Walking on? Passenger space is rarely the problem.</div></div>');
+      info.push('<div class="box"><div class="eyebrow">Getting on with a car</div><div class="bline">' + getOn(rr, cs.level) + '</div><div style="margin-top:6px">' + what + ': ' + share + '.' + plus + ' ' + SP.advice + '</div><div class="small muted" style="margin-top:4px">From the island’s Facebook traffic post, ' + fmtWhen(D.traffic[S.key].at) + (D.traffic[S.key].fix ? ' (labeled “' + esc(D.traffic[S.key].fix.stated) + '”, a typo; see the note above the schedule)' : '') + '. Walking on? Passenger space is rarely the problem.</div></div>');
     } else {
       const st = resStatus(S.key);
       if (st.warn && st.warn.level === 'red') info.push('<div class="box"><b style="color:var(--bad)">' + st.warn.title + '</b><div class="small">' + st.warn.text + '</div></div>');
@@ -2310,7 +2388,7 @@ p { margin: 0 0 8px; }
         const pkgAge = D.pkg ? (Date.now() - D.pkg.at) / 3.6e6 : null;
         if (FAM.linked && (pkgAge == null || pkgAge >= 6)) todo.push('packages');
         const g = /^https:\/\/(www\.)?facebook\.com\/groups\/[^/?#]+/.exec(D.fbUrl || '');
-        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, haveToday: !!D.traffic[tk], sharing: { messages: Object.keys(SYNC.ev).length, savedCopyRead: SYNC.arch.ok ? new Date(SYNC.arch.ok).toISOString() : null, savedCopyMessages: SYNC.arch.n, readable: SYNC.arch.mine, trouble: (t => t ? (t.loading ? 'loading' : t.fix || t.text) : null)(phoneTrouble()) }, haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), pkgGroup: PKG_GROUP, packages: D.pkg ? { list: D.pkg.date, forUs: D.pkg.hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')), checkedHoursAgo: Math.round(pkgAge) } : null, waiting: SYNC.outbox.length });
+        return done({ version: APP_VERSION, linked: FAM.linked, nowET: E.fmt(NOW.min), run: morning ? 'morning' : 'evening', todo, wantDate: want, wantMD: wp.m + '/' + wp.d, wantDay: DAYS[E.weekdayOf(wp.y, wp.m, wp.d)], haveToday: !!D.traffic[tk], sharing: { messages: Object.keys(SYNC.ev).length, savedCopyRead: SYNC.arch.ok ? new Date(SYNC.arch.ok).toISOString() : null, savedCopyMessages: SYNC.arch.n, readable: SYNC.arch.mine, trouble: (t => t ? (t.loading ? 'loading' : t.fix || t.text) : null)(phoneTrouble()) }, haveTomorrow: !!D.traffic[tm], lastTrafficCheck: D.lastX ? new Date(D.lastX).toISOString() : null, boat: v ? v.boat : null, boatCheckedHoursAgo: boatAge == null ? null : Math.round(boatAge), fbGroup: store.get('fbGroup', null) || (g ? g[0] : null), pkgGroup: PKG_GROUP, packages: D.pkg ? { list: D.pkg.date, forUs: D.pkg.hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')), checkedHoursAgo: Math.round(pkgAge) } : null, waiting: SYNC.outbox.length });
       },
       // posts: the text of the newest one or two Traffic posts on the group page, newest first. Imports any for
       // today or later; if the one wanted now isn't among them, records that so the phones can say why.
@@ -2321,10 +2399,10 @@ p { margin: 0 0 8px; }
         const list = (Array.isArray(posts) ? posts : [posts]).filter(x => typeof x === 'string' && x.trim()).slice(0, 4);
         const got = [];
         for (const text of list) {
-          const r = E.parseTraffic(text, { y: NOW.y, m: NOW.m, d: NOW.d });
+          const r = readPost(text);
           if (r.error || r.date < tk || got.some(x => x.date === r.date)) continue;
           await importTraffic(text, 'facebook', url);
-          got.push({ date: r.date, label: r.label, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length });
+          got.push({ date: r.date, label: r.label, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, typo: r.fix ? r.fix.why : undefined });
         }
         const haveWanted = !!D.traffic[want];
         if (!haveWanted) await publish('p', { reason: list.length ? 'notyet' : 'notfound', note: list.length ? 'newest post seen: ' + (String(list[0]).split('\n').find(l => /\d\/\d/.test(l)) || '').slice(0, 60) : '', at: Date.now() });
