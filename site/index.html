@@ -14,7 +14,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261120T1422';</script>
+<script>window.__STANDALONE_SITE__ = true; window.__BUILD__ = '20261122T0205';</script>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#1f3a53;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 </head>
 <body>
@@ -969,13 +969,31 @@ p { margin: 0 0 8px; }
     }
     return best.y;
   }
+  // A date written with the month's name, in the heading: "Sunday, November 22." / "Nov. 22nd, 2026" / "22 November".
+  const MONTH_RE = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?';
+  const MONTH_DAY = new RegExp('\\b' + MONTH_RE + '\\s+(3[01]|[12]\\d|0?[1-9])(?:st|nd|rd|th)?(?![\\d:])(?:,?\\s+(\\d{4}))?', 'i');
+  const DAY_MONTH = new RegExp('\\b(3[01]|[12]\\d|0?[1-9])(?:st|nd|rd|th)?\\s+(?:of\\s+)?' + MONTH_RE + '(?![a-z])(?:,?\\s+(\\d{4}))?', 'i');
+  const monthNum = s => ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(String(s).slice(0, 3).toLowerCase()) + 1;
+  function wordDate(line) {
+    let m = MONTH_DAY.exec(line); if (m) return { m: monthNum(m[1]), d: +m[2], y: m[3] ? +m[3] : null };
+    m = DAY_MONTH.exec(line); if (m) return { m: monthNum(m[2]), d: +m[1], y: m[3] ? +m[3] : null };
+    return null;
+  }
+  // "SI Traffic:", "BH:", or just "FB" on its own line starts a section of the post.
+  const SEC_HEAD = ln => /^(SI|S\.I\.|Swan'?s?(?:\s+Island)?|BH|B\.H\.|Bass\s+Harbou?r|FB|F\.B\.|French\s*boro)\b.*\btraffic\b/i.exec(ln) || /^(SI|BH|FB)\s*:?\s*$/i.exec(ln);
+  // A whole section with nothing booked: "⭕.................⭕" (or its dots, once Facebook's ⭕ pictures are lost),
+  // a lone 0, "Go Fish!", "none", "nothing", "no reservations".
+  const NOTHING = /^[\s.…·•_~*=\-–—⭕️]*⭕[\s.…·•_~*=\-–—⭕️]*$|^[\s.…·]{3,}$|^[\s.\-–—]*0[\s.\-–—]*$|\b(go fish|none|nothing|nada|zilch|nobody|no ?one|no (?:reservations?|res|bookings?|cars?|vehicles?|veh|trucks?|traffic))\b/i;
   function parseTraffic(text, today, opts) {
     const lines = String(text || '').replace(/\r/g, '').replace(/[   ]/g, ' ').split('\n').map(s => s.trim()).filter(Boolean);
     let date = null, label = '', i0 = 0;
     if (opts && opts.date) { date = opts.date; label = (lines.find(l => /\d\s*\/\s*\d|\b(sun|mon|tue|wed|thu|fri|sat)[a-z]*\b|schedule|traffic|reservation/i.test(l)) || lines[0] || '').slice(0, 60); }
+    let headEnd = lines.findIndex(l => SEC_HEAD(l) || /^\d{1,2}[:.]\d{2}\b/.test(l)); if (headEnd < 0) headEnd = lines.length;
     for (let i = 0; i < lines.length && !date; i++) {
       const m = /(^|[^\d/:])(1[0-2]|0?[1-9])\/(3[01]|[12]\d|0?[1-9])(?:\/(\d{4}|\d{2}))?(?![\d/])/.exec(lines[i]);
-      if (m) { const y = m[4] ? (m[4].length === 2 ? 2000 + +m[4] : +m[4]) : nearestYear(+m[2], +m[3], today); date = { y, m: +m[2], d: +m[3] }; label = lines[i].slice(0, 60); i0 = i + 1; }
+      if (m) { const y = m[4] ? (m[4].length === 2 ? 2000 + +m[4] : +m[4]) : nearestYear(+m[2], +m[3], today); date = { y, m: +m[2], d: +m[3] }; label = lines[i].replace(/\s+/g, ' ').slice(0, 60); i0 = i + 1; continue; }
+      const w = i < headEnd && i < 4 ? wordDate(lines[i]) : null;   // "Sunday, November 22." (only up in the heading)
+      if (w) { date = { y: w.y || nearestYear(w.m, w.d, today), m: w.m, d: w.d }; label = lines[i].replace(/\s+/g, ' ').slice(0, 60); i0 = i + 1; }
     }
     if (!date) return { error: 'There is no date like 11/5 in that text.' };
     const plan = dayPlan(date.y, date.m, date.d);
@@ -989,22 +1007,23 @@ p { margin: 0 0 8px; }
       if (prev && /^\d{1,2}[:.]\d{2}\b/.test(prev) && !/^\d{1,2}[:.]\d{2}\b/.test(ln) && !/\btraffic\b/i.test(ln) && /^(['’′`]|(of\s+)?trucks?\b|\d*\s*cars?\b|⭕|,)/i.test(ln)) { body[body.length - 1] = prev + ' ' + ln; continue; }
       body.push(ln);
     }
-    const rows = []; let sec = null;
+    const rows = [], order = [], nothing = {}, odd = {}; let sec = null, cut = String(text || '').length >= 1500;
     for (let i = 0; i < body.length; i++) {
       const ln = body[i];
-      const h = /^(SI|S\.I\.|Swan'?s?(?:\s+Island)?|BH|B\.H\.|Bass\s+Harbou?r|FB|F\.B\.|French\s*boro)\b.*\btraffic\b/i.exec(ln) || /^(SI|BH|FB)\s*:?\s*$/i.exec(ln);
-      if (h) { const w = h[1].toLowerCase().replace(/[^a-z]/g, ''); sec = /^(si|swan)/.test(w) ? 'si' : /^(bh|bass)/.test(w) ? 'bh' : 'fb'; continue; }
+      const h = SEC_HEAD(ln);
+      if (h) { const w = h[1].toLowerCase().replace(/[^a-z]/g, ''); sec = /^(si|swan)/.test(w) ? 'si' : /^(bh|bass)/.test(w) ? 'bh' : 'fb'; order.push(sec); continue; }
       if (/^(like|comment|share|reply|all reactions:?|write a (public )?comment|most relevant|view more comments|see translation)\b/i.test(ln)) break;   // Facebook's buttons and the comments below the post
+      if (/(^|\s|…)see more$/i.test(ln)) cut = true;   // Facebook cut the post short ("… See more" was never opened)
       if (!sec) continue;
       const m = /^(\d{1,2})[:.](\d{2})(?:\s*([ap])\.?m\.?(?![a-z]))?\s*(.*)$/i.exec(ln);
-      if (!m) { if (/traffic/i.test(ln)) sec = null; continue; }
+      if (!m) { if (/traffic/i.test(ln)) sec = null; else if (NOTHING.test(ln)) nothing[sec] = true; continue; }
       const hh = +m[1], mm = +m[2], ap = (m[3] || '').toLowerCase(), rest = m[4] || '';
-      if (hh > 23 || mm > 59) continue;
+      if (hh > 23 || mm > 59) { odd[sec] = true; continue; }
       const tm = /(\d+|⭕️?|[oø0]|no)\s*(?:['’′`]+|ft\.?|feet)?\s*(?:of\s+)?trucks?\b/i.exec(rest);
       const cm = /(\d+|⭕️?|[oø0]|no)\s*(?:cars?|veh(?:icles?)?)\b\.?/i.exec(rest);   // "2 veh" is how some posters write cars
       // "3:00- ⭕" (or "3:00-" once Facebook's ⭕ picture is lost) means nothing booked on that boat.
       const none = !tm && !cm && /^[\s\-–—:]*((⭕️?|0|none|no(thing)?)[\s.]*)*$/i.test(rest) && (/[-–—:⭕0]|^\s*$/i.test(rest) || /none|no/i.test(rest));
-      if (!tm && !cm && !none && !/full|trucks?\b|cars?\b|veh/i.test(rest)) continue;   // a word with no number is a ⭕ (zero) that Facebook drew as a picture
+      if (!tm && !cm && !none && !/full|trucks?\b|cars?\b|veh/i.test(rest)) { odd[sec] = true; continue; }   // a word with no number is a ⭕ (zero) that Facebook drew as a picture
       const cands = ap ? [(hh % 12 + (ap === 'p' ? 12 : 0)) * 60 + mm] : hh >= 13 ? [hh * 60 + mm] : [(hh % 12) * 60 + mm, (hh % 12 + 12) * 60 + mm];
       const legs = legsFor(sec);
       let leg = null;
@@ -1014,10 +1033,22 @@ p { margin: 0 0 8px; }
       const cars = cm ? num(cm[1]) : 0;
       rows.push({ sec, t, to: leg ? leg.to : null, truck: tm ? num(tm[1]) : 0, cars, full: cars >= CAR_RES || /\bfull\b/i.test(rest), matched: !!leg, zero: none || undefined });
     }
-    // Bare times only count as "nothing booked" inside a real reservations post (at least two lines with counts),
-    // so a plain timetable post can't turn into a day of empty boats.
-    if (rows.filter(r => !r.zero).length < 2) for (let i = rows.length - 1; i >= 0; i--) if (rows[i].zero) rows.splice(i, 1);
+    // Bare times only count as "nothing booked" inside a real reservations post (a line with counts, or a section the
+    // poster marked as empty), so a plain timetable post can't turn into a day of empty boats.
+    const counted = rows.filter(r => !r.zero).length, empty = Object.keys(nothing).length > 0;
+    if (!counted && !empty) rows.length = 0;
     rows.forEach(r => { delete r.zero; });
+    // Some posters list only the boats that have reservations, or mark a whole side "⭕.....⭕" or "Go Fish": every
+    // other boat in a section the post covers has nothing booked (fill: true). Only where every line in the section was
+    // understood, and not in a section Facebook cut short.
+    if (counted || empty) order.forEach((s, j) => {
+      if (order.indexOf(s) !== j) return;
+      const has = rows.some(r => r.sec === s);
+      if (!has && !nothing[s]) return;                                                 // a heading with nothing under it
+      if (odd[s] || rows.some(r => r.sec === s && !r.matched)) return;                 // a line the app couldn't place: don't guess
+      if (cut && !nothing[s] && order.lastIndexOf(s) === order.length - 1) return;     // the post was cut off in here
+      for (const L of legsFor(s)) if (!L.nopax && !rows.some(r => r.sec === s && r.t === L.t && r.to === L.to)) rows.push({ sec: s, t: L.t, to: L.to, truck: 0, cars: 0, full: false, matched: true, fill: true });
+    });
     if (!rows.length) return { error: 'Found the date but no sailing lines like “7:30 97′ of truck, 3 cars”.' };
     return { date: dateKey(date.y, date.m, date.d), label, rows };
   }
@@ -1096,7 +1127,10 @@ p { margin: 0 0 8px; }
     ctx = ctx || {};
     const lines = String(text || '').replace(/\r/g, '').split('\n').map(s => s.trim()).filter(Boolean);
     const headIdx = Math.max(0, lines.findIndex(l => /\d\s*\/\s*\d|\b(sun|mon|tue|wed|thu|fri|sat)[a-z]*\b|schedule|traffic|reservation/i.test(l)));
-    const head = lines[headIdx] || '';
+    // The heading can run over two or three lines ("Swan's Island Ferry Reservation News" / "Sunday, November 22.").
+    let headTo = headIdx + 1;
+    while (headTo < lines.length && headTo < headIdx + 3 && !SEC_HEAD(lines[headTo]) && !/^\d{1,2}[:.]\d{2}\b/.test(lines[headTo])) headTo++;
+    const head = lines.slice(headIdx, headTo).join(' ');
     const wm = /\b(sun|mon|tues?|wed(?:nes)?|thur?s?|fri|sat(?:ur)?)(?:day)?(?:'?s)?\b/i.exec(head);
     const wd = wm ? ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].indexOf(wm[1].slice(0, 3).toLowerCase()) : -1;
     const plain = parseTraffic(text, today);
@@ -1108,7 +1142,8 @@ p { margin: 0 0 8px; }
       const r = parseTraffic(text, today, { date: C });
       if (r.error) continue;
       const legs = dayPlan(C.y, C.m, C.d).legs.filter(L => !L.nopax);
-      const matched = r.rows.filter(x => x.matched), fit = matched.length / r.rows.length;
+      const real = r.rows.filter(x => !x.fill);   // the boats the post itself names (filled-in zeros fit any day)
+      const matched = real.filter(x => x.matched), fit = real.length ? matched.length / real.length : 0;
       const cover = legs.length ? new Set(matched.map(x => x.t + x.to)).size / legs.length : 0;
       let sc = 4 * fit + 1.5 * cover;
       if (wd >= 0) sc += weekdayOf(C.y, C.m, C.d) === wd ? 3 : -3;
@@ -1797,7 +1832,7 @@ p { margin: 0 0 8px; }
   const unlinkedNow = () => !FAM.linked && !FAM.loading;   // known not to be linked (not just still reading the key)
   const SYNC = { ev: store.get('sync.ev', {}), outbox: store.get('sync.out', []), bad: {}, lastOk: store.get('sync.ok', 0), lastSent: store.get('sync.sent', 0), backoff: 0, flushing: false, polling: false,
     arch: store.get('sync.arch', null) || {}, resent: store.get('sync.resent', null) || {}, archBusy: false, relayFail: 0 };
-  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null, rides: {}, pkg: null, pkgAck: {} };
+  let D = { trips: {}, traffic: {}, vessel: null, problem: null, lastX: 0, fbUrl: null, rides: {}, pkg: null, pkgAck: {}, pkgOn: {} };
   // A slip anywhere on the page must never stop the sharing from loading. The last one shows on Info, for Claude.
   const DIAG = { err: null };
   function safe(fn) { try { fn(); } catch (e) { DIAG.err = { msg: String((e && e.message) || e).slice(0, 140), at: Date.now() }; } }
@@ -1860,7 +1895,7 @@ p { margin: 0 0 8px; }
     SYNC.ev = keep;
   }
   function derive() {
-    const trips = {}, tripAt = {}, traffic = {}, rides = {}, racc = {}, pkgAck = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null, pkg = null;
+    const trips = {}, tripAt = {}, traffic = {}, rides = {}, racc = {}, pkgAck = {}, pkgOn = {}; let vessel = null, problem = null, lastX = 0, fbUrl = null, pkg = null;
     const evs = Object.values(SYNC.ev).sort((a, b) => ((a.p && a.p.at) || a.ts) - ((b.p && b.p.at) || b.ts));
     for (const e of evs) { try {
       const p = e.p, at = p.at || e.ts;
@@ -1869,12 +1904,12 @@ p { margin: 0 0 8px; }
       else if (e.k === 'b') { if (!vessel || at >= vessel.at) vessel = Object.assign({}, p, { at }); }
       else if (e.k === 'p') { if (!problem || at >= problem.at) problem = Object.assign({}, p, { at }); }
       else if (e.k === 'r') { racc[p.acct] = Number.isInteger(p.set) ? p.set : (racc[p.acct] || 0) + p.d; }
-      else if (e.k === 'f') { if (typeof p.ack === 'string') (pkgAck[p.ack] = pkgAck[p.ack] || []).push(p.sig); else if (!pkg || p.date > pkg.date || (p.date === pkg.date && at >= pkg.at)) pkg = Object.assign({}, p, { at }); }
+      else if (e.k === 'f') { if (typeof p.ack === 'string') { (pkgAck[p.ack] = pkgAck[p.ack] || []).push(p.sig); const t = E.nyParts(at), day = E.dateKey(t.y, t.m, t.d); (pkgOn[day] = pkgOn[day] || []).push(p.sig); } else if (!pkg || p.date > pkg.date || (p.date === pkg.date && at >= pkg.at)) pkg = Object.assign({}, p, { at }); }
     } catch (err) { /* skip it */ } }
     // Rides are summed, then kept between 0 and 999, so two phones' taps add up the same whichever clock is ahead.
     for (const a in racc) rides[a] = Math.max(0, Math.min(999, racc[a]));
     Object.keys(trips).forEach(k => { if (!trips[k]) delete trips[k]; });
-    D = { trips, traffic, vessel, problem, lastX, fbUrl, rides, pkg, pkgAck };
+    D = { trips, traffic, vessel, problem, lastX, fbUrl, rides, pkg, pkgAck, pkgOn };
   }
   async function ingest(list) {
     if (!FAM.linked) return false;
@@ -2143,12 +2178,15 @@ p { margin: 0 0 8px; }
   const PKG_NAME = { Josh: 'Josh', Sarah: 'Sarah', Both: 'Josh & Sarah', Greene: '“Greene”' };
   const PKG_ICON = '<svg class="pkg-ic" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4 42 13v22L24 44 6 35V13Z" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><path d="M6 13l18 9 18-9M24 22v22M15 8.5l18 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/></svg>';
   const pkgSig = hits => (hits || []).map(h => h.who + ':' + (h.count == null ? '' : h.count)).sort().join(',');
+  // Got it covers that list, and a newer list with the same packages dated no later than the day Got it was tapped: the
+  // lists go up in the morning and only drop a name the next day, so the list from the day you picked up still shows you.
+  const pkgAcked = P => { const sig = pkgSig(P.hits); return (D.pkgAck[P.date] || []).includes(sig) || Object.keys(D.pkgOn || {}).some(day => day >= P.date && D.pkgOn[day].includes(sig)); };
   const pkgLine = h => '<span>' + PKG_NAME[h.who] + (h.count ? ' · ' + h.count + (h.count === 1 ? ' package' : ' packages') : '') + (h.note ? ' <small>(' + esc(h.note) + ')</small>' : '') + '</span>';
   function renderPkg() {
     const P = D.pkg, box = $('pkgBox'), info = $('pkgInfo');
     const ld = P ? parseKey(P.date) : null, day = ld ? DAYS[E.weekdayOf(ld.y, ld.m, ld.d)] + ' ' + ld.m + '/' + ld.d : '';
     const age = ld ? Math.round((Date.UTC(NOW.y, NOW.m - 1, NOW.d) - Date.UTC(ld.y, ld.m - 1, ld.d)) / 864e5) : 99;
-    const show = !!(P && P.hits.length && age <= 3 && !(D.pkgAck[P.date] || []).includes(pkgSig(P.hits)));
+    const show = !!(P && P.hits.length && age <= 3 && !pkgAcked(P));
     if (show) {
       const many = P.hits.length > 1 || P.hits.some(h => h.who === 'Both' || (h.count || 1) > 1);
       setHTML(box, PKG_ICON + '<div><h2>' + (many ? 'Packages' : 'Package') + ' to pick up at TIMS</h2><div class="pkg-who">' + P.hits.map(pkgLine).join('') + '</div></div>' +
@@ -2396,16 +2434,16 @@ p { margin: 0 0 8px; }
         await FAM.ready; if (!FAM.linked) return done({ ok: false, error: 'not linked' });
         NOW = nowNY();
         const tk = todayKey(), want = NOW.min < 12 * 60 ? tk : tomorrowKey();
-        const list = (Array.isArray(posts) ? posts : [posts]).filter(x => typeof x === 'string' && x.trim()).slice(0, 4);
+        const list = (Array.isArray(posts) ? posts : [posts]).filter(x => typeof x === 'string' && x.trim()).slice(0, 6);
         const got = [];
         for (const text of list) {
           const r = readPost(text);
           if (r.error || r.date < tk || got.some(x => x.date === r.date)) continue;
           await importTraffic(text, 'facebook', url);
-          got.push({ date: r.date, label: r.label, sailings: r.rows.length, unmatched: r.rows.filter(x => !x.matched).length, typo: r.fix ? r.fix.why : undefined });
+          got.push({ date: r.date, label: r.label, sailings: r.rows.length, named: r.rows.filter(x => !x.fill).length, unmatched: r.rows.filter(x => !x.matched).length, typo: r.fix ? r.fix.why : undefined });
         }
         const haveWanted = !!D.traffic[want];
-        if (!haveWanted) await publish('p', { reason: list.length ? 'notyet' : 'notfound', note: list.length ? 'newest post seen: ' + (String(list[0]).split('\n').find(l => /\d\/\d/.test(l)) || '').slice(0, 60) : '', at: Date.now() });
+        if (!haveWanted) await publish('p', { reason: list.length ? 'notyet' : 'notfound', note: list.length ? 'newest post seen: ' + (String(list[0]).split('\n').find(l => /\d\/\d|\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+\d/i.test(l)) || '').slice(0, 60) : '', at: Date.now() });
         await flush();
         return done({ ok: true, want, got, haveWanted, waiting: SYNC.outbox.length });
       },
@@ -2427,7 +2465,7 @@ p { margin: 0 0 8px; }
         const hits = best.hits.slice(0, 10).map(h => ({ who: h.who, count: h.count, note: h.note, line: h.line }));
         await publish('f', { date: best.key, label: best.label, hits, names: best.names, src: 'facebook', by: me() || 'auto', at: Date.now() });
         await flush();
-        return done({ ok: true, found: true, list: best.key, label: best.label, names: best.names, forUs: hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')), banner: hits.length > 0 && !(D.pkgAck[best.key] || []).includes(pkgSig(hits)), waiting: SYNC.outbox.length });
+        return done({ ok: true, found: true, list: best.key, label: best.label, names: best.names, forUs: hits.map(h => PKG_NAME[h.who] + (h.count ? ' (' + h.count + ')' : '')), banner: hits.length > 0 && !pkgAcked({ date: best.key, hits }), waiting: SYNC.outbox.length });
       },
       async importTraffic(text, src, url) { await FAM.ready; const r = await importTraffic(text, src, url); return done(Object.assign(r, { waiting: SYNC.outbox.length })); },
       async reportProblem(reason, note) {
